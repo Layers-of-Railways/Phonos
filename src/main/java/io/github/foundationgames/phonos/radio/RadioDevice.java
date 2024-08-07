@@ -8,10 +8,16 @@ import java.util.function.LongConsumer;
 public interface RadioDevice {
     int getChannel();
 
+    RadioMetadata getMetadata();
+
     interface Transmitter extends RadioDevice, SoundEmitter {
         @Override
         default void forEachChild(LongConsumer action) {
-            action.accept(UniqueId.ofRadioChannel(getChannel()));
+            if (action instanceof RadioLongConsumer rlc) {
+                rlc.accept(UniqueId.ofRadioChannel(getChannel()), getMetadata());
+            } else {
+                action.accept(UniqueId.ofRadioChannel(getChannel()));
+            }
         }
     }
 

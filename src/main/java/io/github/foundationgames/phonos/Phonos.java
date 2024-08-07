@@ -12,6 +12,7 @@ import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitter;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterStorage;
 import io.github.foundationgames.phonos.sound.stream.ServerOutgoingStreamHandler;
+import io.github.foundationgames.phonos.util.PhonosTags;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.command.PhonosCommands;
 import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
@@ -66,6 +67,7 @@ public class Phonos implements ModInitializer {
 
         PhonosBlocks.init();
         PhonosItems.init();
+        PhonosTags.init();
 
         SoundDataTypes.init();
         InputPlugPoint.init();

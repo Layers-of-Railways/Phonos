@@ -139,7 +139,11 @@ public class RadioStorage {
             var radio = RadioStorage.getInstance(world);
 
             for (long rec : radio.getReceivingEmitters(this.channel)) if (emitters.isLoaded(rec)) {
-                action.accept(rec);
+                if (action instanceof RadioLongConsumer rlc && emitters.getEmitter(rec) instanceof RadioDevice radioDevice) {
+                    rlc.accept(rec, radioDevice.getMetadata());
+                } else {
+                    action.accept(rec);
+                }
             }
         }
     }

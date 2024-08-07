@@ -2,8 +2,11 @@ package io.github.foundationgames.phonos.block.entity;
 
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.block.RadioTransceiverBlock;
+import io.github.foundationgames.phonos.config.PhonosCommonConfig;
 import io.github.foundationgames.phonos.radio.RadioDevice;
+import io.github.foundationgames.phonos.radio.RadioMetadata;
 import io.github.foundationgames.phonos.radio.RadioStorage;
+import io.github.foundationgames.phonos.util.PhonosTags;
 import io.github.foundationgames.phonos.world.RadarPoints;
 import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
@@ -31,6 +34,7 @@ public class RadioTransceiverBlockEntity extends AbstractConnectionHubBlockEntit
 
     private int channel = 0;
     private boolean needsAdd = false;
+    private int transmissionTowerHeight = 0;
 
     public RadioTransceiverBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state, OUTPUT_LAYOUT, new boolean[2]);
@@ -50,6 +54,7 @@ public class RadioTransceiverBlockEntity extends AbstractConnectionHubBlockEntit
         } else {
             this.setAndUpdateChannel(nbt.getInt("channel"));
         }
+        this.transmissionTowerHeight = nbt.getInt("transmissionTowerHeight");
     }
 
     @Override
@@ -57,6 +62,7 @@ public class RadioTransceiverBlockEntity extends AbstractConnectionHubBlockEntit
         super.writeNbt(nbt);
 
         nbt.putInt("channel", this.getChannel());
+        nbt.putInt("transmissionTowerHeight", this.transmissionTowerHeight);
     }
 
     @Override
@@ -78,6 +84,20 @@ public class RadioTransceiverBlockEntity extends AbstractConnectionHubBlockEntit
     @Override
     public int getChannel() {
         return channel;
+    }
+
+    @Override
+    public RadioMetadata getMetadata() {
+        PhonosCommonConfig conf = PhonosCommonConfig.get();
+        BlockPos pos = getPos();
+
+        int relativeToSeaLevel = pos.getY() - (world == null ? 63 : world.getSeaLevel());
+
+        int range = conf.radioBaseRange;
+        range += Math.round(relativeToSeaLevel * conf.worldHeightMultiplier);
+        range += Math.round(transmissionTowerHeight * conf.transmissionTowerMultiplier);
+
+        return new RadioMetadata(pos, Math.max(0, range));
     }
 
     @Override
@@ -149,6 +169,9 @@ public class RadioTransceiverBlockEntity extends AbstractConnectionHubBlockEntit
         radio.removeReceivingEmitter(this.getChannel(), this.emitterId());
     }
 
+    private static final int lazyTickRate = 100;
+    private int lazyTickCounter = 0;
+
     @Override
     public void tick(World world, BlockPos pos, BlockState state) {
         super.tick(world, pos, state);
@@ -156,6 +179,31 @@ public class RadioTransceiverBlockEntity extends AbstractConnectionHubBlockEntit
         if (this.needsAdd) {
             this.addReceiver();
             this.needsAdd = false;
+        }
+
+        if (lazyTickCounter++ >= lazyTickRate) {
+            lazyTickCounter = 0;
+            lazyTick();
+        }
+    }
+
+    private void lazyTick() {
+        if (world == null || world.isClient)
+            return;
+
+        int lastHeight = transmissionTowerHeight;
+
+        BlockPos.Mutable pos = getPos().mutableCopy();
+        for (transmissionTowerHeight = 0; transmissionTowerHeight < PhonosCommonConfig.get().maxTransmissionTowerHeight; transmissionTowerHeight++) {
+            pos.move(Direction.UP);
+            BlockState state = world.getBlockState(pos);
+            if (!state.isIn(PhonosTags.TRANSMISSION_TOWERS))
+                break;
+        }
+
+        if (transmissionTowerHeight != lastHeight) {
+            this.markDirty();
+            sync();
         }
     }
 }

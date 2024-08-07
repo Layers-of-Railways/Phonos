@@ -17,24 +17,25 @@ import java.util.List;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 
-public class PhonosClientConfigScreen extends Screen {
-    private static final Text TITLE = Text.translatable("text.config.phonos.title");
+public class PhonosConfigScreen extends Screen {
+    private static final Text CLIENT_TITLE = Text.translatable("text.config.phonos.client_title");
+    private static final Text COMMON_TITLE = Text.translatable("text.config.phonos.common_title");
 
     private final Screen parent;
     private final List<SimpleOption<?>> options = new ArrayList<>();
     private final Runnable save;
 
-    public PhonosClientConfigScreen(Screen parent, Runnable save) {
-        super(TITLE);
+    public PhonosConfigScreen(Text title, Screen parent, Runnable save) {
+        super(title);
 
         this.parent = parent;
         this.save = save;
     }
 
-    public static PhonosClientConfigScreen create(PhonosClientConfig config, Screen parent) {
+    public static PhonosConfigScreen create(PhonosClientConfig config, Screen parent) {
         var copy = config.copyTo(new PhonosClientConfig());
 
-        var screen = new PhonosClientConfigScreen(parent, () -> {
+        var screen = new PhonosConfigScreen(CLIENT_TITLE, parent, () -> {
             copy.copyTo(config);
             try {
                 config.save();
@@ -50,6 +51,26 @@ public class PhonosClientConfigScreen extends Screen {
         screen.addBoolean("cableLODs", val -> copy.cableLODs = val, copy.cableLODs);
         screen.addPercentage("cableLODNearDetail", val -> copy.cableLODNearDetail = val, copy.cableLODNearDetail);
         screen.addPercentage("cableLODFarDetail", val -> copy.cableLODFarDetail = val, copy.cableLODFarDetail);
+
+        return screen;
+    }
+
+    public static PhonosConfigScreen create(PhonosCommonConfig config, Screen parent) {
+        var copy = config.copyTo(new PhonosCommonConfig());
+
+        var screen = new PhonosConfigScreen(COMMON_TITLE, parent, () -> {
+            copy.copyTo(config);
+            try {
+                config.save();
+            } catch (IOException e) {
+                Phonos.LOG.error("Could not save config!", e);
+            }
+        });
+
+        screen.addIntRange("radioBaseRange", val -> copy.radioBaseRange = val, copy.radioBaseRange, 16, 1024);
+        screen.addIntRange("worldHeightMultiplier", val -> copy.worldHeightMultiplier = val, Math.round(copy.worldHeightMultiplier), 0, 10);
+        screen.addIntRange("transmissionTowerMultiplier", val -> copy.transmissionTowerMultiplier = val, Math.round(copy.transmissionTowerMultiplier), 0, 100);
+        screen.addIntRange("maxTransmissionTowerHeight", val -> copy.maxTransmissionTowerHeight = val, copy.maxTransmissionTowerHeight, 0, 256);
 
         return screen;
     }
@@ -71,6 +92,7 @@ public class PhonosClientConfigScreen extends Screen {
         );
     }
 
+    @Override
     public void close() {
         this.client.setScreen(this.parent);
     }

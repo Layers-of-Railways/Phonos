@@ -73,7 +73,9 @@
     "tooltip.phonos.item.record_player_hint": "Right click with Music Disc to play",
     "tooltip.phonos.item.playing": "Playing:",
 
-    "text.config.phonos.title": "Phonos Client Config",
+    "text.config.phonos.title": "Phonos Configs",
+    "text.config.phonos.client_title": "Phonos Client Config",
+    "text.config.phonos.common_title": "Phonos Common Config",
 
     "text.config.phonos.option.phonosMasterVolume": "Loudspeaker Master Volume",
     "text.config.phonos.option.streamVolume": "Satellite Audio Volume",
@@ -84,5 +86,10 @@
     "text.config.phonos.option.cableLODFarDetail": "Lowest Audio Cable Detail Level",
 
     "text.config.phonos.option.vanilla.phonosMasterVolume": "Phonos (Master)",
-    "text.config.phonos.option.vanilla.streamVolume": "Phonos Satellites"
+    "text.config.phonos.option.vanilla.streamVolume": "Phonos Satellites",
+
+    "text.config.phonos.option.radioBaseRange": "Base Radio Range",
+    "text.config.phonos.option.worldHeightMultiplier": "Added Range per Block Above Sea Level",
+    "text.config.phonos.option.transmissionTowerMultiplier": "Added Range per Transmission Tower Block",
+    "text.config.phonos.option.maxTransmissionTowerHeight": "Max Height for Transmission Tower"
 }

@@ -8,23 +8,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class PhonosClientConfig {
-    private static PhonosClientConfig config = null;
+public class PhonosCommonConfig {
+    private static PhonosCommonConfig config = null;
 
-    public double phonosMasterVolume = 1;
-    public double streamVolume = 1;
+    public int radioBaseRange = 16;
+    public float worldHeightMultiplier = 0.0f;
+    public float transmissionTowerMultiplier = 8.0f;
+    public int maxTransmissionTowerHeight = 64;
 
-    public boolean cableCulling = true;
-    public boolean cableVBOs = false;
-    public boolean cableLODs = true;
-    public double cableLODNearDetail = 1;
-    public double cableLODFarDetail = 0.25;
-
-    public PhonosClientConfig() {
+    public PhonosCommonConfig() {
     }
 
-    public PhonosClientConfig copyTo(PhonosClientConfig copy) {
-        for (var f : PhonosClientConfig.class.getDeclaredFields()) {
+    public PhonosCommonConfig copyTo(PhonosCommonConfig copy) {
+        for (var f : PhonosCommonConfig.class.getDeclaredFields()) {
             try {
                 f.set(copy, f.get(this));
             } catch (IllegalAccessException ignored) {}
@@ -33,18 +29,18 @@ public class PhonosClientConfig {
         return copy;
     }
 
-    public static PhonosClientConfig get() {
+    public static PhonosCommonConfig get() {
         if (config == null) {
-            config = new PhonosClientConfig();
+            config = new PhonosCommonConfig();
 
             try {
                 config.load();
             } catch (IOException ex) {
-                Phonos.LOG.error("Error loading Phonos client config!", ex);
+                Phonos.LOG.error("Error loading Phonos common config!", ex);
                 try {
                     config.save();
                 } catch (IOException e) {
-                    Phonos.LOG.error("Error saving Phonos client config!", e);
+                    Phonos.LOG.error("Error saving Phonos common config!", e);
                 }
             }
         }
@@ -53,14 +49,14 @@ public class PhonosClientConfig {
     }
 
     private static Path configPath() {
-        return FabricLoader.getInstance().getConfigDir().resolve("phonos.json");
+        return FabricLoader.getInstance().getConfigDir().resolve("phonos-common.json");
     }
 
     public void load() throws IOException {
         var path = configPath();
 
         try (var in = Files.newBufferedReader(path)) {
-            var fileCfg = new Gson().fromJson(in, PhonosClientConfig.class);
+            var fileCfg = new Gson().fromJson(in, PhonosCommonConfig.class);
             fileCfg.copyTo(this);
         }
     }
@@ -72,7 +68,7 @@ public class PhonosClientConfig {
         try (var writer = gson.newJsonWriter(Files.newBufferedWriter(path))) {
             writer.setIndent("    ");
 
-            gson.toJson(gson.toJsonTree(this, PhonosClientConfig.class), writer);
+            gson.toJson(gson.toJsonTree(this, PhonosCommonConfig.class), writer);
         }
     }
 }

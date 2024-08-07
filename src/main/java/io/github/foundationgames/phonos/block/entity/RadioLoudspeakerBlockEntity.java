@@ -2,6 +2,7 @@ package io.github.foundationgames.phonos.block.entity;
 
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.radio.RadioDevice;
+import io.github.foundationgames.phonos.radio.RadioMetadata;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.sound.emitter.SoundSource;
 import io.github.foundationgames.phonos.world.sound.block.SoundDataHandler;
@@ -65,6 +66,11 @@ public class RadioLoudspeakerBlockEntity extends BlockEntity implements Syncing,
     @Override
     public int getChannel() {
         return channel;
+    }
+
+    @Override
+    public RadioMetadata getMetadata() {
+        return new RadioMetadata(getPos(), 0);
     }
 
     @Override
