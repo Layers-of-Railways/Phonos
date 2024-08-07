@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.sound.emitter;
 
+import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioLongConsumer;
 import io.github.foundationgames.phonos.radio.RadioMetadata;
@@ -14,6 +15,7 @@ import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -210,32 +212,53 @@ public class SoundEmitterTree {
         }
     }
 
-    public void forEachSource(World world, Consumer<SoundSource> action) {
-        var emitters = SoundEmitterStorage.getInstance(world);
+    public class SmartSoundSourceConsumer implements Consumer<SoundSource> {
+        private final Consumer<SoundSource> wrapped;
+        private final int channel;
 
-        Consumer<SoundSource> checkingAction = soundSource -> {
-            if (soundSource instanceof RadioDevice radioDevice) {
-                int channel = radioDevice.getChannel();
-                if (!radioSources.containsKey(channel)) {
-                    return;
+        public SmartSoundSourceConsumer(Consumer<SoundSource> wrapped, int channel) {
+            this.wrapped = wrapped;
+            this.channel = channel;
+        }
+
+        public boolean shouldAccept(RadioMetadata deviceMetadata) {
+            if (!radioSources.containsKey(channel)) {
+                return false;
+            }
+            for (var metadata : radioSources.get(channel)) {
+                if (metadata.shouldTransmitTo(deviceMetadata)) {
+                    return true;
                 }
-                RadioMetadata deviceMetadata = radioDevice.getMetadata();
-                for (var metadata : this.radioSources.get(channel)) {
-                    if (metadata.shouldTransmitTo(deviceMetadata)) {
-                        action.accept(soundSource);
-                        return;
-                    }
+            }
+            return false;
+        }
+
+        @Override
+        public void accept(SoundSource soundSource) {
+            if (soundSource instanceof RadioDevice radioDevice) {
+                if (radioDevice.getChannel() != channel) {
+                    Phonos.LOG.error("RadioDevice channel mismatch");
+                }
+                if (shouldAccept(radioDevice.getMetadata())) {
+                    wrapped.accept(soundSource);
                 }
             } else {
-                action.accept(soundSource);
+                wrapped.accept(soundSource);
             }
-        };
+        }
+    }
+
+    public void forEachSource(World world, Consumer<SoundSource> action) {
+        var emitters = SoundEmitterStorage.getInstance(world);
 
         for (var level : this.levels)
             for (long em : level.active) {
             if (emitters.isLoaded(em)) {
                 var emitter = emitters.getEmitter(em);
-                emitter.forEachSource(emitter instanceof RadioStorage.RadioEmitter ? checkingAction : action);
+                emitter.forEachSource(emitter instanceof RadioStorage.RadioEmitter radioEmitter
+                    ? new SmartSoundSourceConsumer(action, radioEmitter.channel)
+                    : action
+                );
             }
         }
     }

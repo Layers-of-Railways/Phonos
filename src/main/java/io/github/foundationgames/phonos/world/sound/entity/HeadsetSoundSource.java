@@ -2,14 +2,17 @@ package io.github.foundationgames.phonos.world.sound.entity;
 
 import io.github.foundationgames.phonos.item.HeadsetItem;
 import io.github.foundationgames.phonos.item.SoundEmitterItem;
+import io.github.foundationgames.phonos.radio.RadioMetadata;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitter;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterStorage;
+import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
 import io.github.foundationgames.phonos.sound.emitter.SoundSource;
 import io.github.foundationgames.phonos.world.sound.data.SoundData;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.HashSet;
@@ -95,6 +98,18 @@ public class HeadsetSoundSource implements SoundSource {
         createdEmitters.removeIf(em -> createdEmittersToRemove.contains(em.emitterId()));
     }
 
+    public boolean shouldAccept(Consumer<SoundSource> action) {
+        if (action instanceof SoundEmitterTree.SmartSoundSourceConsumer smartSoundSourceConsumer) {
+            RadioMetadata deviceMetadata = new RadioMetadata(
+                BlockPos.ofFloored(x + 0.5, y + 0.5, z + 0.5),
+                0
+            );
+            return smartSoundSourceConsumer.shouldAccept(deviceMetadata);
+        } else {
+            return true;
+        }
+    }
+
     public static class InvToHeadsetSoundEmitter implements SoundEmitter {
         private final long emitterId;
         private final HeadsetSoundSource headset;
@@ -111,7 +126,8 @@ public class HeadsetSoundSource implements SoundSource {
 
         @Override
         public void forEachSource(Consumer<SoundSource> action) {
-            action.accept(this.headset);
+            if (this.headset.shouldAccept(action))
+                action.accept(this.headset);
         }
 
         @Override

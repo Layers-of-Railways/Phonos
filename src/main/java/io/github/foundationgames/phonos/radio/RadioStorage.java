@@ -127,7 +127,7 @@ public class RadioStorage {
             // TODO: make this less bad
             if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
                 var headset = HeadsetSoundSource.INSTANCE;
-                if (headset.parentEmitters.contains(this.emitterId)) {
+                if (headset.parentEmitters.contains(this.emitterId) && headset.shouldAccept(action)) {
                     action.accept(headset);
                 }
             }
