@@ -14,6 +14,7 @@ import io.github.foundationgames.phonos.sound.emitter.SoundEmitterStorage;
 import io.github.foundationgames.phonos.sound.stream.ServerOutgoingStreamHandler;
 import io.github.foundationgames.phonos.util.PhonosTags;
 import io.github.foundationgames.phonos.util.PhonosUtil;
+import io.github.foundationgames.phonos.util.ServerLifecycleHooks;
 import io.github.foundationgames.phonos.world.command.PhonosCommands;
 import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.data.SoundDataTypes;
@@ -52,8 +53,12 @@ public class Phonos implements ModInitializer {
 
     public static final Identifier STREAMED_SOUND = Phonos.id("streamed");
 
+    public static final Identifier SVC_STREAMED_SOUND = Phonos.id("svc_streamed");
+
     public static final RecipeSerializer<ItemGlowRecipe> ITEM_GLOW_RECIPE_SERIALIZER = Registry.register(
             Registries.RECIPE_SERIALIZER, Phonos.id("crafting_special_itemglow"), new SpecialRecipeSerializer<>(ItemGlowRecipe::new));
+
+    public static long microphoneSource = -1;
 
     @Override
     public void onInitialize() {
@@ -123,6 +128,7 @@ public class Phonos implements ModInitializer {
 
         RadioStorage.init();
         PhonosCommands.init();
+        ServerLifecycleHooks.init();
     }
 
     public static Identifier id(String path) {

@@ -15,6 +15,7 @@ public class PhonosCommonConfig {
     public float worldHeightMultiplier = 0.0f;
     public float transmissionTowerMultiplier = 8.0f;
     public int maxTransmissionTowerHeight = 64;
+    public int maxMicrophoneRange = 8;
 
     public PhonosCommonConfig() {
     }

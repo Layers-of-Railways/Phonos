@@ -6,11 +6,12 @@
   "name": "Phonos",
   "description": "Fill your world with music!",
   "authors": [
-    "FoundationGames"
+    "FoundationGames",
+    "techno-sam"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "sources": "https://github.com/Layers-of-Railways/Phonos",
+    "issues": "https://github.com/Layers-of-Railways/Phonos/issues"
   },
 
   "license": "MIT",
@@ -21,11 +22,14 @@
     "main": [
       "io.github.foundationgames.phonos.Phonos"
     ],
-	"client": [
+    "client": [
       "io.github.foundationgames.phonos.PhonosClient"
     ],
     "modmenu": [
       "io.github.foundationgames.phonos.util.compat.PhonosModMenu"
+    ],
+    "voicechat": [
+      "io.github.foundationgames.phonos.util.compat.PhonosVoicechatPlugin"
     ]
   },
   "mixins": [
@@ -36,5 +40,8 @@
     "fabricloader": ">=0.7.4",
     "fabric": "*",
     "minecraft": "1.20.x"
+  },
+  "suggests": {
+    "voicechat": ">=2.4.16"
   }
 }

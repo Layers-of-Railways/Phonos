@@ -71,6 +71,7 @@ public class PhonosConfigScreen extends Screen {
         screen.addIntRange("worldHeightMultiplier", val -> copy.worldHeightMultiplier = val, Math.round(copy.worldHeightMultiplier), 0, 10);
         screen.addIntRange("transmissionTowerMultiplier", val -> copy.transmissionTowerMultiplier = val, Math.round(copy.transmissionTowerMultiplier), 0, 100);
         screen.addIntRange("maxTransmissionTowerHeight", val -> copy.maxTransmissionTowerHeight = val, copy.maxTransmissionTowerHeight, 0, 256);
+        screen.addIntRange("maxMicrophoneRange", val -> copy.maxMicrophoneRange = val, copy.maxMicrophoneRange, 6, 32);
 
         return screen;
     }

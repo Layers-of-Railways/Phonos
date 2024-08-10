@@ -4,12 +4,18 @@
   "package": "io.github.foundationgames.phonos.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "compat.LocationSoundPacketAccessor",
+    "compat.SoundPacketAccessor"
   ],
   "client": [
+    "AbstractClientPlayerEntityMixin",
+    "BipedEntityModelMixin",
     "BipedEntityRendererMixin",
+    "HeldItemRendererMixin",
     "PlayerEntityRendererMixin",
     "SoundOptionsScreenMixin",
-    "WorldRendererAccess"
+    "WorldRendererAccess",
+    "compat.AudioChannelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

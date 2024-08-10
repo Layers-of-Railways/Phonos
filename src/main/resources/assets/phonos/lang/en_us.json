@@ -91,5 +91,6 @@
     "text.config.phonos.option.radioBaseRange": "Base Radio Range",
     "text.config.phonos.option.worldHeightMultiplier": "Added Range per Block Above Sea Level",
     "text.config.phonos.option.transmissionTowerMultiplier": "Added Range per Transmission Tower Block",
-    "text.config.phonos.option.maxTransmissionTowerHeight": "Max Height for Transmission Tower"
+    "text.config.phonos.option.maxTransmissionTowerHeight": "Max Height for Transmission Tower",
+    "text.config.phonos.option.maxMicrophoneRange": "Max Microphone Cable Length"
 }

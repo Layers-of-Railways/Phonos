@@ -19,6 +19,7 @@ public class PhonosBlocks {
     public static final Block RADIO_TRANSCEIVER = register(new RadioTransceiverBlock(FabricBlockSettings.copy(Blocks.OAK_SLAB)), "radio_transceiver");
     public static final Block RADIO_LOUDSPEAKER = register(new RadioLoudspeakerBlock(FabricBlockSettings.copy(Blocks.NOTE_BLOCK)), "radio_loudspeaker");
     public static final Block SATELLITE_STATION = register(new SatelliteStationBlock(FabricBlockSettings.copy(Blocks.OAK_SLAB)), "satellite_station");
+    public static final Block MICROPHONE_BASE = register(new MicrophoneBaseBlock(FabricBlockSettings.copy(Blocks.OAK_PLANKS).nonOpaque()), "microphone_base");
 
     public static BlockEntityType<ElectronicNoteBlockEntity> ELECTRONIC_NOTE_BLOCK_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Phonos.id("electronic_note_block"),
@@ -38,6 +39,9 @@ public class PhonosBlocks {
     public static BlockEntityType<SatelliteStationBlockEntity> SATELLITE_STATION_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Phonos.id("satellite_station"),
             BlockEntityType.Builder.create(SatelliteStationBlockEntity::new, SATELLITE_STATION).build(null));
+    public static BlockEntityType<MicrophoneBaseBlockEntity> MICROPHONE_BASE_ENTITY = Registry.register(
+            Registries.BLOCK_ENTITY_TYPE, Phonos.id("microphone_base"),
+            BlockEntityType.Builder.create(MicrophoneBaseBlockEntity::new, MICROPHONE_BASE).build(null));
 
     private static Block register(Block block, String name) {
         var item = Registry.register(Registries.ITEM, Phonos.id(name), new BlockItem(block, new Item.Settings()));

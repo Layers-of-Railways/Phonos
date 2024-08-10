@@ -17,6 +17,7 @@ import net.minecraft.util.ClickType;
 import net.minecraft.util.math.BlockPos;
 
 import java.nio.ByteBuffer;
+import java.util.UUID;
 
 public final class PayloadPackets {
     public static void initCommon() {
@@ -146,5 +147,21 @@ public final class PayloadPackets {
         buf.writeInt(action);
 
         return ServerPlayNetworking.createS2CPacket(Phonos.id("satellite_action"), buf);
+    }
+
+    public static void sendMicrophoneChannelOpen(ServerPlayerEntity player, UUID channelId, long streamId) {
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeUuid(channelId);
+        buf.writeLong(streamId);
+
+        ServerPlayNetworking.send(player, Phonos.id("microphone_channel_open"), buf);
+    }
+
+    public static void sendMicrophoneChannelClose(ServerPlayerEntity player, UUID channelId, long streamId) {
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeUuid(channelId);
+        buf.writeLong(streamId);
+
+        ServerPlayNetworking.send(player, Phonos.id("microphone_channel_close"), buf);
     }
 }

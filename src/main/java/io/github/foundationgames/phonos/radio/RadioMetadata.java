@@ -11,7 +11,6 @@ public record RadioMetadata(BlockPos pos, int transmissionRange) {
 
     public static void write(PacketByteBuf buf, RadioMetadata metadata) {
         metadata.write(buf);
-        metadata.write(buf);
     }
 
     public void write(PacketByteBuf buf) {

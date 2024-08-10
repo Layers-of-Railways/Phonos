@@ -19,9 +19,9 @@ import net.minecraft.util.Identifier;
 
 public class CableOutputBlockEntityRenderer<E extends BlockEntity & OutputBlockEntity> implements BlockEntityRenderer<E> {
     public static final Identifier TEXTURE = Phonos.id("textures/entity/audio_cable.png");
-    private final BasicModel cableEndModel;
+    protected final BasicModel cableEndModel;
 
-    private final CableBounds boundCache = new CableBounds();
+    protected final CableBounds boundCache = new CableBounds();
 
     public CableOutputBlockEntityRenderer(BlockEntityRendererFactory.Context ctx) {
         cableEndModel = new BasicModel(ctx.getLayerModelPart(PhonosClient.AUDIO_CABLE_END_LAYER));

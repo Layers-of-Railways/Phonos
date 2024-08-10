@@ -9,6 +9,7 @@ import io.github.foundationgames.phonos.sound.custom.ClientCustomAudioUploader;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
 import io.github.foundationgames.phonos.sound.stream.ClientIncomingStreamHandler;
 import io.github.foundationgames.phonos.util.PhonosUtil;
+import io.github.foundationgames.phonos.util.compat.PhonosVoicechatPlugin;
 import io.github.foundationgames.phonos.world.sound.data.SoundData;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
@@ -19,6 +20,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.ClickType;
 
 import java.nio.ByteBuffer;
+import java.util.UUID;
 
 public final class ClientPayloadPackets {
     @Environment(EnvType.CLIENT)
@@ -99,6 +101,20 @@ public final class ClientPayloadPackets {
                     be.performAction(action);
                 }
             });
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(Phonos.id("microphone_channel_open"), (client, handler, buf, responseSender) -> {
+            UUID channelId = buf.readUuid();
+            long streamId = buf.readLong();
+
+            PhonosVoicechatPlugin.startClientMicrophoneStream(channelId, streamId);
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(Phonos.id("microphone_channel_close"), (client, handler, buf, responseSender) -> {
+            UUID channelId = buf.readUuid();
+            long streamId = buf.readLong();
+
+            PhonosVoicechatPlugin.endClientMicrophoneStream(channelId, streamId);
         });
     }
 

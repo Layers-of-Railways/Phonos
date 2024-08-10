@@ -22,6 +22,10 @@ public class StreamSoundData extends SoundData {
         return new StreamSoundData(SoundDataTypes.STREAM, id, streamId, category, volume, pitch);
     }
 
+    public static StreamSoundData createMicrophone(long id, long streamId, SoundCategory category) {
+        return new StreamSoundData(SoundDataTypes.SVC_MICROPHONE, id, streamId, category, 1.0f, 1.0f);
+    }
+
     @Override
     public void toPacket(PacketByteBuf buf) {
         super.toPacket(buf);

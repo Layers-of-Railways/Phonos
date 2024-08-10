@@ -2,10 +2,9 @@ package io.github.foundationgames.phonos;
 
 import io.github.foundationgames.jsonem.JsonEM;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
-import io.github.foundationgames.phonos.client.render.block.CableOutputBlockEntityRenderer;
-import io.github.foundationgames.phonos.client.render.block.RadioLoudspeakerBlockEntityRenderer;
-import io.github.foundationgames.phonos.client.render.block.RadioTransceiverBlockEntityRenderer;
-import io.github.foundationgames.phonos.client.render.block.SatelliteStationBlockEntityRenderer;
+import io.github.foundationgames.phonos.client.model.PartialModel;
+import io.github.foundationgames.phonos.client.model.PhonosPartialModels;
+import io.github.foundationgames.phonos.client.render.block.*;
 import io.github.foundationgames.phonos.config.PhonosClientConfig;
 import io.github.foundationgames.phonos.item.*;
 import io.github.foundationgames.phonos.network.ClientPayloadPackets;
@@ -24,13 +23,16 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.state.property.Properties;
 
 public class PhonosClient implements ClientModInitializer {
@@ -49,6 +51,11 @@ public class PhonosClient implements ClientModInitializer {
         JsonEM.registerModelLayer(SATELLITE_LAYER);
         JsonEM.registerModelLayer(HEADSET_LAYER);
 
+        ModelLoadingRegistry.INSTANCE.registerModelProvider(PartialModel::onModelRegistry);
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(PartialModel.ResourceReloadListener.INSTANCE);
+
+        PhonosPartialModels.init();
+
         BlockRenderLayerMap.INSTANCE.putBlock(PhonosBlocks.ELECTRONIC_NOTE_BLOCK, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(PhonosBlocks.RADIO_TRANSCEIVER, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(PhonosBlocks.RADIO_LOUDSPEAKER, RenderLayer.getCutout());
@@ -59,6 +66,7 @@ public class PhonosClient implements ClientModInitializer {
         BlockEntityRendererFactories.register(PhonosBlocks.RADIO_TRANSCEIVER_ENTITY, RadioTransceiverBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(PhonosBlocks.RADIO_LOUDSPEAKER_ENTITY, RadioLoudspeakerBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(PhonosBlocks.SATELLITE_STATION_ENTITY, SatelliteStationBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(PhonosBlocks.MICROPHONE_BASE_ENTITY, MicrophoneBaseBlockEntityRenderer::new);
 
         ColorProviderRegistry.BLOCK.register((state, world, pos, tintIndex) ->
                 world != null && pos != null && state != null ?

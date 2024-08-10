@@ -92,5 +92,7 @@ public class ClientSoundStorage extends SoundStorage {
                 new MultiSourceSoundInstance(list, data.sound.value(), data.soundCategory, random, data.volume, data.pitch));
         registerProvider(SoundDataTypes.STREAM, (data, list, random) ->
                 new StreamMultiSoundInstance(list, data.streamId, data.soundCategory, random, data.volume, data.pitch));
+        registerProvider(SoundDataTypes.SVC_MICROPHONE, (data, list, random) ->
+                new SVCMultiSoundInstance(list, data.streamId, data.soundCategory, random, data.volume, data.pitch));
     }
 }

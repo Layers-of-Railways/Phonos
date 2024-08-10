@@ -1,5 +1,8 @@
 {
   "streamed": {
     "sounds": [{"name": "fabric-sound-api-v1:empty", "stream": true}]
+  },
+  "svc_streamed": {
+    "sounds": [{"name": "fabric-sound-api-v1:empty", "stream": true}]
   }
 }

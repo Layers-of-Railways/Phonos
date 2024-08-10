@@ -75,10 +75,13 @@ public abstract class AbstractOutputBlockEntity extends BlockEntity implements S
         nbt.put("Outputs", outputsNbt);
     }
 
+    protected void writeClientNbt(NbtCompound nbt) {}
+
     @Override
     public NbtCompound toInitialChunkDataNbt() {
         NbtCompound nbt = new NbtCompound();
         this.writeNbt(nbt);
+        this.writeClientNbt(nbt);
         return nbt;
     }
 

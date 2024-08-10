@@ -1,6 +1,7 @@
 package io.github.foundationgames.phonos.mixin;
 
 import io.github.foundationgames.phonos.client.render.entity.HeadsetFeatureRenderer;
+import io.github.foundationgames.phonos.client.render.entity.MicrophoneFeatureRenderer;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -21,5 +22,6 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
             at = @At("TAIL"))
     private void phonos$addHeadsetFeatureRenderer(EntityRendererFactory.Context ctx, boolean slim, CallbackInfo ci) {
         this.addFeature(new HeadsetFeatureRenderer<>(this, ctx.getModelLoader()));
+        this.addFeature(new MicrophoneFeatureRenderer<>(this, ctx.getModelLoader()));
     }
 }

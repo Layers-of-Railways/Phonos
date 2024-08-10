@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class CableConnection {
+public class CableConnection implements RenderableCableConnection {
     public final CablePlugPoint start;
     public final InputPlugPoint end;
     public final @Nullable DyeColor color;
@@ -29,6 +29,7 @@ public class CableConnection {
         return false; //start.getPos(world).squaredDistanceTo(end.getPos(world)) > PhonosUtil.maxSquaredConnectionDistance(world);
     }
 
+    @Override
     public boolean isStatic() {
         return start.isStatic() && end.isStatic();
     }
@@ -78,5 +79,20 @@ public class CableConnection {
     @Override
     public int hashCode() {
         return Objects.hash(start, end, color, drop);
+    }
+
+    @Override
+    public CablePlugPoint getStart() {
+        return start;
+    }
+
+    @Override
+    public CablePlugPoint getEnd() {
+        return end;
+    }
+
+    @Override
+    public @Nullable DyeColor getColor() {
+        return color;
     }
 }

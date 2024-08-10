@@ -3,8 +3,8 @@ package io.github.foundationgames.phonos.client.render;
 import io.github.foundationgames.phonos.config.PhonosClientConfig;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.util.Pose3f;
-import io.github.foundationgames.phonos.world.sound.CableConnection;
 import io.github.foundationgames.phonos.world.sound.CablePlugPoint;
+import io.github.foundationgames.phonos.world.sound.RenderableCableConnection;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.render.*;
@@ -65,13 +65,13 @@ public class CableRenderer {
     }
 
     public static void renderConnection(@Nullable CableVBOContainer vboContainer, PhonosClientConfig config, World world,
-                                        CableConnection conn, @Nullable CableBounds bounds, Frustum frustum, MatrixStack matrices,
+                                        RenderableCableConnection conn, @Nullable CableBounds bounds, Frustum frustum, MatrixStack matrices,
                                         VertexConsumer immediate, Model cableEndModel, int overlay, float tickDelta) {
         int startLight, endLight;
 
         // Connection plug points are always rendered immediate
         matrices.push();
-            transformConnPoint(world, conn.start, matrices, cableStPt, tickDelta);
+            transformConnPoint(world, conn.getStart(), matrices, cableStPt, tickDelta);
 
             lightPos.set(cableStPt.x, cableStPt.y, cableStPt.z);
             startLight = WorldRenderer.getLightmapCoordinates(world, lightPos);
@@ -80,7 +80,7 @@ public class CableRenderer {
         matrices.pop();
 
         matrices.push();
-            transformConnPoint(world, conn.end, matrices, cableEnPt, tickDelta);
+            transformConnPoint(world, conn.getEnd(), matrices, cableEnPt, tickDelta);
 
             lightPos.set(cableEnPt.x, cableEnPt.y, cableEnPt.z);
             endLight = WorldRenderer.getLightmapCoordinates(world, lightPos);
@@ -131,14 +131,14 @@ public class CableRenderer {
         }
     }
 
-    private static void buildCableGeometry(CableConnection conn, MatrixStack matrices, VertexConsumer buffer, int segments,
+    private static void buildCableGeometry(RenderableCableConnection conn, MatrixStack matrices, VertexConsumer buffer, int segments,
                                            float length, double detail, int startLight, int endLight, int overlay) {
         matrices.push();
 
-        float vOffset = conn.color != null ? 0.125f : 0;
-        float r = conn.color != null ? conn.color.getColorComponents()[0] : 1;
-        float g = conn.color != null ? conn.color.getColorComponents()[1] : 1;
-        float b = conn.color != null ? conn.color.getColorComponents()[2] : 1;
+        float vOffset = conn.getColor() != null ? 0.125f : 0;
+        float r = conn.getColor() != null ? conn.getColor().getColorComponents()[0] : 1;
+        float g = conn.getColor() != null ? conn.getColor().getColorComponents()[1] : 1;
+        float b = conn.getColor() != null ? conn.getColor().getColorComponents()[2] : 1;
 
         final float texUWid = (float) (0.25 / detail);
 
