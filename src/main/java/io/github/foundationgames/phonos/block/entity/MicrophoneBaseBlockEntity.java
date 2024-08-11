@@ -8,7 +8,7 @@ import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
 import io.github.foundationgames.phonos.util.UniqueId;
-import io.github.foundationgames.phonos.util.compat.PhonosVoicechatPlugin;
+import io.github.foundationgames.phonos.util.compat.PhonosVoicechatProxy;
 import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
 import io.github.foundationgames.phonos.world.sound.block.OutputBlockEntity;
@@ -66,7 +66,7 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
 
     public void start(ServerPlayerEntity serverPlayer) {
         if (world instanceof ServerWorld) {
-            if (PhonosVoicechatPlugin.isStreaming(serverPlayer))
+            if (PhonosVoicechatProxy.isStreaming(serverPlayer))
                 return;
 
             this.playingSound = new SoundEmitterTree(this.emitterId);
@@ -75,7 +75,7 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
                 this.playingSound);
             this.serverPlayer = new WeakReference<>(serverPlayer);
 
-            if (PhonosVoicechatPlugin.startStream(serverPlayer, this.streamId)) {
+            if (PhonosVoicechatProxy.startStream(serverPlayer, this.streamId)) {
                 Phonos.LOG.info("Started microphone stream for player {} with stream ID {}", serverPlayer, this.streamId);
             } else {
                 Phonos.LOG.warn("Failed to start microphone stream for player {} with stream ID {}", serverPlayer, this.streamId);
@@ -90,7 +90,7 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
             SoundStorage.getInstance(this.world).stop(this.world, this.emitterId());
             this.playingSound = null;
 
-            PhonosVoicechatPlugin.stopStreaming(this.streamId);
+            PhonosVoicechatProxy.stopStreaming(this.streamId);
             Phonos.LOG.info("Stopped microphone stream for player {} with stream ID {}", this.serverPlayer, this.streamId);
         }
 

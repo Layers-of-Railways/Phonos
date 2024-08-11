@@ -1,6 +1,7 @@
 package io.github.foundationgames.phonos.sound;
 
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
+import io.github.foundationgames.phonos.util.compat.PhonosVoicechatProxy;
 import io.github.foundationgames.phonos.world.sound.data.SoundData;
 import io.github.foundationgames.phonos.world.sound.data.SoundDataTypes;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -92,7 +93,9 @@ public class ClientSoundStorage extends SoundStorage {
                 new MultiSourceSoundInstance(list, data.sound.value(), data.soundCategory, random, data.volume, data.pitch));
         registerProvider(SoundDataTypes.STREAM, (data, list, random) ->
                 new StreamMultiSoundInstance(list, data.streamId, data.soundCategory, random, data.volume, data.pitch));
-        registerProvider(SoundDataTypes.SVC_MICROPHONE, (data, list, random) ->
+        PhonosVoicechatProxy.executeIfLoaded(() -> () -> {
+            registerProvider(SoundDataTypes.SVC_MICROPHONE, (data, list, random) ->
                 new SVCMultiSoundInstance(list, data.streamId, data.soundCategory, random, data.volume, data.pitch));
+        });
     }
 }

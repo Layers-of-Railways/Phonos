@@ -3,6 +3,7 @@ package io.github.foundationgames.phonos.block;
 import io.github.foundationgames.phonos.block.entity.MicrophoneBaseBlockEntity;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.util.VoxelShaper;
+import io.github.foundationgames.phonos.util.compat.PhonosVoicechatProxy;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -11,7 +12,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateManager;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -54,6 +58,14 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
     @Override
     @SuppressWarnings("deprecation")
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if (!PhonosVoicechatProxy.isLoaded()) {
+            if (player instanceof ServerPlayerEntity serverPlayer) {
+                serverPlayer.sendMessageToClient(Text.translatable("block.phonos.microphone_base.voicechat_not_installed")
+                    .setStyle(Style.EMPTY.withColor(Formatting.RED)), true);
+            }
+            return ActionResult.FAIL;
+        }
+
         if (player.canModifyBlocks()) {
             if (PhonosUtil.holdingAudioCable(player)) {
                 return ActionResult.PASS;
