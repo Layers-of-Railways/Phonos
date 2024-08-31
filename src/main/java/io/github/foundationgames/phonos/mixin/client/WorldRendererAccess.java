@@ -1,4 +1,4 @@
-package io.github.foundationgames.phonos.mixin;
+package io.github.foundationgames.phonos.mixin.client;
 
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.WorldRenderer;

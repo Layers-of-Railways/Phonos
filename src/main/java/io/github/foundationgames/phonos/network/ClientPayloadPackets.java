@@ -26,10 +26,10 @@ public final class ClientPayloadPackets {
     @Environment(EnvType.CLIENT)
     public static void initClient() {
         ClientPlayNetworking.registerGlobalReceiver(Phonos.id("sound_play"), (client, handler, buf, responseSender) -> {
-           var data = SoundData.fromPacket(buf);
-           var tree = SoundEmitterTree.fromPacket(buf);
+            var data = SoundData.fromPacket(buf);
+            var tree = SoundEmitterTree.fromPacket(buf);
 
-           client.execute(() -> SoundStorage.getInstance(client.world).play(client.world, data, tree));
+            client.execute(() -> SoundStorage.getInstance(client.world).play(client.world, data, tree));
         });
 
         ClientPlayNetworking.registerGlobalReceiver(Phonos.id("sound_stop"), (client, handler, buf, responseSender) -> {

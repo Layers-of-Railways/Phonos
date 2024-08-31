@@ -39,6 +39,10 @@ public abstract class SoundData {
         buf.writeFloat(pitch);
     }
 
+    public boolean updateSkippedTicksAndCheckResumable() {
+        return false;
+    }
+
     @SuppressWarnings("unchecked")
     public static @Nullable SoundData fromPacket(PacketByteBuf buf) {
         var id = buf.readIdentifier();
@@ -52,10 +56,14 @@ public abstract class SoundData {
     }
 
     public static <S extends SoundData> Type<S> register(Identifier id, Factory<S> factory) {
-        return Registry.register(REGISTRY, id, new Type<>(id, factory));
+        return register(id, false, factory);
     }
 
-    public record Type<S extends SoundData>(Identifier id, Factory<S> constructor) {}
+    public static <S extends SoundData> Type<S> register(Identifier id, boolean resumable, Factory<S> factory) {
+        return Registry.register(REGISTRY, id, new Type<>(id, resumable, factory));
+    }
+
+    public record Type<S extends SoundData>(Identifier id, boolean resumable, Factory<S> constructor) {}
 
     public interface Factory<S extends SoundData> {
         S create(Type<?> type, PacketByteBuf buf);

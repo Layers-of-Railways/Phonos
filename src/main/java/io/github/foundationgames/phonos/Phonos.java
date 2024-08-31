@@ -7,6 +7,7 @@ import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.recipe.ItemGlowRecipe;
+import io.github.foundationgames.phonos.sound.ServerSoundStorage;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitter;
@@ -19,6 +20,7 @@ import io.github.foundationgames.phonos.world.command.PhonosCommands;
 import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.data.SoundDataTypes;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -34,6 +36,7 @@ import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialRecipeSerializer;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPointer;
 import net.minecraft.world.GameRules;
@@ -97,6 +100,17 @@ public class Phonos implements ModInitializer {
         });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
                 ServerCustomAudio.onPlayerDisconnect(handler.getPlayer()));
+
+        ServerPlayConnectionEvents.JOIN.register(((handler, sender, server) -> {
+            ServerPlayerEntity player = handler.getPlayer();
+            SoundStorage.getInstance(player.getServerWorld())
+                .registerPlayerWaitingForResume(player);
+        }));
+
+        ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(((player, origin, destination) -> {
+            SoundStorage.getInstance(player.getServerWorld())
+                .registerPlayerWaitingForResume(player);
+        }));
 
         ServerTickEvents.END_WORLD_TICK.register(world -> SoundStorage.getInstance(world).tick(world));
         ServerTickEvents.START_SERVER_TICK.register(ServerOutgoingStreamHandler::tick);

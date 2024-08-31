@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.SoundInstance;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +33,12 @@ public class ClientSoundStorage extends SoundStorage {
     }
 
     @Override
+    public void registerPlayerWaitingForResume(ServerPlayerEntity player) {}
+
+    @Override
     public void play(World world, SoundData data, SoundEmitterTree tree) {
+        stop(world, data.emitterId);
+
         tree.updateClient(world);
 
         var inst = provideSound(data, tree, world.getRandom());
@@ -88,7 +94,8 @@ public class ClientSoundStorage extends SoundStorage {
 
     public static void initClient() {
         registerProvider(SoundDataTypes.SOUND_EVENT, (data, list, random) ->
-                new MultiSourceSoundInstance(list, data.sound.value(), data.soundCategory, random, data.volume, data.pitch));
+                new MultiSourceSoundInstance(list, data.sound.value(), data.soundCategory, random, data.volume, data.pitch)
+                    .withSkippedTicks(data.getSkippedTicks()));
         registerProvider(SoundDataTypes.NOTE_BLOCK, (data, list, random) ->
                 new MultiSourceSoundInstance(list, data.sound.value(), data.soundCategory, random, data.volume, data.pitch));
         registerProvider(SoundDataTypes.STREAM, (data, list, random) ->

@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.2-SNAPSHOT'
+	id 'fabric-loom' version '1.7-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -40,7 +40,11 @@ processResources {
 	inputs.property "version", project.version
 
 	filesMatching("fabric.mod.json") {
-		expand "version": project.version
+		expand(
+				"version": project.version,
+				"fabric_loader_version": project.loader_version,
+				"fabric_api_version": project.fabric_version
+		)
 	}
 }
 

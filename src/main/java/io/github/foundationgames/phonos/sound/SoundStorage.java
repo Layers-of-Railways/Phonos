@@ -6,6 +6,7 @@ import io.github.foundationgames.phonos.world.sound.data.SoundData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 
@@ -16,6 +17,11 @@ public abstract class SoundStorage {
     private static SoundStorage CLIENT;
     private static final Map<RegistryKey<World>, SoundStorage> SERVER = new HashMap<>();
     private static final SoundStorage INVALID = new SoundStorage() {
+        @Override
+        public void registerPlayerWaitingForResume(ServerPlayerEntity player) {
+            Phonos.LOG.error("Registering player " + player + " in an invalid world");
+        }
+
         @Override
         public void play(World world, SoundData data, SoundEmitterTree tree) {
             Phonos.LOG.error("Playing " + data.emitterId + " of type " + data.type + " in an invalid world");
@@ -41,6 +47,8 @@ public abstract class SoundStorage {
             source.onSoundPlayed(world, data);
         });
     }
+
+    public abstract void registerPlayerWaitingForResume(ServerPlayerEntity player);
 
     public abstract void play(World world, SoundData data, SoundEmitterTree tree);
 

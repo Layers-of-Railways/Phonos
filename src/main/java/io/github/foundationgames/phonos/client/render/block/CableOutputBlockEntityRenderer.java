@@ -7,7 +7,7 @@ import io.github.foundationgames.phonos.client.render.CableBounds;
 import io.github.foundationgames.phonos.client.render.CableRenderer;
 import io.github.foundationgames.phonos.client.render.CableVBOContainer;
 import io.github.foundationgames.phonos.config.PhonosClientConfig;
-import io.github.foundationgames.phonos.mixin.WorldRendererAccess;
+import io.github.foundationgames.phonos.mixin.client.WorldRendererAccess;
 import io.github.foundationgames.phonos.world.sound.block.OutputBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;

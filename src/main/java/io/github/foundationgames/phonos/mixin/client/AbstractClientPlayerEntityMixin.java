@@ -1,4 +1,4 @@
-package io.github.foundationgames.phonos.mixin;
+package io.github.foundationgames.phonos.mixin.client;
 
 import com.mojang.authlib.GameProfile;
 import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingPlayerEntity;

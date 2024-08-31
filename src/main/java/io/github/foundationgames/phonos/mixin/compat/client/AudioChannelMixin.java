@@ -1,4 +1,4 @@
-package io.github.foundationgames.phonos.mixin.compat;
+package io.github.foundationgames.phonos.mixin.compat.client;
 
 import de.maxhenkel.voicechat.voice.client.AudioChannel;
 import de.maxhenkel.voicechat.voice.common.LocationSoundPacket;

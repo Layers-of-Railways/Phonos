@@ -8,14 +8,16 @@
     "compat.SoundPacketAccessor"
   ],
   "client": [
-    "AbstractClientPlayerEntityMixin",
-    "BipedEntityModelMixin",
-    "BipedEntityRendererMixin",
-    "HeldItemRendererMixin",
-    "PlayerEntityRendererMixin",
-    "SoundOptionsScreenMixin",
-    "WorldRendererAccess",
-    "compat.AudioChannelMixin"
+    "client.AbstractClientPlayerEntityMixin",
+    "client.BipedEntityModelMixin",
+    "client.BipedEntityRendererMixin",
+    "client.HeldItemRendererMixin",
+    "client.PlayerEntityRendererMixin",
+    "client.SoundOptionsScreenMixin",
+    "client.SoundSystemMixin",
+    "client.SourceMixin",
+    "client.WorldRendererAccess",
+    "compat.client.AudioChannelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

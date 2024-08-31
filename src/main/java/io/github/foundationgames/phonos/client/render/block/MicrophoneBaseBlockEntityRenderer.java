@@ -4,7 +4,7 @@ import io.github.foundationgames.phonos.block.entity.MicrophoneBaseBlockEntity;
 import io.github.foundationgames.phonos.client.model.PhonosPartialModels;
 import io.github.foundationgames.phonos.client.render.CableRenderer;
 import io.github.foundationgames.phonos.config.PhonosClientConfig;
-import io.github.foundationgames.phonos.mixin.WorldRendererAccess;
+import io.github.foundationgames.phonos.mixin.client.WorldRendererAccess;
 import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingPlayerEntity;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.util.Pose3f;

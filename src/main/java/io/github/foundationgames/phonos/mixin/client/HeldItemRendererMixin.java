@@ -1,4 +1,4 @@
-package io.github.foundationgames.phonos.mixin;
+package io.github.foundationgames.phonos.mixin.client;
 
 import io.github.foundationgames.phonos.client.model.PhonosPartialModels;
 import io.github.foundationgames.phonos.client.render.block.MicrophoneBaseBlockEntityRenderer;

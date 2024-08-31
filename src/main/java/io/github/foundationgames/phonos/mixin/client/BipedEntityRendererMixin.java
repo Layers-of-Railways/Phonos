@@ -1,4 +1,4 @@
-package io.github.foundationgames.phonos.mixin;
+package io.github.foundationgames.phonos.mixin.client;
 
 import io.github.foundationgames.phonos.client.render.entity.HeadsetFeatureRenderer;
 import net.minecraft.client.render.entity.BipedEntityRenderer;

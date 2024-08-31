@@ -37,8 +37,8 @@
   ],
   "accessWidener": "phonos.accesswidener",
   "depends": {
-    "fabricloader": ">=0.7.4",
-    "fabric": "*",
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric": ">=${fabric_api_version}",
     "minecraft": "1.20.x"
   },
   "suggests": {

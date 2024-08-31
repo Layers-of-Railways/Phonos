@@ -11,6 +11,7 @@ import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
 import io.github.foundationgames.phonos.world.sound.block.BlockEntityOutputs;
 import io.github.foundationgames.phonos.world.sound.block.OutputBlockEntity;
+import io.github.foundationgames.phonos.world.sound.block.ResumableSoundHolder;
 import io.github.foundationgames.phonos.world.sound.data.SoundEventSoundData;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntityType;
@@ -35,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
-public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements Syncing, Ticking, OutputBlockEntity {
+public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements Syncing, Ticking, OutputBlockEntity, ResumableSoundHolder {
     public static final BlockConnectionLayout OUTPUT_LAYOUT = new BlockConnectionLayout()
             .addPoint(-8, -4, 0, Direction.WEST)
             .addPoint(8, -4, 0, Direction.EAST)
@@ -48,6 +49,7 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
     private @Nullable NbtCompound pendingNbt = null;
     private final long emitterId;
     private @Nullable SoundEmitterTree playingSound = null;
+    private int playingSoundId = 1;
 
     private CableVBOContainer vboContainer;
 
@@ -70,6 +72,16 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
     }
 
     @Override
+    public int getPlayingSoundId() {
+        return this.playingSoundId;
+    }
+
+    @Override
+    public long getSkippedTicks() {
+        return this.tickCount - this.recordStartTick;
+    }
+
+    @Override
     public void startPlaying() {
         this.recordStartTick = this.tickCount;
         this.isPlaying = true;
@@ -79,7 +91,7 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
             this.playingSound = new SoundEmitterTree(this.emitterId);
 
             SoundStorage.getInstance(world).play(world, SoundEventSoundData.create(
-                    emitterId, Registries.SOUND_EVENT.getEntry(disc.getSound()), SoundCategory.RECORDS, 2, 1),
+                    emitterId, Registries.SOUND_EVENT.getEntry(disc.getSound()), SoundCategory.RECORDS, 2, 1, this),
                     this.playingSound);
             sync();
         }
@@ -97,6 +109,7 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
             this.playingSound = null;
 
             SoundStorage.getInstance(world).stop(world, emitterId);
+            playingSoundId++;
             sync();
         }
 

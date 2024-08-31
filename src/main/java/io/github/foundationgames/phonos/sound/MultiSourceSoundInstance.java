@@ -19,11 +19,13 @@ import org.joml.Vector3d;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class MultiSourceSoundInstance extends AbstractSoundInstance implements TickableSoundInstance {
+public class MultiSourceSoundInstance extends AbstractSoundInstance implements TickableSoundInstance, SkippableSoundInstance {
     public final AtomicReference<SoundEmitterTree> emitters;
     private double camX, camZ;
     private double x, y, z;
     protected float volMultiplier = 1;
+
+    private long skippedTicks = 0;
     
     private boolean done;
 
@@ -62,7 +64,7 @@ public class MultiSourceSoundInstance extends AbstractSoundInstance implements T
     }
 
     private void updatePosition() {
-    	var mc = MinecraftClient.getInstance();
+        var mc = MinecraftClient.getInstance();
         var camPos = mc.gameRenderer.getCamera().getPos();
 
         boolean ncTemp = false;
@@ -162,5 +164,15 @@ public class MultiSourceSoundInstance extends AbstractSoundInstance implements T
     @Override
     public void tick() {
         updatePosition();
+    }
+
+    public MultiSourceSoundInstance withSkippedTicks(long skippedTicks) {
+        this.skippedTicks = skippedTicks;
+        return this;
+    }
+
+    @Override
+    public long getSkippedTicks() {
+        return skippedTicks;
     }
 }

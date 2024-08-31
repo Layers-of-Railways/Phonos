@@ -11,7 +11,7 @@ public class NoteBlockSoundData extends SoundEventSoundData {
     public final int note;
 
     public NoteBlockSoundData(Type<?> type, long id, RegistryEntry<SoundEvent> sound, SoundCategory category, float volume, float pitch, Instrument instrument, int note) {
-        super(type, id, sound, category, volume, pitch);
+        super(type, id, sound, category, volume, pitch, null);
 
         this.instrument = instrument;
         this.note = note;
