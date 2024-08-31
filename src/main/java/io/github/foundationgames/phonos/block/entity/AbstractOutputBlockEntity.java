@@ -1,6 +1,8 @@
 package io.github.foundationgames.phonos.block.entity;
 
 import io.github.foundationgames.phonos.client.render.CableVBOContainer;
+import io.github.foundationgames.phonos.sound.emitter.SoundEmitterStorage;
+import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
 import io.github.foundationgames.phonos.sound.emitter.SoundSource;
 import io.github.foundationgames.phonos.util.UniqueId;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
@@ -14,6 +16,7 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -149,5 +152,29 @@ public abstract class AbstractOutputBlockEntity extends BlockEntity implements S
             this.vboContainer.close();
         }
         super.markRemoved();
+    }
+
+    @ApiStatus.Internal
+    public void debugNetwork(World world, Consumer<String> feedback) {
+        SoundEmitterStorage emitterStorage = SoundEmitterStorage.getInstance(world);
+
+        feedback.accept("%s %s has the following children: ".formatted(getClass().getSimpleName(), UniqueId.debugNameOf(emitterId())));
+
+        var tree = new SoundEmitterTree(emitterId());
+        if (world.isClient) {
+            tree.updateClient(world);
+        } else {
+            tree.updateServer(world);
+        }
+
+        tree.debugLevels((level, id) -> {
+            feedback.accept("%s- %s: %s".formatted("  ".repeat(level + 1), UniqueId.debugNameOf(id), emitterStorage.getEmitter(id)));
+        });
+
+        feedback.accept("");
+        feedback.accept("Sources:");
+        tree.forEachSource(world, source -> {
+            feedback.accept("  - (%s, %s, %s) %s".formatted(source.x(), source.y(), source.z(), source));
+        });
     }
 }

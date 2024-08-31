@@ -5,6 +5,7 @@ import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioMetadata;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.sound.emitter.SoundSource;
+import io.github.foundationgames.phonos.util.UniqueId;
 import io.github.foundationgames.phonos.world.sound.block.SoundDataHandler;
 import io.github.foundationgames.phonos.world.sound.data.SoundData;
 import net.minecraft.block.BlockState;
@@ -132,5 +133,10 @@ public class RadioLoudspeakerBlockEntity extends BlockEntity implements Syncing,
 
     public Direction getRotation() {
         return this.getCachedState().get(Properties.HORIZONTAL_FACING);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " {(%s) channel#%s}".formatted(getPos().toShortString(), getChannel());
     }
 }

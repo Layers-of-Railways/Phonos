@@ -124,9 +124,11 @@ public class BlockEntityOutputs implements ConnectionCollection {
                 nbt.put(Integer.toString(i), connNbt);
             }
         }
+        nbt.remove("WasPending");
     }
 
     public @Nullable NbtCompound consumeNbt(NbtCompound nbt) {
+        boolean wasPending = nbt.getBoolean("WasPending");
         NbtCompound result = null;
 
         for (int i = 0; i < connections.length; i++) {
@@ -143,8 +145,9 @@ public class BlockEntityOutputs implements ConnectionCollection {
                     connections[i] = conn;
                 } else {
                     result = nbt;
+                    result.putBoolean("WasPending", true);
                 }
-            } else {
+            } else if (!wasPending) { // If this is a fresh load, remove any connections that were not saved
                 connections[i] = null;
             }
         }

@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class SoundEmitterTree {
@@ -278,6 +279,14 @@ public class SoundEmitterTree {
             var inactive = buf.readCollection(LongArrayList::new, PacketByteBuf::readLong);
 
             return new Level(active, inactive);
+        }
+    }
+
+    public void debugLevels(BiConsumer<Integer, Long> action) {
+        for (int i = 0; i < levels.size(); i++) {
+            for (long l : levels.get(i).active) {
+                action.accept(i, l);
+            }
         }
     }
 

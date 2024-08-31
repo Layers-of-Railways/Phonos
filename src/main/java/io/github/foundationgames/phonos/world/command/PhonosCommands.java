@@ -1,8 +1,10 @@
 package io.github.foundationgames.phonos.world.command;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.foundationgames.phonos.Phonos;
+import io.github.foundationgames.phonos.block.entity.AbstractOutputBlockEntity;
 import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
@@ -30,44 +32,85 @@ public class PhonosCommands {
                 SatelliteArgumentType.class, ConstantArgumentSerializer.of(SatelliteArgumentType::new));
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            dispatcher.register(literal("phonos")
-                    .then(literal("radar")
-                            .requires(src -> src.hasPermissionLevel(2))
-                            .then(argument(
-                                    "channel",
-                                    IntegerArgumentType.integer(0, RadioStorage.CHANNEL_COUNT - 1))
-                                    .executes(ctx -> radar(
-                                            ctx.getSource(),
-                                            ctx.getArgument("channel", Integer.class)
-                                    ))
-                            )
-                    )
-                    .then(literal("satellite")
-                            .then(literal("inspect").then(argument("pos", BlockPosArgumentType.blockPos())
-                                            .executes(ctx -> satelliteInspect(
-                                                    ctx.getSource(),
-                                                    ctx.getArgument("pos", PosArgument.class).toAbsoluteBlockPos(ctx.getSource())
-                                            ))
-                                    )
-                            )
-                            .then(literal("list")
-                                    .requires(src -> src.hasPermissionLevel(2))
-                                    .executes(ctx -> satelliteList(
-                                            ctx.getSource()
-                                    ))
-                            )
-                            .then(literal("crash")
-                                    .requires(src -> src.hasPermissionLevel(4) && src.getPlayer() != null)
-                                    .then(argument("id", new SatelliteArgumentType())
-                                            .executes(ctx -> satelliteCrash(
-                                                    ctx.getSource(),
-                                                    ctx.getArgument("id", Long.class)
-                                            ))
-                                    )
-                            )
-                    )
-            );
+            LiteralArgumentBuilder<ServerCommandSource> phonos = literal("phonos");
+
+            phonos
+                .then($radar())
+                .then($satellite());
+
+            if (Phonos.DEBUG) {
+                phonos.then($debug());
+            }
+
+            dispatcher.register(phonos);
         });
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> $radar() {
+        return literal("radar")
+            .requires(src -> src.hasPermissionLevel(2))
+            .then(argument(
+                "channel",
+                IntegerArgumentType.integer(0, RadioStorage.CHANNEL_COUNT - 1))
+                .executes(ctx -> radar(
+                    ctx.getSource(),
+                    ctx.getArgument("channel", Integer.class)
+                ))
+            );
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> $satellite() {
+        return literal("satellite")
+            .then(literal("inspect").then(argument("pos", BlockPosArgumentType.blockPos())
+                    .executes(ctx -> satelliteInspect(
+                        ctx.getSource(),
+                        ctx.getArgument("pos", PosArgument.class).toAbsoluteBlockPos(ctx.getSource())
+                    ))
+                )
+            )
+            .then(literal("list")
+                .requires(src -> src.hasPermissionLevel(2))
+                .executes(ctx -> satelliteList(
+                    ctx.getSource()
+                ))
+            )
+            .then(literal("crash")
+                .requires(src -> src.hasPermissionLevel(4) && src.getPlayer() != null)
+                .then(argument("id", new SatelliteArgumentType())
+                    .executes(ctx -> satelliteCrash(
+                        ctx.getSource(),
+                        ctx.getArgument("id", Long.class)
+                    ))
+                )
+            );
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> $debug() {
+        return literal("debug")
+            .requires(src -> src.hasPermissionLevel(2))
+            .then($debug$network());
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> $debug$network() {
+        return literal("network")
+            .then(argument("source", BlockPosArgumentType.blockPos())
+                .executes(ctx -> debugNetwork(
+                    ctx.getSource(),
+                    ctx.getArgument("source", PosArgument.class).toAbsoluteBlockPos(ctx.getSource())
+                ))
+            );
+    }
+
+    private static int debugNetwork(ServerCommandSource source, BlockPos sourcePos) {
+        var world = source.getWorld();
+
+        if (!(world.getBlockEntity(sourcePos) instanceof AbstractOutputBlockEntity be)) {
+            source.sendError(Text.literal("Block at position is not an AbstractOutputBlockEntity"));
+            return 0;
+        }
+
+        be.debugNetwork(world, msg -> source.sendFeedback(() -> Text.of(msg), false));
+        return 1;
     }
 
     public static int satelliteInspect(ServerCommandSource source, BlockPos pos) {

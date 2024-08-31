@@ -2,6 +2,7 @@ package io.github.foundationgames.phonos.block.entity;
 
 import io.github.foundationgames.phonos.block.ConnectionHubBlock;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
+import io.github.foundationgames.phonos.util.UniqueId;
 import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
 import net.minecraft.block.BlockState;
@@ -68,5 +69,10 @@ public class ConnectionHubBlockEntity extends AbstractConnectionHubBlockEntity {
         }
 
         return Direction.NORTH;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " {(%s) %s}".formatted(getPos().toShortString(), UniqueId.debugNameOf(emitterId()));
     }
 }

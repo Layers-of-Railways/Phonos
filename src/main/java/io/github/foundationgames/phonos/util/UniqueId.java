@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.util;
 
+import net.minecraft.util.NameGenerator;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.Random;
@@ -30,5 +31,13 @@ public final class UniqueId {
     public static UUID uuidOf(long uniqueId, UUID uuid) {
         Random random = new Random(uniqueId * uuid.getMostSignificantBits() * uuid.getLeastSignificantBits());
         return new UUID(random.nextLong(), random.nextLong());
+    }
+
+    public static String debugNameOf(long uniqueId) {
+        return NameGenerator.name(uuidOf(uniqueId));
+    }
+
+    public static String debugNameOf(UUID uuid) {
+        return NameGenerator.name(uuid);
     }
 }

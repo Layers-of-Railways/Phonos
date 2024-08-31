@@ -17,6 +17,7 @@ import io.github.foundationgames.phonos.sound.emitter.SoundEmitter;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterStorage;
 import io.github.foundationgames.phonos.sound.stream.ClientIncomingStreamHandler;
 import io.github.foundationgames.phonos.util.PhonosUtil;
+import io.github.foundationgames.phonos.world.command.PhonosClientCommands;
 import io.github.foundationgames.phonos.world.sound.entity.HeadsetSoundSource;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -46,6 +47,7 @@ public class PhonosClient implements ClientModInitializer {
 
         ClientPayloadPackets.initClient();
         ClientSoundStorage.initClient();
+        PhonosClientCommands.initClient();
 
         JsonEM.registerModelLayer(AUDIO_CABLE_END_LAYER);
         JsonEM.registerModelLayer(SATELLITE_LAYER);

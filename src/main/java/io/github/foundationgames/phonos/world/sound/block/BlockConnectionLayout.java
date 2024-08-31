@@ -77,7 +77,7 @@ public class BlockConnectionLayout {
         var index = nbt.getInt("index");
 
         if (state.getBlock() instanceof InputBlock input) {
-             return input.getInputLayout().inputOfConnection(type, pos, index);
+            return input.getInputLayout().inputOfConnection(type, pos, index);
         }
 
         return null;

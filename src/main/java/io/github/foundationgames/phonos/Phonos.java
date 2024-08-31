@@ -58,7 +58,7 @@ public class Phonos implements ModInitializer {
     public static final RecipeSerializer<ItemGlowRecipe> ITEM_GLOW_RECIPE_SERIALIZER = Registry.register(
             Registries.RECIPE_SERIALIZER, Phonos.id("crafting_special_itemglow"), new SpecialRecipeSerializer<>(ItemGlowRecipe::new));
 
-    public static long microphoneSource = -1;
+    public static final boolean DEBUG = true;
 
     @Override
     public void onInitialize() {

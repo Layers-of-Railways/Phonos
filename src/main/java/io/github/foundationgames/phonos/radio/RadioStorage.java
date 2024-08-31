@@ -146,6 +146,11 @@ public class RadioStorage {
                 }
             }
         }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + " {channel#%s %s}".formatted(channel, UniqueId.debugNameOf(emitterId()));
+        }
     }
 
     public static void init() {

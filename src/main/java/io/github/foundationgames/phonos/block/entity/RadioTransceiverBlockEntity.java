@@ -7,6 +7,7 @@ import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioMetadata;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.util.PhonosTags;
+import io.github.foundationgames.phonos.util.UniqueId;
 import io.github.foundationgames.phonos.world.RadarPoints;
 import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
@@ -205,5 +206,10 @@ public class RadioTransceiverBlockEntity extends AbstractConnectionHubBlockEntit
             this.markDirty();
             sync();
         }
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " {(%s) %s channel#%s}".formatted(getPos().toShortString(), UniqueId.debugNameOf(emitterId()), getChannel());
     }
 }
