@@ -29,8 +29,8 @@ public class RadioTransceiverBlock extends HorizontalFacingBlock implements Bloc
     private static final VoxelShape SHAPE = createCuboidShape(0, 0, 0, 16, 7, 16);
 
     public final BlockConnectionLayout inputLayout = new BlockConnectionLayout()
-            .addPoint(-4.5, -4.5, -8, Direction.NORTH)
-            .addPoint(4.5, -4.5, -8, Direction.NORTH);
+            .addPoint(-4.5, -4.5, 8, Direction.SOUTH)
+            .addPoint(4.5, -4.5, 8, Direction.SOUTH);
 
     public RadioTransceiverBlock(Settings settings) {
         super(settings);
@@ -38,15 +38,16 @@ public class RadioTransceiverBlock extends HorizontalFacingBlock implements Bloc
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         var side = hit.getSide();
         var facing = state.get(FACING);
 
-        if (side == Direction.DOWN) {
+        if (side == Direction.DOWN || side == Direction.UP) {
             return ActionResult.PASS;
         }
 
-        if (side == Direction.UP) {
+        if (side == facing) {
             if (!world.isClient()) {
                 int inc = player.isSneaking() ? -1 : 1;
                 if (world.getBlockEntity(pos) instanceof RadioTransceiverBlockEntity be) {
@@ -66,7 +67,7 @@ public class RadioTransceiverBlock extends HorizontalFacingBlock implements Bloc
                     return ActionResult.PASS;
                 }
 
-                if (side != facing) {
+                if (side != facing.getOpposite()) {
                     if (be.outputs.tryRemoveConnection(world, hit, !player.isCreative())) {
                         be.sync();
                         return ActionResult.SUCCESS;
@@ -77,7 +78,7 @@ public class RadioTransceiverBlock extends HorizontalFacingBlock implements Bloc
             }
         }
 
-        return ActionResult.success(side == facing);
+        return ActionResult.success(side == facing.getOpposite());
     }
 
     @Override
@@ -120,7 +121,7 @@ public class RadioTransceiverBlock extends HorizontalFacingBlock implements Bloc
         var facing = state.get(FACING);
         var side = ctx.getSide();
 
-        if (side == facing) {
+        if (side == facing.getOpposite()) {
             int index = this.getInputLayout().getClosestIndexClicked(ctx.getHitPos(), pos, getRotation(state));
 
             return !this.isInputPluggedIn(index, state, world, pos);

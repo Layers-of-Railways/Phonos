@@ -1,0 +1,19 @@
+{
+  "credit": "Made with Blockbench",
+  "parent": "block/block",
+  "textures": {
+    "0": "phonos:block/radio_antenna",
+    "particle": "phonos:block/radio_transceiver_top"
+  },
+  "elements": [
+    {
+      "from": [0, 16, -0.5],
+      "to": [16, 16, 15.5],
+      "rotation": {"angle": 22.5, "axis": "y", "origin": [8, 6, 8.75]},
+      "faces": {
+        "up": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#0"},
+        "down": {"uv": [0, 0, 16, 16], "texture": "#0"}
+      }
+    }
+  ]
+}

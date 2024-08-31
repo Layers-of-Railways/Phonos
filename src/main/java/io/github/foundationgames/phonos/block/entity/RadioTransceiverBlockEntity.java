@@ -30,8 +30,7 @@ import java.util.function.LongConsumer;
 public class RadioTransceiverBlockEntity extends AbstractConnectionHubBlockEntity implements RadioDevice.Transmitter, RadioDevice.Receiver {
     public static final BlockConnectionLayout OUTPUT_LAYOUT = new BlockConnectionLayout()
             .addPoint(-8, -5, 0, Direction.WEST)
-            .addPoint(8, -5, 0, Direction.EAST)
-            .addPoint(0, -5, 8, Direction.SOUTH);
+            .addPoint(8, -5, 0, Direction.EAST);
 
     private int channel = 0;
     private boolean needsAdd = false;
@@ -206,6 +205,10 @@ public class RadioTransceiverBlockEntity extends AbstractConnectionHubBlockEntit
             this.markDirty();
             sync();
         }
+    }
+
+    public int getTransmissionTowerHeight() {
+        return transmissionTowerHeight;
     }
 
     @Override
