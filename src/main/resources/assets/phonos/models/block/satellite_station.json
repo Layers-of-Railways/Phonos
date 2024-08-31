@@ -4,9 +4,10 @@
 	"textures": {
 		"0": "phonos:block/satellite_dish",
 		"1": "phonos:block/satellite_station_front",
-		"2": "phonos:block/wireless_hub_side",
 		"3": "phonos:block/satellite_station_top",
 		"4": "phonos:block/stone_base",
+		"5": "phonos:block/wireless_hub_front",
+		"6": "phonos:block/wireless_hub_none",
 		"particle": "phonos:block/satellite_station_top"
 	},
 	"elements": [
@@ -15,9 +16,9 @@
 			"to": [16, 7, 16],
 			"faces": {
 				"north": {"uv": [0, 9, 16, 16], "texture": "#1"},
-				"east": {"uv": [0, 9, 16, 16], "texture": "#2"},
-				"south": {"uv": [0, 9, 16, 16], "texture": "#2"},
-				"west": {"uv": [0, 9, 16, 16], "texture": "#2"},
+				"east": {"uv": [0, 9, 16, 16], "texture": "#5"},
+				"south": {"uv": [0, 9, 16, 16], "texture": "#6"},
+				"west": {"uv": [0, 9, 16, 16], "texture": "#5"},
 				"up": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#3"},
 				"down": {"uv": [0, 0, 16, 16], "texture": "#4"}
 			}
