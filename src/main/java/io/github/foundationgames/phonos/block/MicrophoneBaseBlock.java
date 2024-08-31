@@ -12,6 +12,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.Properties;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -23,9 +25,12 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockEntityProvider {
+
+    public static final BooleanProperty POWERED = Properties.POWERED;
 
     private static final VoxelShaper SHAPE = VoxelShaper.Builder.create(5, 0, 5, 11, 6, 11)
         .add(7, 6, 7, 9, 12, 9)
@@ -35,12 +40,14 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
     public MicrophoneBaseBlock(Settings settings) {
         super(settings);
 
-        setDefaultState(getDefaultState().with(FACING, Direction.NORTH));
+        setDefaultState(getDefaultState()
+            .with(FACING, Direction.NORTH)
+            .with(POWERED, false));
     }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        super.appendProperties(builder.add(FACING));
+        super.appendProperties(builder.add(FACING, POWERED));
     }
 
     @Nullable
@@ -53,6 +60,65 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
     @SuppressWarnings("deprecation")
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return SHAPE.get(state.get(FACING));
+    }
+
+    @ApiStatus.Internal
+    public void updatePower(World world, BlockPos pos) {
+        boolean poweredTarget;
+        if (world.getBlockEntity(pos) instanceof MicrophoneBaseBlockEntity be) {
+            poweredTarget = be.isPlaying();
+        } else {
+            poweredTarget = false;
+        }
+
+        BlockState state = world.getBlockState(pos);
+
+        boolean powered = state.get(POWERED);
+
+        if (powered ^ poweredTarget) {
+            world.setBlockState(pos, state.with(POWERED, poweredTarget), Block.NOTIFY_LISTENERS);
+            updateNeighbors(world, pos);
+        }
+    }
+
+    protected void updateNeighbors(World world, BlockPos pos) {
+        BlockPos blockPos = pos.down();
+        world.updateNeighbor(blockPos, this, pos);
+        world.updateNeighborsExcept(blockPos, this, Direction.UP);
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public boolean emitsRedstonePower(BlockState state) {
+        return true;
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public int getStrongRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
+        return state.getWeakRedstonePower(world, pos, direction);
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public int getWeakRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
+        if (state.get(POWERED) && direction == Direction.UP) {
+            return 15;
+        }
+        return 0;
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
+        if (state.isOf(oldState.getBlock())) {
+            return;
+        }
+        if (!world.isClient() && state.get(POWERED)) {
+            BlockState blockState = state.with(POWERED, false);
+            world.setBlockState(pos, blockState, Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+            this.updateNeighbors(world, pos);
+        }
     }
 
     @Override
@@ -88,10 +154,12 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
 
                 if (be.isPlaying()) {
                     be.stop();
+                    updatePower(world, pos);
                     return ActionResult.SUCCESS;
                 } else if (player instanceof ServerPlayerEntity serverPlayer) {
                     if (player.getMainHandStack().isEmpty())
                         be.start(serverPlayer);
+                    updatePower(world, pos);
                     return ActionResult.SUCCESS;
                 }
             }
@@ -103,8 +171,16 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
     @Override
     @SuppressWarnings("deprecation")
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        if (!newState.isOf(this) && world.getBlockEntity(pos) instanceof MicrophoneBaseBlockEntity be) {
+        if (newState.isOf(this)) {
+            return;
+        }
+
+        if (world.getBlockEntity(pos) instanceof MicrophoneBaseBlockEntity be) {
             be.onDestroyed();
+        }
+
+        if (!world.isClient && state.get(POWERED)) {
+            this.updateNeighbors(world, pos);
         }
 
         super.onStateReplaced(state, world, pos, newState, moved);

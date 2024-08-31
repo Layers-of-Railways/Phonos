@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.client.render.block;
 
+import io.github.foundationgames.phonos.block.MicrophoneBaseBlock;
 import io.github.foundationgames.phonos.block.entity.MicrophoneBaseBlockEntity;
 import io.github.foundationgames.phonos.client.model.PhonosPartialModels;
 import io.github.foundationgames.phonos.client.render.CableRenderer;
@@ -91,7 +92,7 @@ public class MicrophoneBaseBlockEntityRenderer extends CableOutputBlockEntityRen
             );
         }
 
-        Direction facing = entity.getRotation();
+        Direction facing = entity.getCachedState().get(MicrophoneBaseBlock.FACING);
         MinecraftClient mc = MinecraftClient.getInstance();
 
         UUID clientPlayer = entity.getClientPlayer();

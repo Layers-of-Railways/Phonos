@@ -97,6 +97,8 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
         return this.playingSound != null;
     }
 
+    private int lazyTick = 0;
+
     @Override
     public void tick(World world, BlockPos pos, BlockState state) {
         super.tick(world, pos, state);
@@ -118,7 +120,13 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
             var player = serverPlayer.get();
             if (player == null || player.isRemoved() || !player.getMainHandStack().isEmpty() || !player.getPos().isInRange(getPos().toCenterPos(), PhonosCommonConfig.get().maxMicrophoneRange)) {
                 this.stop();
+                ((MicrophoneBaseBlock) state.getBlock()).updatePower(world, pos);
             }
+        }
+
+        if (lazyTick++ > 10) {
+            lazyTick = 0;
+            ((MicrophoneBaseBlock) state.getBlock()).updatePower(world, pos);
         }
     }
 
