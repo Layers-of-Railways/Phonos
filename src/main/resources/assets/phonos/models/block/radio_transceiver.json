@@ -5,10 +5,10 @@
 		"0": "phonos:block/radio_antenna",
 		"1": "phonos:block/wireless_hub_front",
 		"2": "phonos:block/wireless_hub_side",
-		"3": "phonos:radio_transceiver_top",
+		"3": "phonos:block/radio_transceiver_top",
 		"4": "phonos:block/stone_base",
 		"5": "phonos:block/radio_transceiver_front",
-		"particle": "phonos:radio_transceiver_top"
+		"particle": "phonos:block/radio_transceiver_top"
 	},
 	"elements": [
 		{
