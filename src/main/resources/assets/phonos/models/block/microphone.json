@@ -20,19 +20,6 @@
 			}
 		},
 		{
-			"from": [4.5, 12.06775, 4.61157],
-			"to": [11.5, 13.06775, 11.61157],
-			"rotation": {"angle": 0, "axis": "x", "origin": [8, 14.56775, 6.11157]},
-			"faces": {
-				"north": {"uv": [0, 11, 7, 12], "texture": "#microphone"},
-				"east": {"uv": [0, 5, 1, 12], "rotation": 270, "texture": "#microphone"},
-				"south": {"uv": [0, 5, 7, 6], "rotation": 180, "texture": "#microphone"},
-				"west": {"uv": [6, 5, 7, 12], "rotation": 90, "texture": "#microphone"},
-				"up": {"uv": [0, 5, 7, 12], "rotation": 180, "texture": "#microphone"},
-				"down": {"uv": [7, 5, 0, 12], "texture": "#microphone"}
-			}
-		},
-		{
 			"from": [6.5, 0.06775, 6.61157],
 			"to": [9.5, 11.06775, 9.61157],
 			"rotation": {"angle": 0, "axis": "x", "origin": [8, 14.56775, 6.11157]},
@@ -86,8 +73,7 @@
 			"name": "Microphone",
 			"origin": [0, 0, 0],
 			"color": 0,
-			"nbt": "{}",
-			"children": [0, 1, 2]
+			"children": [0, 1]
 		}
 	]
 }
