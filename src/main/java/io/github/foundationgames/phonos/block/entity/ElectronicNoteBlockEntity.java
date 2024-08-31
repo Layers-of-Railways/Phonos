@@ -1,11 +1,6 @@
 package io.github.foundationgames.phonos.block.entity;
 
-import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
-import io.github.foundationgames.phonos.sound.SoundStorage;
-import io.github.foundationgames.phonos.sound.emitter.SoundEmitter;
-import io.github.foundationgames.phonos.sound.emitter.SoundEmitterStorage;
-import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
 import io.github.foundationgames.phonos.util.UniqueId;
 import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
@@ -13,16 +8,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.text.Text;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.function.Consumer;
 
 public class ElectronicNoteBlockEntity extends AbstractConnectionHubBlockEntity {
     public static final BlockConnectionLayout OUTPUT_LAYOUT = new BlockConnectionLayout()

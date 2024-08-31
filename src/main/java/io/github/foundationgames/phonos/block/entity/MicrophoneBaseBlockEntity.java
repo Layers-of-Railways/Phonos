@@ -59,11 +59,6 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
         return this.serverPlayer != null && this.serverPlayer.get() == player;
     }
 
-    @Override
-    public Direction getRotation() {
-        return getCachedState().get(MicrophoneBaseBlock.FACING);
-    }
-
     public void start(ServerPlayerEntity serverPlayer) {
         if (world instanceof ServerWorld) {
             if (PhonosVoicechatProxy.isStreaming(serverPlayer))
