@@ -22,12 +22,13 @@ public class ServerSoundStorage extends SoundStorage {
     public void play(World world, SoundData data, SoundEmitterTree tree) {
         tree.updateServer(world);
 
-        if (world instanceof ServerWorld sWorld) for (var player : sWorld.getPlayers()) {
-            PayloadPackets.sendSoundPlay(player, data, tree);
+        if (data.type.resumable()) {
+            data.updateSkippedTicksAndCheckResumable();
+            resumableSounds.put(tree, data);
         }
 
-        if (data.type.resumable() && data.updateSkippedTicksAndCheckResumable()) {
-            resumableSounds.put(tree, data);
+        if (world instanceof ServerWorld sWorld) for (var player : sWorld.getPlayers()) {
+            PayloadPackets.sendSoundPlay(player, data, tree);
         }
 
         this.notifySoundSourcesPlayed(world, data, tree);
@@ -64,6 +65,7 @@ public class ServerSoundStorage extends SoundStorage {
                         if (player.isRemoved() || player.getWorld() != world)
                             continue;
                         PayloadPackets.sendSoundPlay(player, data, tree);
+                        data.onResumedToPlayer(player);
                     }
                 }
             } else {

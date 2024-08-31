@@ -6,6 +6,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.SimpleRegistry;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -62,6 +63,8 @@ public abstract class SoundData {
     public static <S extends SoundData> Type<S> register(Identifier id, boolean resumable, Factory<S> factory) {
         return Registry.register(REGISTRY, id, new Type<>(id, resumable, factory));
     }
+
+    public void onResumedToPlayer(ServerPlayerEntity player) {}
 
     public record Type<S extends SoundData>(Identifier id, boolean resumable, Factory<S> constructor) {}
 

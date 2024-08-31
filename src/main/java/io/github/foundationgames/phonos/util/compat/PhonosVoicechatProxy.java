@@ -31,12 +31,20 @@ public class PhonosVoicechatProxy {
         }
     }
 
+    public static boolean isStreaming(long streamId) {
+        return runIfLoaded(() -> () -> PhonosVoicechatPlugin.isStreaming(streamId), false);
+    }
+
     public static boolean isStreaming(ServerPlayerEntity serverPlayer) {
         return runIfLoaded(() -> () -> PhonosVoicechatPlugin.isStreaming(serverPlayer), false);
     }
 
     public static boolean startStream(ServerPlayerEntity serverPlayer, long streamId) {
         return runIfLoaded(() -> () -> PhonosVoicechatPlugin.startStream(serverPlayer, streamId), false);
+    }
+
+    public static void resumeStream(ServerPlayerEntity target, long streamId) {
+        executeIfLoaded(() -> () -> PhonosVoicechatPlugin.resumeStream(target, streamId));
     }
 
     public static void stopStreaming(long streamId) {

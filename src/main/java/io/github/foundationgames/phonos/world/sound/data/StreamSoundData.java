@@ -1,6 +1,8 @@
 package io.github.foundationgames.phonos.world.sound.data;
 
+import io.github.foundationgames.phonos.util.compat.PhonosVoicechatProxy;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 
 public class StreamSoundData extends SoundData {
@@ -24,6 +26,21 @@ public class StreamSoundData extends SoundData {
 
     public static StreamSoundData createMicrophone(long id, long streamId, SoundCategory category) {
         return new StreamSoundData(SoundDataTypes.SVC_MICROPHONE, id, streamId, category, 1.0f, 1.0f);
+    }
+
+    @Override
+    public boolean updateSkippedTicksAndCheckResumable() {
+        if (!this.type.resumable())
+            return false;
+
+        return PhonosVoicechatProxy.isStreaming(this.streamId);
+    }
+
+    @Override
+    public void onResumedToPlayer(ServerPlayerEntity player) {
+        if (this.type == SoundDataTypes.SVC_MICROPHONE) {
+            PhonosVoicechatProxy.resumeStream(player, this.streamId);
+        }
     }
 
     @Override

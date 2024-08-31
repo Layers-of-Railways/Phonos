@@ -33,12 +33,18 @@ public class PhonosVoicechatPlugin implements VoicechatPlugin {
     @Nullable
     public static VoicechatClientApi clientApi;
 
+    // Server
     private static final WeakHashMap<ServerPlayerEntity, LocationalAudioChannel> microphonePlayers = new WeakHashMap<>();
     private static final Long2ObjectOpenHashMap<WeakReference<LocationalAudioChannel>> removalHelperMap = new Long2ObjectOpenHashMap<>();
 
+    // Client
     private static final HashMap<UUID, SVCSoundMetadata> clientMetadataByChannelId = new HashMap<>();
     private static final Long2ObjectOpenHashMap<SVCSoundMetadata> clientMetadataByStreamId = new Long2ObjectOpenHashMap<>();
     private static final Long2ObjectOpenHashMap<CompletableFuture<SVCSoundMetadata>> waitingClientMetadata = new Long2ObjectOpenHashMap<>();
+
+    public static boolean isStreaming(long streamID) {
+        return removalHelperMap.containsKey(streamID) && removalHelperMap.get(streamID).get() != null;
+    }
 
     public static boolean isStreaming(ServerPlayerEntity serverPlayer) {
         return microphonePlayers.containsKey(serverPlayer);
@@ -70,6 +76,18 @@ public class PhonosVoicechatPlugin implements VoicechatPlugin {
         microphonePlayers.put(serverPlayer, channel);
         removalHelperMap.put(streamID, new WeakReference<>(channel));
         return true;
+    }
+
+    public static void resumeStream(ServerPlayerEntity target, long streamID) {
+        var removalData = removalHelperMap.get(streamID);
+        if (removalData == null)
+            return;
+        var key = removalData.get();
+        if (key == null)
+            return;
+        UUID channelId = key.getId();
+        PayloadPackets.sendMicrophoneChannelOpen(target, channelId, streamID);
+        Phonos.LOG.info("Resumed microphone channel for player {} with stream ID {} and channel ID {}", target, streamID, channelId);
     }
 
     public static void stopStreaming(long streamID) {

@@ -124,6 +124,17 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
 
         if (!world.isClient()) {
             super.tick(world, pos, state);
+            this.markDirty();
+
+            if (this.playingSound == null && this.isPlayingRecord() && this.getStack().getItem() instanceof MusicDiscItem disc) {
+                this.playingSound = new SoundEmitterTree(this.emitterId);
+
+                playingSoundId++;
+                SoundStorage.getInstance(world).play(world, SoundEventSoundData.create(
+                        emitterId, Registries.SOUND_EVENT.getEntry(disc.getSound()), SoundCategory.RECORDS, 2, 1, this),
+                    this.playingSound);
+                sync();
+            }
 
             if (this.playingSound != null) {
                 var delta = this.playingSound.updateServer(world);
