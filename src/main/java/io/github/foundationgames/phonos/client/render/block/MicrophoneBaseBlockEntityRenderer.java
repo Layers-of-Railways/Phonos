@@ -68,6 +68,7 @@ public class MicrophoneBaseBlockEntityRenderer extends CableOutputBlockEntityRen
         super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay);
 
         Vector3f beCenter = new Vector3f(entity.getPos().getX() + 0.5f, entity.getPos().getY() + 0.5f, entity.getPos().getZ() + 0.5f);
+        Direction rotation = entity.getCachedState().get(MicrophoneBaseBlock.FACING);
         if (start == null || end == null) {
             start = new MutableCablePlugPoint(
                 new Pose3f(
@@ -76,7 +77,7 @@ public class MicrophoneBaseBlockEntityRenderer extends CableOutputBlockEntityRen
                 ),
                 new Pose3f(
                     beCenter,
-                    PhonosUtil.rotationTo(entity.getRotation())
+                    PhonosUtil.rotationTo(rotation)
                 )
             );
             end = new MutableCablePlugPoint(
@@ -127,7 +128,7 @@ public class MicrophoneBaseBlockEntityRenderer extends CableOutputBlockEntityRen
                 start.setOriginPose(
                     new Pose3f(
                         beCenter,
-                        PhonosUtil.rotationTo(entity.getRotation())
+                        PhonosUtil.rotationTo(rotation)
                     )
                 );
                 Vec3d lerpedPos = player.getLeashPos(tickDelta);

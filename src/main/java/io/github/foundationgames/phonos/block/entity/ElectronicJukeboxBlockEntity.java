@@ -13,9 +13,12 @@ import io.github.foundationgames.phonos.world.sound.block.BlockEntityOutputs;
 import io.github.foundationgames.phonos.world.sound.block.OutputBlockEntity;
 import io.github.foundationgames.phonos.world.sound.block.ResumableSoundHolder;
 import io.github.foundationgames.phonos.world.sound.data.SoundEventSoundData;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.JukeboxBlock;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.JukeboxBlockEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.MusicDiscItem;
@@ -116,6 +119,13 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
         this.markDirty();
     }
 
+    private void updateState(@Nullable Entity entity, boolean hasRecord) {
+        if (this.world.getBlockState(this.getPos()) == this.getCachedState()) {
+            this.world.setBlockState(this.getPos(), (BlockState)this.getCachedState().with(JukeboxBlock.HAS_RECORD, hasRecord), Block.NOTIFY_LISTENERS);
+            this.world.emitGameEvent(GameEvent.BLOCK_CHANGE, this.getPos(), GameEvent.Emitter.of(entity, this.getCachedState()));
+        }
+    }
+
     @Override
     public void tick(World world, BlockPos pos, BlockState state) {
         if (this.pendingNbt != null) {
@@ -124,6 +134,10 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
 
         if (!world.isClient()) {
             super.tick(world, pos, state);
+            if (this.isPlaying && this.getStack().isEmpty() && this.getSkippedTicks() > 5) {
+                this.updateState(null, false);
+                this.stopPlaying();
+            }
             this.markDirty();
 
             if (this.playingSound == null && this.isPlayingRecord() && this.getStack().getItem() instanceof MusicDiscItem disc) {
