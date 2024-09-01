@@ -4,6 +4,7 @@ import io.github.foundationgames.jsonem.JsonEM;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.client.model.PartialModel;
 import io.github.foundationgames.phonos.client.model.PhonosPartialModels;
+import io.github.foundationgames.phonos.client.render.RadioDebugRenderer;
 import io.github.foundationgames.phonos.client.render.block.*;
 import io.github.foundationgames.phonos.config.PhonosClientConfig;
 import io.github.foundationgames.phonos.item.*;
@@ -28,6 +29,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
@@ -122,6 +124,7 @@ public class PhonosClient implements ClientModInitializer {
                 RadioStorage.clientReset();
                 SoundStorage.clientReset();
                 SoundEmitterStorage.clientReset();
+                RadioDebugRenderer.clearTargets();
             }
         });
 
@@ -153,6 +156,14 @@ public class PhonosClient implements ClientModInitializer {
             }
             if (be instanceof RadioDevice.Receiver rec) {
                 rec.removeReceiver();
+            }
+        });
+
+        WorldRenderEvents.AFTER_ENTITIES.register((context) -> RadioDebugRenderer.render(context.matrixStack(), context.consumers()));
+
+        ClientTickEvents.END_WORLD_TICK.register(world -> {
+            if (world != null) {
+                RadioDebugRenderer.tick(world);
             }
         });
 

@@ -4,6 +4,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.entity.AbstractOutputBlockEntity;
 import io.github.foundationgames.phonos.block.entity.ElectronicNoteBlockEntity;
+import io.github.foundationgames.phonos.client.render.RadioDebugRenderer;
 import io.github.foundationgames.phonos.world.command.ClientBlockPosArgumentType.ClientPosArgument;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -25,10 +26,51 @@ public class PhonosClientCommands {
             LiteralArgumentBuilder<FabricClientCommandSource> phonosClient = literal("phonos_client");
 
             phonosClient
-                .then($debug());
+                .then($radio_dbg());
+
+            if (Phonos.DEBUG) {
+                phonosClient.then($debug());
+            }
 
             dispatcher.register(phonosClient);
         });
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> $radio_dbg() {
+        return literal("radio_dbg")
+            .then($radio_dbg$add())
+            .then($radio_dbg$remove())
+            .then($radio_dbg$clear());
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> $radio_dbg$add() {
+        return literal("add")
+            .then(argument("pos", ClientBlockPosArgumentType.blockPosClient())
+                .executes(ctx -> {
+                    var pos = ((ClientPosArgument) ctx.getArgument("pos", PosArgument.class)).toAbsoluteBlockPos(ctx.getSource());
+                    RadioDebugRenderer.addTarget(pos);
+                    return 1;
+                })
+            );
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> $radio_dbg$remove() {
+        return literal("remove")
+            .then(argument("pos", ClientBlockPosArgumentType.blockPosClient())
+                .executes(ctx -> {
+                    var pos = ((ClientPosArgument) ctx.getArgument("pos", PosArgument.class)).toAbsoluteBlockPos(ctx.getSource());
+                    RadioDebugRenderer.removeTarget(pos);
+                    return 1;
+                })
+            );
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> $radio_dbg$clear() {
+        return literal("clear")
+            .executes(ctx -> {
+                RadioDebugRenderer.clearTargets();
+                return 1;
+            });
     }
 
     private static LiteralArgumentBuilder<FabricClientCommandSource> $debug() {
