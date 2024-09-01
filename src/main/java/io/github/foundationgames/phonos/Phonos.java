@@ -10,6 +10,7 @@ import io.github.foundationgames.phonos.recipe.ItemGlowRecipe;
 import io.github.foundationgames.phonos.sound.ServerSoundStorage;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
+import io.github.foundationgames.phonos.sound.emitter.SecondaryEmitterHolder;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitter;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterStorage;
 import io.github.foundationgames.phonos.sound.stream.ServerOutgoingStreamHandler;
@@ -119,6 +120,9 @@ public class Phonos implements ModInitializer {
             if (be instanceof SoundEmitter p) {
                 SoundEmitterStorage.getInstance(world).addEmitter(p);
             }
+            if (be instanceof SecondaryEmitterHolder p) {
+                SoundEmitterStorage.getInstance(world).addEmitter(p.getSecondaryEmitter());
+            }
             if (be instanceof RadioDevice.Receiver rec) {
                 rec.setAndUpdateChannel(rec.getChannel());
             }
@@ -126,6 +130,9 @@ public class Phonos implements ModInitializer {
         ServerBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register((be, world) -> {
             if (be instanceof SoundEmitter p) {
                 SoundEmitterStorage.getInstance(world).removeEmitter(p);
+            }
+            if (be instanceof SecondaryEmitterHolder p) {
+                SoundEmitterStorage.getInstance(world).removeEmitter(p.getSecondaryEmitter());
             }
             if (be instanceof RadioDevice.Receiver rec) {
                 rec.removeReceiver();

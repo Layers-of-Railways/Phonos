@@ -42,6 +42,7 @@
     "block.phonos.radio_transceiver": "Radio Transceiver",
     "block.phonos.radio_loudspeaker": "Radio Loudspeaker",
     "block.phonos.satellite_station": "Satellite Station",
+    "block.phonos.audio_switch": "Audio Switch",
     "block.phonos.microphone_base": "Microphone Base",
     "block.phonos.microphone_base.voicechat_not_installed": "Install Simple Voice Chat to use this block",
 

@@ -19,6 +19,7 @@ public class PhonosBlocks {
     public static final Block RADIO_TRANSCEIVER = register(new RadioTransceiverBlock(FabricBlockSettings.copy(Blocks.OAK_SLAB)), "radio_transceiver");
     public static final Block RADIO_LOUDSPEAKER = register(new RadioLoudspeakerBlock(FabricBlockSettings.copy(Blocks.NOTE_BLOCK)), "radio_loudspeaker");
     public static final Block SATELLITE_STATION = register(new SatelliteStationBlock(FabricBlockSettings.copy(Blocks.OAK_SLAB)), "satellite_station");
+    public static final Block AUDIO_SWITCH = register(new AudioSwitchBlock(FabricBlockSettings.copy(Blocks.OAK_SLAB)), "audio_switch");
     public static final Block MICROPHONE_BASE = register(new MicrophoneBaseBlock(FabricBlockSettings.copy(Blocks.OAK_PLANKS).nonOpaque()), "microphone_base");
 
     public static BlockEntityType<ElectronicNoteBlockEntity> ELECTRONIC_NOTE_BLOCK_ENTITY = Registry.register(
@@ -39,6 +40,9 @@ public class PhonosBlocks {
     public static BlockEntityType<SatelliteStationBlockEntity> SATELLITE_STATION_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Phonos.id("satellite_station"),
             BlockEntityType.Builder.create(SatelliteStationBlockEntity::new, SATELLITE_STATION).build(null));
+    public static BlockEntityType<AudioSwitchBlockEntity> AUDIO_SWITCH_ENTITY = Registry.register(
+            Registries.BLOCK_ENTITY_TYPE, Phonos.id("audio_switch"),
+            BlockEntityType.Builder.create(AudioSwitchBlockEntity::new, PhonosBlocks.AUDIO_SWITCH).build(null));
     public static BlockEntityType<MicrophoneBaseBlockEntity> MICROPHONE_BASE_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Phonos.id("microphone_base"),
             BlockEntityType.Builder.create(MicrophoneBaseBlockEntity::new, MICROPHONE_BASE).build(null));

@@ -6,6 +6,8 @@
         "phonos:electronic_jukebox",
         "phonos:connection_hub",
         "phonos:radio_transceiver",
-        "phonos:radio_loudspeaker"
+        "phonos:radio_loudspeaker",
+        "phonos:audio_switch",
+        "phonos:microphone_base"
     ]
 }

@@ -152,7 +152,7 @@ public class BlockConnectionLayout {
             if (world.isPosLoaded(this.blockPos.getX(), this.blockPos.getZ()) &&
                     world.getBlockEntity(this.blockPos) instanceof OutputBlockEntity out &&
                     out.forwards()) {
-                return out;
+                return out.forward(connectionIndex);
             }
 
             return null;

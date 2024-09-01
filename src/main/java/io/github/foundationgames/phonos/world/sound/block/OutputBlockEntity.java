@@ -17,6 +17,10 @@ public interface OutputBlockEntity extends SoundEmitter {
 
     boolean forwards();
 
+    default SoundEmitter forward(int connectionIndex) {
+        return this;
+    }
+
     BlockEntityOutputs getOutputs();
 
     void enforceVBOState(boolean enabled);

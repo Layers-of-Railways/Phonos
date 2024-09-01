@@ -13,6 +13,7 @@ import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.sound.ClientSoundStorage;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.custom.ClientCustomAudioUploader;
+import io.github.foundationgames.phonos.sound.emitter.SecondaryEmitterHolder;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitter;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterStorage;
 import io.github.foundationgames.phonos.sound.stream.ClientIncomingStreamHandler;
@@ -68,6 +69,7 @@ public class PhonosClient implements ClientModInitializer {
         BlockEntityRendererFactories.register(PhonosBlocks.RADIO_TRANSCEIVER_ENTITY, RadioTransceiverBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(PhonosBlocks.RADIO_LOUDSPEAKER_ENTITY, RadioLoudspeakerBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(PhonosBlocks.SATELLITE_STATION_ENTITY, SatelliteStationBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(PhonosBlocks.AUDIO_SWITCH_ENTITY, CableOutputBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(PhonosBlocks.MICROPHONE_BASE_ENTITY, MicrophoneBaseBlockEntityRenderer::new);
 
         ColorProviderRegistry.BLOCK.register((state, world, pos, tintIndex) ->
@@ -135,6 +137,9 @@ public class PhonosClient implements ClientModInitializer {
             if (be instanceof SoundEmitter p) {
                 SoundEmitterStorage.getInstance(world).addEmitter(p);
             }
+            if (be instanceof SecondaryEmitterHolder p) {
+                SoundEmitterStorage.getInstance(world).addEmitter(p.getSecondaryEmitter());
+            }
             if (be instanceof RadioDevice.Receiver rec) {
                 rec.setAndUpdateChannel(rec.getChannel());
             }
@@ -142,6 +147,9 @@ public class PhonosClient implements ClientModInitializer {
         ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register((be, world) -> {
             if (be instanceof SoundEmitter p) {
                 SoundEmitterStorage.getInstance(world).removeEmitter(p);
+            }
+            if (be instanceof SecondaryEmitterHolder p) {
+                SoundEmitterStorage.getInstance(world).removeEmitter(p.getSecondaryEmitter());
             }
             if (be instanceof RadioDevice.Receiver rec) {
                 rec.removeReceiver();

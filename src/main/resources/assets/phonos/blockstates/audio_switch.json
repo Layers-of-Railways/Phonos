@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "powered=false,facing=east":  {"model": "phonos:block/audio_switch_straight", "y": 90},
+    "powered=false,facing=north": {"model": "phonos:block/audio_switch_straight"},
+    "powered=false,facing=south": {"model": "phonos:block/audio_switch_straight", "y": 180},
+    "powered=false,facing=west":  {"model": "phonos:block/audio_switch_straight", "y": 270},
+
+    "powered=true,facing=east":  {"model": "phonos:block/audio_switch_cross", "y": 90},
+    "powered=true,facing=north": {"model": "phonos:block/audio_switch_cross"},
+    "powered=true,facing=south": {"model": "phonos:block/audio_switch_cross", "y": 180},
+    "powered=true,facing=west":  {"model": "phonos:block/audio_switch_cross", "y": 270}
+  }
+}
