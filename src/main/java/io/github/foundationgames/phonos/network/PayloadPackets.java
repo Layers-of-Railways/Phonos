@@ -37,7 +37,7 @@ public final class PayloadPackets {
                     onto.getItem().onClicked(onto, with, null, click, player, StackReference.EMPTY));
         });
 
-        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("request_satellite_upload_session"), (server, player, handler, buf, responseSender) -> {
+        /*ServerPlayNetworking.registerGlobalReceiver(Phonos.id("request_satellite_upload_session"), (server, player, handler, buf, responseSender) -> {
             var pos = buf.readBlockPos();
 
             server.execute(() -> {
@@ -55,7 +55,7 @@ public final class PayloadPackets {
                     }
                 }
             });
-        });
+        });*/
 
         ServerPlayNetworking.registerGlobalReceiver(Phonos.id("request_satellite_crash"), (server, player, handler, buf, responseSender) -> {
             var pos = buf.readBlockPos();
@@ -131,12 +131,11 @@ public final class PayloadPackets {
         ServerPlayNetworking.send(player, Phonos.id("sound_update"), buf);
     }
 
-    public static void sendOpenSatelliteStationScreen(ServerPlayerEntity player, BlockPos pos, int screenType) {
+    public static void sendOpenSatelliteStationCrashScreen(ServerPlayerEntity player, BlockPos pos) {
         var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeBlockPos(pos);
-        buf.writeInt(screenType);
 
-        ServerPlayNetworking.send(player, Phonos.id("open_satellite_station_screen"), buf);
+        ServerPlayNetworking.send(player, Phonos.id("open_satellite_station_crash_screen"), buf);
     }
 
     public static void sendUploadStop(ServerPlayerEntity player, long uploadId) {

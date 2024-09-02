@@ -8,6 +8,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class CrashSatelliteStationScreen extends ConfirmScreen {
+    public static final Text TITLE = Text.translatable("container.phonos.satellite_station");
     public static final Text MESSAGE = Text.translatable("message.phonos.crash_satellite_station").formatted(Formatting.RED);
 
     public CrashSatelliteStationScreen(SatelliteStationBlockEntity blockEntity) {
@@ -16,6 +17,6 @@ public class CrashSatelliteStationScreen extends ConfirmScreen {
                 ClientPayloadPackets.sendRequestSatelliteCrash(blockEntity);
             }
             MinecraftClient.getInstance().setScreen(null);
-        }, LaunchSatelliteStationScreen.TITLE, MESSAGE);
+        }, TITLE, MESSAGE);
     }
 }

@@ -26,7 +26,8 @@ public class PhonosItems {
     public static final Item RED_AUDIO_CABLE = register(new AudioCableItem(DyeColor.RED, new Item.Settings()), "red_audio_cable");
     public static final Item BLACK_AUDIO_CABLE = register(new AudioCableItem(DyeColor.BLACK, new Item.Settings()), "black_audio_cable");
     public static final Item HEADSET = register(new HeadsetItem(new Item.Settings().maxCount(1)), "headset");
-    public static final Item PORTABLE_RADIO = register(new PortableRadioItem(new Item.Settings().maxCount(1)), "portable_radio");
+    public static final Item PORTABLE_RADIO = register(new PortableRadioItem(new Item.Settings().maxCount(1), false), "portable_radio");
+    public static final Item PORTABLE_SATELLITE_RADIO = register(new PortableRadioItem(new Item.Settings().maxCount(1), true), "portable_satellite_radio");
     public static final Item PORTABLE_RECORD_PLAYER = register(new PortableRecordPlayerItem(new Item.Settings().maxCount(1)), "portable_record_player");
 
     public static final Item[] ALL_AUDIO_CABLES = new Item[] {WHITE_AUDIO_CABLE, ORANGE_AUDIO_CABLE, MAGENTA_AUDIO_CABLE,

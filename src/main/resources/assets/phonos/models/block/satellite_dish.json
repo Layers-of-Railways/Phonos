@@ -1,7 +1,7 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "satellite_dish"
+		"0": "phonos:block/satellite_dish"
 	},
 	"elements": [
 		{

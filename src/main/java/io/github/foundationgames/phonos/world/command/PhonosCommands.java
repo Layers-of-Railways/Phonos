@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.entity.AbstractOutputBlockEntity;
-import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.util.PhonosUtil;
@@ -122,7 +121,7 @@ public class PhonosCommands {
             return 1;
         }
 
-        if (world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity be) {
+/*        if (world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity be) {
             long id = be.streamId;
 
             if (!ServerCustomAudio.SAVED.containsKey(id)) {
@@ -140,7 +139,7 @@ public class PhonosCommands {
                     sizeKB));
 
             return 1;
-        }
+        }*/ // todo restore
 
         source.sendError(Text.translatable("command.phonos.satellite.inspect.invalid"));
         return 1;

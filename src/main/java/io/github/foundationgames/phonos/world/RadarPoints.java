@@ -56,7 +56,7 @@ public class RadarPoints extends PersistentState {
     public static RadarPoints readNbt(NbtCompound nbt) {
         var state = new RadarPoints();
 
-        for (int ch = 0; ch < RadioStorage.CHANNEL_COUNT; ch++) {
+        for (int ch = 0; ch < RadioStorage.RADIO_CHANNEL_COUNT; ch++) {
             var key = "ch" + ch;
 
             if (nbt.contains(key)) {

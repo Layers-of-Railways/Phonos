@@ -5,7 +5,8 @@ import io.github.foundationgames.phonos.Phonos;
 public class PhonosPartialModels {
     public static final PartialModel
         MICROPHONE = block("microphone"),
-        RADIO_ANTENNA = block("radio_transceiver_antenna")
+        RADIO_ANTENNA = block("radio_transceiver_antenna"),
+        SATELLITE_DISH = block("satellite_dish")
     ;
 
     @SuppressWarnings("SameParameterValue")

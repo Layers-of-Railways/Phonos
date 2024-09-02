@@ -5,22 +5,15 @@ import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioLongConsumer;
 import io.github.foundationgames.phonos.radio.RadioMetadata;
 import io.github.foundationgames.phonos.radio.RadioStorage;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectAVLTreeMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -80,7 +73,7 @@ public class SoundEmitterTree {
             for (long emId : level.active()) {
                 if (emitters.isLoaded(emId)) {
                     var emitter = emitters.getEmitter(emId);
-                    if (emitter instanceof RadioStorage.RadioEmitter)
+                    if (emitter instanceof RadioStorage.RadioEmitter radioEmitter && radioEmitter.isRadio())
                         continue;
 
                     if (emitter instanceof RadioDevice.Transmitter radioTransmitter) {
@@ -91,10 +84,10 @@ public class SoundEmitterTree {
                         radioChanges.add(channel, metadata);
                     }
 
-                    final int searchUntil = index;
+                    final int searchUntil = index; // fixme should this be index + 1?
                     RadioLongConsumer[] consumerRef = new RadioLongConsumer[1];
                     RadioLongConsumer consumer = (child, metadata) -> {
-                        if (emitters.isLoaded(child) && emitters.getEmitter(child) instanceof RadioStorage.RadioEmitter radioEmitter) {
+                        if (emitters.isLoaded(child) && emitters.getEmitter(child) instanceof RadioStorage.RadioEmitter radioEmitter && radioEmitter.isRadio()) {
                             radioEmitter.forEachChild(consumerRef[0]);
                         }
 
@@ -164,7 +157,7 @@ public class SoundEmitterTree {
             for (long emId : level.active()) {
                 if (emitters.isLoaded(emId)) {
                     var emitter = emitters.getEmitter(emId);
-                    if (emitter instanceof RadioStorage.RadioEmitter)
+                    if (emitter instanceof RadioStorage.RadioEmitter radioEmitter && radioEmitter.isRadio())
                         continue;
 
                     if (emitter instanceof RadioDevice.Transmitter radioTransmitter) {
@@ -177,7 +170,7 @@ public class SoundEmitterTree {
                     final int searchUntil = index;
                     RadioLongConsumer[] consumerRef = new RadioLongConsumer[1];
                     RadioLongConsumer consumer = (child, metadata) -> {
-                        if (emitters.isLoaded(child) && emitters.getEmitter(child) instanceof RadioStorage.RadioEmitter radioEmitter) {
+                        if (emitters.isLoaded(child) && emitters.getEmitter(child) instanceof RadioStorage.RadioEmitter radioEmitter && radioEmitter.isRadio()) {
                             radioEmitter.forEachChild(consumerRef[0]);
                         }
 
@@ -256,7 +249,7 @@ public class SoundEmitterTree {
             for (long em : level.active) {
             if (emitters.isLoaded(em)) {
                 var emitter = emitters.getEmitter(em);
-                emitter.forEachSource(emitter instanceof RadioStorage.RadioEmitter radioEmitter
+                emitter.forEachSource(emitter instanceof RadioStorage.RadioEmitter radioEmitter && radioEmitter.isRadio()
                     ? new SmartSoundSourceConsumer(action, radioEmitter.channel)
                     : action
                 );

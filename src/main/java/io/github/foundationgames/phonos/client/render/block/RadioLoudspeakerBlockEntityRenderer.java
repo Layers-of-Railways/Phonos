@@ -11,7 +11,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.RotationAxis;
 
 public class RadioLoudspeakerBlockEntityRenderer implements BlockEntityRenderer<RadioLoudspeakerBlockEntity> {
-    public static final Text[] CHANNEL_TO_TEXT = new Text[RadioStorage.CHANNEL_COUNT];
+    public static final Text[] CHANNEL_TO_TEXT = new Text[RadioStorage.RADIO_CHANNEL_COUNT];
     public static int TEXT_COLOR = 0xFF2A2A;
     public static int OUTLINE_COLOR = 0x4F0000;
 

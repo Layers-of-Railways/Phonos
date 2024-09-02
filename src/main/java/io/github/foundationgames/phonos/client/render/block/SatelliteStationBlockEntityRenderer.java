@@ -7,6 +7,7 @@ import io.github.foundationgames.phonos.client.model.BasicModel;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -14,12 +15,11 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 
-public class SatelliteStationBlockEntityRenderer extends CableOutputBlockEntityRenderer<SatelliteStationBlockEntity> {
+public class SatelliteStationBlockEntityRenderer implements BlockEntityRenderer<SatelliteStationBlockEntity> {
     public static final String[] LOAD_ANIM = {"Oooo", "oOoo", "ooOo", "oooO"};
     public static final Text TEXT_LAUNCH_READY = Text.translatable("display.phonos.satellite_station.launch_ready");
     public static final Text TEXT_LAUNCHING = Text.translatable("display.phonos.satellite_station.launching").formatted(Formatting.YELLOW);
     public static final Text TEXT_IN_ORBIT = Text.translatable("display.phonos.satellite_station.in_orbit");
-    public static final Text TEXT_ERROR = Text.translatable("display.phonos.satellite_station.error").formatted(Formatting.RED);
 
     public static final Identifier TEXTURE = Phonos.id("textures/entity/satellite/satellite.png");
     public static final Identifier EXHAUST_TEX_1 = Phonos.id("textures/entity/satellite/exhaust_1.png");
@@ -33,16 +33,12 @@ public class SatelliteStationBlockEntityRenderer extends CableOutputBlockEntityR
     private final TextRenderer font;
 
     public SatelliteStationBlockEntityRenderer(BlockEntityRendererFactory.Context ctx) {
-        super(ctx);
-
         this.satelliteModel = new BasicModel(ctx.getLayerModelPart(PhonosClient.SATELLITE_LAYER));
         this.font = ctx.getTextRenderer();
     }
 
     @Override
     public void render(SatelliteStationBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay);
-
         var rocket = entity.getRocket();
 
         if (rocket != null) {
@@ -81,12 +77,9 @@ public class SatelliteStationBlockEntityRenderer extends CableOutputBlockEntityR
         matrices.translate(0, 10.75, 0);
 
         var text = switch (entity.getStatus()) {
-            case IN_ORBIT -> TEXT_IN_ORBIT;
+            case IN_ORBIT -> RadioLoudspeakerBlockEntityRenderer.getTextForChannel(entity.getChannel());
             case LAUNCHING -> TEXT_LAUNCHING;
             default -> {
-                if (entity.getError() != null) {
-                    yield TEXT_ERROR;
-                }
                 if (entity.getRocket() != null) {
                     yield TEXT_LAUNCH_READY;
                 }

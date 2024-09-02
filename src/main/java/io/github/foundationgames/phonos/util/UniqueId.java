@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.util;
 
+import io.github.foundationgames.phonos.radio.RadioStorage;
 import net.minecraft.util.NameGenerator;
 import net.minecraft.util.math.BlockPos;
 
@@ -17,6 +18,10 @@ public final class UniqueId {
 
     public static long ofRadioChannel(int channel) {
         return obf(channel + 0xFADECAB);
+    }
+
+    public static long ofSatelliteChannel(int channel) {
+        return ofRadioChannel(RadioStorage.toSatelliteBand(channel));
     }
 
     public static long obf(long uniqueId) {

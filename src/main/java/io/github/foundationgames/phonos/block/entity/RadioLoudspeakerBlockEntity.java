@@ -5,7 +5,6 @@ import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioMetadata;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.sound.emitter.SoundSource;
-import io.github.foundationgames.phonos.util.UniqueId;
 import io.github.foundationgames.phonos.world.sound.block.SoundDataHandler;
 import io.github.foundationgames.phonos.world.sound.data.SoundData;
 import net.minecraft.block.BlockState;
@@ -76,7 +75,7 @@ public class RadioLoudspeakerBlockEntity extends BlockEntity implements Syncing,
 
     @Override
     public void setAndUpdateChannel(int channel) {
-        channel = Math.floorMod(channel, RadioStorage.CHANNEL_COUNT);
+        channel = Math.floorMod(channel, RadioStorage.RADIO_CHANNEL_COUNT);
 
         var radio = RadioStorage.getInstance(this.world);
 

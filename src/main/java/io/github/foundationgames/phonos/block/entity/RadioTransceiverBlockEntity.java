@@ -141,7 +141,7 @@ public class RadioTransceiverBlockEntity extends AbstractConnectionHubBlockEntit
 
     @Override
     public void setAndUpdateChannel(int channel) {
-        channel = Math.floorMod(channel, RadioStorage.CHANNEL_COUNT);
+        channel = Math.floorMod(channel, RadioStorage.RADIO_CHANNEL_COUNT);
 
         if (this.world instanceof ServerWorld sWorld) for (boolean in : this.inputs) if (in) {
             RadarPoints.get(sWorld).remove(this.channel, this.pos);

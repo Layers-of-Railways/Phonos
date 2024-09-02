@@ -17,7 +17,6 @@
     "display.phonos.satellite_station.launch_ready": "READY",
     "display.phonos.satellite_station.launching": "LAUNCH",
     "display.phonos.satellite_station.in_orbit": "ORBIT",
-    "display.phonos.satellite_station.error": "ERROR",
 
     "message.phonos.crash_satellite_station": "Crash the currently orbiting satellite?",
     "message.phonos.satellite_launching": "Launch in progress!",

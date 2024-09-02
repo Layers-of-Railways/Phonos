@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.world.sound.block;
 
+import io.github.foundationgames.phonos.sound.emitter.ForwardingSoundEmitter;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitter;
 import io.github.foundationgames.phonos.sound.emitter.SoundSource;
 import io.github.foundationgames.phonos.util.PhonosUtil;
@@ -150,7 +151,7 @@ public class BlockConnectionLayout {
         @Override
         public @Nullable SoundEmitter forward(World world) {
             if (world.isPosLoaded(this.blockPos.getX(), this.blockPos.getZ()) &&
-                    world.getBlockEntity(this.blockPos) instanceof OutputBlockEntity out &&
+                    world.getBlockEntity(this.blockPos) instanceof ForwardingSoundEmitter out &&
                     out.forwards()) {
                 return out.forward(connectionIndex);
             }
