@@ -7,6 +7,7 @@ import io.github.foundationgames.phonos.client.model.PhonosPartialModels;
 import io.github.foundationgames.phonos.client.render.RadioDebugRenderer;
 import io.github.foundationgames.phonos.client.render.block.*;
 import io.github.foundationgames.phonos.config.PhonosClientConfig;
+import io.github.foundationgames.phonos.config.widgets.PhonosOptionRegistry;
 import io.github.foundationgames.phonos.item.*;
 import io.github.foundationgames.phonos.network.ClientPayloadPackets;
 import io.github.foundationgames.phonos.radio.RadioDevice;
@@ -46,7 +47,9 @@ public class PhonosClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        PhonosClientConfig.get(); // Load if not already
+        PhonosOptionRegistry.init();
+        if (!PhonosClientConfig.load())
+            Phonos.LOG.error("Error loading Phonos client config!");
 
         ClientPayloadPackets.initClient();
         ClientSoundStorage.initClient();

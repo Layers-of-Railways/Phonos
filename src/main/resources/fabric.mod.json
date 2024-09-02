@@ -39,7 +39,8 @@
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
     "fabric": ">=${fabric_api_version}",
-    "minecraft": "1.20.x"
+    "minecraft": "1.20.x",
+    "yet_another_config_lib_v3": ">=${yacl_version}"
   },
   "suggests": {
     "voicechat": ">=2.4.16"

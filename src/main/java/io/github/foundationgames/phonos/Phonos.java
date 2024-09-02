@@ -1,13 +1,13 @@
 package io.github.foundationgames.phonos;
 
 import io.github.foundationgames.phonos.block.PhonosBlocks;
+import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.item.ItemGroupQueue;
 import io.github.foundationgames.phonos.item.PhonosItems;
 import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.recipe.ItemGlowRecipe;
-import io.github.foundationgames.phonos.sound.ServerSoundStorage;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SecondaryEmitterHolder;
@@ -52,6 +52,7 @@ public class Phonos implements ModInitializer {
 
     public static final ItemGroupQueue PHONOS_ITEMS = new ItemGroupQueue(id("phonos"));
 
+    // fixme turn this into a config option
     public static final GameRules.Key<GameRules.IntRule> PHONOS_UPLOAD_LIMIT_KB = GameRuleRegistry.register(
             "phonosUploadLimitKB", GameRules.Category.MISC, GameRuleFactory.createIntRule(-1, -1));
 
@@ -89,6 +90,9 @@ public class Phonos implements ModInitializer {
         });
 
         ServerLifecycleEvents.SERVER_STARTED.register(e -> {
+            // Initialize config
+            PhonosServerConfig.get(e.getOverworld());
+
             ServerCustomAudio.reset();
             try {
                 var path = PhonosUtil.getCustomSoundFolder(e);
@@ -106,6 +110,7 @@ public class Phonos implements ModInitializer {
             ServerPlayerEntity player = handler.getPlayer();
             SoundStorage.getInstance(player.getServerWorld())
                 .registerPlayerWaitingForResume(player);
+            PayloadPackets.sendConfig(player, PhonosServerConfig.getHandler(player.getServerWorld()));
         }));
 
         ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(((player, origin, destination) -> {

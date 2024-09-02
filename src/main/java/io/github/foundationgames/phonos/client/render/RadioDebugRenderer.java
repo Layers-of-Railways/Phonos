@@ -4,6 +4,7 @@ import com.google.common.hash.Hashing;
 import io.github.foundationgames.phonos.block.entity.RadioTransceiverBlockEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -47,7 +48,7 @@ public class RadioDebugRenderer {
             var pos = entry.getKey();
             if (world.getBlockEntity(pos) instanceof RadioTransceiverBlockEntity be) {
                 entry.setValue(new DebugMeta(be.getMetadata().transmissionRange(), colorFromLong(be.emitterId())));
-            } else {
+            } else if (!world.getBlockState(pos).isOf(Blocks.VOID_AIR)) {
                 iterator.remove();
             }
         }

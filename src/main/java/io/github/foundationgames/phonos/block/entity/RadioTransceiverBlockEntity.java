@@ -2,7 +2,7 @@ package io.github.foundationgames.phonos.block.entity;
 
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.block.RadioTransceiverBlock;
-import io.github.foundationgames.phonos.config.PhonosCommonConfig;
+import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioMetadata;
 import io.github.foundationgames.phonos.radio.RadioStorage;
@@ -88,7 +88,7 @@ public class RadioTransceiverBlockEntity extends AbstractConnectionHubBlockEntit
 
     @Override
     public RadioMetadata getMetadata() {
-        PhonosCommonConfig conf = PhonosCommonConfig.get();
+        PhonosServerConfig conf = PhonosServerConfig.get(world);
         BlockPos pos = getPos();
 
         int relativeToSeaLevel = pos.getY() - (world == null ? 63 : world.getSeaLevel());
@@ -194,7 +194,7 @@ public class RadioTransceiverBlockEntity extends AbstractConnectionHubBlockEntit
         int lastHeight = transmissionTowerHeight;
 
         BlockPos.Mutable pos = getPos().mutableCopy();
-        for (transmissionTowerHeight = 0; transmissionTowerHeight < PhonosCommonConfig.get().maxTransmissionTowerHeight; transmissionTowerHeight++) {
+        for (transmissionTowerHeight = 0; transmissionTowerHeight < PhonosServerConfig.get(world).maxTransmissionTowerHeight; transmissionTowerHeight++) {
             pos.move(Direction.UP);
             BlockState state = world.getBlockState(pos);
             if (!state.isIn(PhonosTags.TRANSMISSION_TOWERS))

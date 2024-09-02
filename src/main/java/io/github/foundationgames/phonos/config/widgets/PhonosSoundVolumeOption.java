@@ -1,4 +1,4 @@
-package io.github.foundationgames.phonos.config;
+package io.github.foundationgames.phonos.config.widgets;
 
 import net.minecraft.client.option.SimpleOption;
 import net.minecraft.text.Text;

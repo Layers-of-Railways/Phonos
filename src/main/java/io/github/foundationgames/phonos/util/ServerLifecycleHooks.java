@@ -2,17 +2,23 @@ package io.github.foundationgames.phonos.util;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
+import org.jetbrains.annotations.Nullable;
+
+import java.lang.ref.WeakReference;
 
 public class ServerLifecycleHooks {
-    private static MinecraftServer currentServer;
+    @Nullable
+    private static WeakReference<MinecraftServer> currentServer = null;
 
     public static void init() {
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-            currentServer = server;
+            currentServer = new WeakReference<>(server);
         });
     }
 
-    public static MinecraftServer getCurrentServer() {
-        return currentServer;
+    public static @Nullable MinecraftServer getCurrentServer() {
+        if (currentServer == null)
+            return null;
+        return currentServer.get();
     }
 }

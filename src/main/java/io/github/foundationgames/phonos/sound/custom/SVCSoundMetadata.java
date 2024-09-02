@@ -4,11 +4,18 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 public class SVCSoundMetadata {
     private @NotNull Vec3d position = Vec3d.ZERO;
     private float distance = 0.0f;
     private @Nullable String category = null;
     private float volume = 1.0f;
+    private final @NotNull UUID playerId;
+
+    public SVCSoundMetadata(@NotNull UUID playerId) {
+        this.playerId = playerId;
+    }
 
     public @NotNull Vec3d getPosition() {
         return position;
@@ -40,5 +47,9 @@ public class SVCSoundMetadata {
 
     public void setVolume(float volume) {
         this.volume = volume;
+    }
+
+    public @NotNull UUID getPlayerId() {
+        return playerId;
     }
 }

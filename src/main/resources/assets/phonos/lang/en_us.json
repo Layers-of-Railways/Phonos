@@ -78,22 +78,31 @@
 
     "text.config.phonos.title": "Phonos Configs",
     "text.config.phonos.client_title": "Phonos Client Config",
-    "text.config.phonos.common_title": "Phonos Common Config",
+    "text.config.phonos.server_title": "Phonos Server Config",
+    "text.config.phonos.server_title.disabled_tooltip": "Only Available In-Game",
 
-    "text.config.phonos.option.phonosMasterVolume": "Loudspeaker Master Volume",
-    "text.config.phonos.option.streamVolume": "Satellite Audio Volume",
-    "text.config.phonos.option.cableCulling": "Cull Audio Cables not on-screen",
-    "text.config.phonos.option.cableVBOs": "Render Audio Cables with VBOs",
-    "text.config.phonos.option.cableLODs": "Render Audio Cables with Detail Levels",
-    "text.config.phonos.option.cableLODNearDetail": "Highest Audio Cable Detail Level",
-    "text.config.phonos.option.cableLODFarDetail": "Lowest Audio Cable Detail Level",
+    "yacl3.config.phonos:client_config.category.audio": "Audio",
+    "yacl3.config.phonos:client_config.category.rendering": "Rendering",
+
+    "yacl3.config.phonos:client_config.phonosMasterVolume": "Loudspeaker Master Volume",
+    "yacl3.config.phonos:client_config.streamVolume": "Satellite Audio Volume",
+    "yacl3.config.phonos:client_config.ownVoiceVolume": "Microphone Volume (Own Voice)",
+    "yacl3.config.phonos:client_config.cableCulling": "Cull Audio Cables not on-screen",
+    "yacl3.config.phonos:client_config.cableVBOs": "Render Audio Cables with VBOs",
+    "yacl3.config.phonos:client_config.cableLODs": "Render Audio Cables with Detail Levels",
+    "yacl3.config.phonos:client_config.cableLODNearDetail": "Highest Audio Cable Detail Level",
+    "yacl3.config.phonos:client_config.cableLODFarDetail": "Lowest Audio Cable Detail Level",
 
     "text.config.phonos.option.vanilla.phonosMasterVolume": "Phonos (Master)",
     "text.config.phonos.option.vanilla.streamVolume": "Phonos Satellites",
+    "text.config.phonos.option.vanilla.ownVoiceVolume": "Phonos Microphones (Own Voice)",
 
-    "text.config.phonos.option.radioBaseRange": "Base Radio Range",
-    "text.config.phonos.option.worldHeightMultiplier": "Added Range per Block Above Sea Level",
-    "text.config.phonos.option.transmissionTowerMultiplier": "Added Range per Transmission Tower Block",
-    "text.config.phonos.option.maxTransmissionTowerHeight": "Max Height for Transmission Tower",
-    "text.config.phonos.option.maxMicrophoneRange": "Max Microphone Cable Length"
+    "yacl3.config.phonos:server_config.category.general": "General",
+    "yacl3.config.phonos:server_config.category.radio": "Radio",
+
+    "yacl3.config.phonos:server_config.radioBaseRange": "Base Radio Range",
+    "yacl3.config.phonos:server_config.worldHeightMultiplier": "Added Range per Block Above Sea Level",
+    "yacl3.config.phonos:server_config.transmissionTowerMultiplier": "Added Range per Transmission Tower Block",
+    "yacl3.config.phonos:server_config.maxTransmissionTowerHeight": "Max Height for Transmission Tower",
+    "yacl3.config.phonos:server_config.maxMicrophoneRange": "Max Microphone Cable Length"
 }

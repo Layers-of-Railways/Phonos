@@ -3,7 +3,7 @@ package io.github.foundationgames.phonos.block.entity;
 import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.MicrophoneBaseBlock;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
-import io.github.foundationgames.phonos.config.PhonosCommonConfig;
+import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
@@ -118,7 +118,11 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
 
         if (serverPlayer != null) {
             var player = serverPlayer.get();
-            if (player == null || player.isRemoved() || !player.getMainHandStack().isEmpty() || !player.getPos().isInRange(getPos().toCenterPos(), PhonosCommonConfig.get().maxMicrophoneRange)) {
+            if (
+                player == null || player.isRemoved() ||
+                    !player.getMainHandStack().isEmpty() ||
+                    !player.getPos().isInRange(getPos().toCenterPos(), PhonosServerConfig.get(world).maxMicrophoneRange)
+            ) {
                 this.stop();
                 ((MicrophoneBaseBlock) state.getBlock()).updatePower(world, pos);
             }

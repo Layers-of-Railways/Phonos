@@ -112,6 +112,7 @@ public class ServerCustomAudio {
 
             if (aud != null) {
                 Phonos.LOG.info("Saved audio with ID {} ({} bytes) was deleted.", Long.toHexString(id), aud.originalSize);
+                TOTAL_SAVED_SIZE -= aud.originalSize;
             }
         } catch (IOException ex) {
             Phonos.LOG.error("Error saving uploaded sound", ex);

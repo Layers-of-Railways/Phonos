@@ -1,78 +1,88 @@
 package io.github.foundationgames.phonos.config;
 
-import com.google.gson.Gson;
+import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
+import dev.isxander.yacl3.config.v2.api.SerialEntry;
+import dev.isxander.yacl3.config.v2.api.autogen.AutoGen;
+import dev.isxander.yacl3.config.v2.api.autogen.MasterTickBox;
+import dev.isxander.yacl3.config.v2.api.autogen.TickBox;
+import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import io.github.foundationgames.phonos.Phonos;
+import io.github.foundationgames.phonos.config.widgets.DoublePercentSlider;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import net.minecraft.client.gui.screen.Screen;
+import org.jetbrains.annotations.ApiStatus;
 
 public class PhonosClientConfig {
-    private static PhonosClientConfig config = null;
+    private static final ConfigClassHandler<PhonosClientConfig> HANDLER = ConfigClassHandler.createBuilder(PhonosClientConfig.class)
+        .id(Phonos.id("client_config"))
+        .serializer(config -> GsonConfigSerializerBuilder.create(config)
+            .setPath(FabricLoader.getInstance().getConfigDir().resolve("phonos.json5"))
+            .setJson5(true)
+            .build())
+        .build();
 
+    @SerialEntry(comment = "Loudspeaker Master Volume [0, 1]")
+    @AutoGen(category = "audio")
+    @DoublePercentSlider(min = 0, max = 1, step = 0.01f)
     public double phonosMasterVolume = 1;
+
+    @SerialEntry(comment = "Satellite Audio Volume [0, 1]")
+    @AutoGen(category = "audio")
+    @DoublePercentSlider(min = 0, max = 1, step = 0.01f)
     public double streamVolume = 1;
 
+    @SerialEntry(comment = "Microphone Volume (Own Voice) [0, 1]")
+    @AutoGen(category = "audio")
+    @DoublePercentSlider(min = 0, max = 1, step = 0.01f)
+    public double ownVoiceVolume = 1;
+
+
+    @SerialEntry(comment = "Cull Audio Cables not on-screen")
+    @AutoGen(category = "rendering")
+    @TickBox
     public boolean cableCulling = true;
+
+    @SerialEntry(comment = "Render Audio Cables with VBOs")
+    @AutoGen(category = "rendering")
+    @TickBox
     public boolean cableVBOs = false;
+
+    @SerialEntry(comment = "Render Audio Cables with Detail Levels")
+    @AutoGen(category = "rendering")
+    @MasterTickBox(value = {"cableLODNearDetail", "cableLODFarDetail"})
     public boolean cableLODs = true;
+
+    @SerialEntry(comment = "Highest Audio Cable Detail Level [0.1, 1]")
+    @AutoGen(category = "rendering")
+    @DoublePercentSlider(min = 0.1, max = 1, step = 0.01f)
     public double cableLODNearDetail = 1;
+
+    @SerialEntry(comment = "Lowest Audio Cable Detail Level [0.1, 1]")
+    @AutoGen(category = "rendering")
+    @DoublePercentSlider(min = 0.1, max = 1, step = 0.01f)
     public double cableLODFarDetail = 0.25;
 
+    @ApiStatus.Internal
     public PhonosClientConfig() {
     }
 
-    public PhonosClientConfig copyTo(PhonosClientConfig copy) {
-        for (var f : PhonosClientConfig.class.getDeclaredFields()) {
-            try {
-                f.set(copy, f.get(this));
-            } catch (IllegalAccessException ignored) {}
-        }
-
-        return copy;
-    }
-
     public static PhonosClientConfig get() {
-        if (config == null) {
-            config = new PhonosClientConfig();
-
-            try {
-                config.load();
-            } catch (IOException ex) {
-                Phonos.LOG.error("Error loading Phonos client config!", ex);
-                try {
-                    config.save();
-                } catch (IOException e) {
-                    Phonos.LOG.error("Error saving Phonos client config!", e);
-                }
-            }
-        }
-
-        return config;
+        return HANDLER.instance();
     }
 
-    private static Path configPath() {
-        return FabricLoader.getInstance().getConfigDir().resolve("phonos.json");
+    public static boolean load() {
+        return HANDLER.load();
     }
 
-    public void load() throws IOException {
-        var path = configPath();
-
-        try (var in = Files.newBufferedReader(path)) {
-            var fileCfg = new Gson().fromJson(in, PhonosClientConfig.class);
-            fileCfg.copyTo(this);
-        }
+    public static void save() {
+        HANDLER.save();
     }
 
-    public void save() throws IOException {
-        var path = configPath();
-
-        var gson = new Gson();
-        try (var writer = gson.newJsonWriter(Files.newBufferedWriter(path))) {
-            writer.setIndent("    ");
-
-            gson.toJson(gson.toJsonTree(this, PhonosClientConfig.class), writer);
-        }
+    @Environment(EnvType.CLIENT)
+    public static Screen createScreen(Screen parent) {
+        return HANDLER.generateGui()
+            .generateScreen(parent);
     }
 }

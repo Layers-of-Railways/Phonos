@@ -8,6 +8,7 @@ import de.maxhenkel.voicechat.api.audiochannel.LocationalAudioChannel;
 import de.maxhenkel.voicechat.api.events.*;
 import de.maxhenkel.voicechat.voice.common.LocationSoundPacket;
 import io.github.foundationgames.phonos.Phonos;
+import io.github.foundationgames.phonos.config.PhonosClientConfig;
 import io.github.foundationgames.phonos.mixin.compat.LocationSoundPacketAccessor;
 import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.sound.custom.SVCSoundMetadata;
@@ -16,7 +17,10 @@ import io.github.foundationgames.phonos.util.UniqueId;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -35,7 +39,7 @@ public class PhonosVoicechatPlugin implements VoicechatPlugin {
 
     // Server
     private static final WeakHashMap<ServerPlayerEntity, LocationalAudioChannel> microphonePlayers = new WeakHashMap<>();
-    private static final Long2ObjectOpenHashMap<WeakReference<LocationalAudioChannel>> removalHelperMap = new Long2ObjectOpenHashMap<>();
+    private static final Long2ObjectOpenHashMap<Pair<WeakReference<LocationalAudioChannel>, UUID>> removalHelperMap = new Long2ObjectOpenHashMap<>();
 
     // Client
     private static final HashMap<UUID, SVCSoundMetadata> clientMetadataByChannelId = new HashMap<>();
@@ -43,7 +47,7 @@ public class PhonosVoicechatPlugin implements VoicechatPlugin {
     private static final Long2ObjectOpenHashMap<CompletableFuture<SVCSoundMetadata>> waitingClientMetadata = new Long2ObjectOpenHashMap<>();
 
     public static boolean isStreaming(long streamID) {
-        return removalHelperMap.containsKey(streamID) && removalHelperMap.get(streamID).get() != null;
+        return removalHelperMap.containsKey(streamID) && removalHelperMap.get(streamID).getLeft().get() != null;
     }
 
     public static boolean isStreaming(ServerPlayerEntity serverPlayer) {
@@ -69,12 +73,12 @@ public class PhonosVoicechatPlugin implements VoicechatPlugin {
 
         channel.setDistance(Float.MAX_VALUE);
         for (var player : server.getPlayerManager().getPlayerList()) {
-            PayloadPackets.sendMicrophoneChannelOpen(player, channelId, streamID);
+            PayloadPackets.sendMicrophoneChannelOpen(player, channelId, streamID, serverPlayer.getUuid());
             Phonos.LOG.info("Opened microphone channel for player {} with stream ID {} and channel ID {}", player, streamID, channelId);
         }
 
         microphonePlayers.put(serverPlayer, channel);
-        removalHelperMap.put(streamID, new WeakReference<>(channel));
+        removalHelperMap.put(streamID, new Pair<>(new WeakReference<>(channel), serverPlayer.getUuid()));
         return true;
     }
 
@@ -82,11 +86,11 @@ public class PhonosVoicechatPlugin implements VoicechatPlugin {
         var removalData = removalHelperMap.get(streamID);
         if (removalData == null)
             return;
-        var key = removalData.get();
+        var key = removalData.getLeft().get();
         if (key == null)
             return;
         UUID channelId = key.getId();
-        PayloadPackets.sendMicrophoneChannelOpen(target, channelId, streamID);
+        PayloadPackets.sendMicrophoneChannelOpen(target, channelId, streamID, removalData.getRight());
         Phonos.LOG.info("Resumed microphone channel for player {} with stream ID {} and channel ID {}", target, streamID, channelId);
     }
 
@@ -94,7 +98,7 @@ public class PhonosVoicechatPlugin implements VoicechatPlugin {
         var removalData = removalHelperMap.remove(streamID);
         if (removalData == null)
             return;
-        var key = removalData.get();
+        var key = removalData.getLeft().get();
         if (key == null)
             return;
 
@@ -122,11 +126,11 @@ public class PhonosVoicechatPlugin implements VoicechatPlugin {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void startClientMicrophoneStream(UUID channelId, long streamId) {
+    public static void startClientMicrophoneStream(UUID channelId, long streamId, UUID speakingPlayerId) {
         if (clientApi == null)
             return;
 
-        var metadata = new SVCSoundMetadata();
+        var metadata = new SVCSoundMetadata(speakingPlayerId);
         clientMetadataByChannelId.put(channelId, metadata);
         clientMetadataByStreamId.put(streamId, metadata);
         if (waitingClientMetadata.containsKey(streamId)) {
@@ -195,6 +199,12 @@ public class PhonosVoicechatPlugin implements VoicechatPlugin {
         ((LocationSoundPacketAccessor) packet).setCategory(metadata.getCategory());
 
         float volume = metadata.getVolume();
+
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        if (player != null && metadata.getPlayerId().equals(player.getUuid())) {
+            volume *= (float) PhonosClientConfig.get().ownVoiceVolume;
+        }
+
         if (volume != 1.0f) for (int i = 0; i < audioData.length; i++) {
             audioData[i] = (short) (audioData[i] * volume);
         }

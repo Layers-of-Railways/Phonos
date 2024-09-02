@@ -1,9 +1,13 @@
 package io.github.foundationgames.phonos.network;
 
+import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
+import dev.isxander.yacl3.config.v2.api.FieldAccess;
 import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity;
 import io.github.foundationgames.phonos.client.screen.CrashSatelliteStationScreen;
 import io.github.foundationgames.phonos.client.screen.LaunchSatelliteStationScreen;
+import io.github.foundationgames.phonos.config.PhonosServerConfig;
+import io.github.foundationgames.phonos.config.serializers.NetworkConfigSerializer;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.custom.ClientCustomAudioUploader;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
@@ -106,8 +110,9 @@ public final class ClientPayloadPackets {
         ClientPlayNetworking.registerGlobalReceiver(Phonos.id("microphone_channel_open"), (client, handler, buf, responseSender) -> {
             UUID channelId = buf.readUuid();
             long streamId = buf.readLong();
+            UUID speakerId = buf.readUuid();
 
-            PhonosVoicechatProxy.startClientMicrophoneStream(channelId, streamId);
+            PhonosVoicechatProxy.startClientMicrophoneStream(channelId, streamId, speakerId);
         });
 
         ClientPlayNetworking.registerGlobalReceiver(Phonos.id("microphone_channel_close"), (client, handler, buf, responseSender) -> {
@@ -115,6 +120,11 @@ public final class ClientPayloadPackets {
             long streamId = buf.readLong();
 
             PhonosVoicechatProxy.endClientMicrophoneStream(channelId, streamId);
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(Phonos.id("set_config"), (client, handler, buf, responseSender) -> {
+            ConfigClassHandler<PhonosServerConfig> config = PhonosServerConfig.getHandler(client.world);
+            NetworkConfigSerializer.read(buf, config);
         });
     }
 
@@ -149,5 +159,14 @@ public final class ClientPayloadPackets {
         buf.writeBoolean(last);
 
         ClientPlayNetworking.send(Phonos.id("audio_upload"), buf);
+    }
+
+    public static void sendConfigChange(int i, FieldAccess<?> access) {
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeVarInt(i);
+        buf.writeString(access.name());
+        NetworkConfigSerializer.write(buf, access);
+
+        ClientPlayNetworking.send(Phonos.id("config_change"), buf);
     }
 }

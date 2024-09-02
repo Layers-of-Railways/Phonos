@@ -52,8 +52,8 @@ public class PhonosVoicechatProxy {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void startClientMicrophoneStream(UUID channelId, long streamId) {
-        executeIfLoaded(() -> () -> PhonosVoicechatPlugin.startClientMicrophoneStream(channelId, streamId));
+    public static void startClientMicrophoneStream(UUID channelId, long streamId, UUID speakingPlayerId) {
+        executeIfLoaded(() -> () -> PhonosVoicechatPlugin.startClientMicrophoneStream(channelId, streamId, speakingPlayerId));
     }
 
     @Environment(EnvType.CLIENT)
