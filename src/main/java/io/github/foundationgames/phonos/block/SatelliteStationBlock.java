@@ -14,6 +14,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
@@ -45,6 +46,7 @@ public class SatelliteStationBlock extends HorizontalFacingBlock implements Bloc
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         var side = hit.getSide();
         var facing = state.get(FACING);
+        var stack = player.getStackInHand(hand);
 
         if (side == Direction.DOWN) {
             return ActionResult.PASS;
@@ -73,7 +75,17 @@ public class SatelliteStationBlock extends HorizontalFacingBlock implements Bloc
             if (side == facing) {
                 if (!world.isClient()) {
                     int inc = player.isSneaking() ? -1 : 1;
-                    be.setAndUpdateChannel(be.getChannel() + inc);
+                    int goal = be.getChannel() + inc;
+
+                    if (stack.isOf(Items.NAME_TAG) && stack.hasCustomName()) {
+                        String customName = stack.getName().getString();
+                        if (customName.matches("\\d+")) {
+                            goal = Integer.parseInt(customName);
+                            goal = MathHelper.clamp(goal, 0, RadioStorage.SATELLITE_CHANNEL_COUNT-1);
+                        }
+                    }
+
+                    be.setAndUpdateChannel(goal);
                     be.markDirty();
 
                     return ActionResult.CONSUME;

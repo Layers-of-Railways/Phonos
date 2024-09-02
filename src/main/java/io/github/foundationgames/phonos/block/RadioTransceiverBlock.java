@@ -1,116 +1,31 @@
 package io.github.foundationgames.phonos.block;
 
+import io.github.foundationgames.phonos.block.entity.RadioReceiverBlockEntity;
 import io.github.foundationgames.phonos.block.entity.RadioTransceiverBlockEntity;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.RadarPoints;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
 import io.github.foundationgames.phonos.world.sound.block.InputBlock;
-import net.minecraft.block.*;
+import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class RadioTransceiverBlock extends HorizontalFacingBlock implements BlockEntityProvider, InputBlock {
-    private static final VoxelShape SHAPE = createCuboidShape(0, 0, 0, 16, 7, 16);
-
+public class RadioTransceiverBlock extends RadioReceiverBlock implements BlockEntityProvider, InputBlock {
     public final BlockConnectionLayout inputLayout = new BlockConnectionLayout()
             .addPoint(-4.5, -4.5, 8, Direction.SOUTH)
             .addPoint(4.5, -4.5, 8, Direction.SOUTH);
 
     public RadioTransceiverBlock(Settings settings) {
         super(settings);
-        setDefaultState(getDefaultState().with(FACING, Direction.NORTH));
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        var side = hit.getSide();
-        var facing = state.get(FACING);
-
-        if (side == Direction.DOWN || side == Direction.UP) {
-            return ActionResult.PASS;
-        }
-
-        if (side == facing) {
-            if (!world.isClient()) {
-                int inc = player.isSneaking() ? -1 : 1;
-                if (world.getBlockEntity(pos) instanceof RadioTransceiverBlockEntity be) {
-                    be.setAndUpdateChannel(be.getChannel() + inc);
-                    be.markDirty();
-                }
-
-                return ActionResult.CONSUME;
-            }
-
-            return ActionResult.SUCCESS;
-        }
-
-        if (player.canModifyBlocks()) {
-            if (!world.isClient() && world.getBlockEntity(pos) instanceof RadioTransceiverBlockEntity be) {
-                if (PhonosUtil.holdingAudioCable(player)) {
-                    return ActionResult.PASS;
-                }
-
-                if (side != facing.getOpposite()) {
-                    if (be.outputs.tryRemoveConnection(world, hit, !player.isCreative())) {
-                        be.sync();
-                        return ActionResult.SUCCESS;
-                    }
-                } else {
-                    return tryRemoveConnection(state, world, pos, hit);
-                }
-            }
-        }
-
-        return ActionResult.success(side == facing.getOpposite());
-    }
-
-    @Override
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        if (!newState.isOf(this) && world.getBlockEntity(pos) instanceof RadioTransceiverBlockEntity be) {
-            be.onDestroyed();
-        }
-
-        super.onStateReplaced(state, world, pos, newState, moved);
-    }
-
-    @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return SHAPE;
-    }
-
-    @Override
-    public Direction getRotation(BlockState state) {
-        return state.get(FACING);
-    }
-
-    @Nullable
-    @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
-    }
-
-    @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        super.appendProperties(builder);
-
-        builder.add(FACING);
     }
 
     @Override
@@ -137,7 +52,7 @@ public class RadioTransceiverBlock extends HorizontalFacingBlock implements Bloc
 
     @Override
     public boolean isInputPluggedIn(int inputIndex, BlockState state, World world, BlockPos pos) {
-        if (world.getBlockEntity(pos) instanceof RadioTransceiverBlockEntity be) {
+        if (world.getBlockEntity(pos) instanceof RadioReceiverBlockEntity be) {
             inputIndex = MathHelper.clamp(inputIndex, 0, be.inputs.length - 1);
 
             return be.inputs[inputIndex];
@@ -148,7 +63,7 @@ public class RadioTransceiverBlock extends HorizontalFacingBlock implements Bloc
 
     @Override
     public void setInputPluggedIn(int inputIndex, boolean pluggedIn, BlockState state, World world, BlockPos pos) {
-        if (world.getBlockEntity(pos) instanceof RadioTransceiverBlockEntity be) {
+        if (world.getBlockEntity(pos) instanceof RadioReceiverBlockEntity be) {
             inputIndex = MathHelper.clamp(inputIndex, 0, be.inputs.length - 1);
             be.inputs[inputIndex] = pluggedIn;
 
@@ -188,5 +103,10 @@ public class RadioTransceiverBlock extends HorizontalFacingBlock implements Bloc
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
         return PhonosUtil.blockEntityTicker(type, PhonosBlocks.RADIO_TRANSCEIVER_ENTITY);
+    }
+
+    @Override
+    public Direction getRotation(BlockState state) {
+        return super.getRotation(state);
     }
 }

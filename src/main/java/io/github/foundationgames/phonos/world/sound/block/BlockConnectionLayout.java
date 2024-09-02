@@ -212,6 +212,11 @@ public class BlockConnectionLayout {
         public int hashCode() {
             return Objects.hash(blockPos);
         }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + " {(%s) %s}".formatted(this.blockPos.toShortString(), UniqueId.debugNameOf(uniqueId));
+        }
     }
 
     public static class BlockOutput implements CablePlugPoint {

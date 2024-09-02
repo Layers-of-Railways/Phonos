@@ -2,7 +2,6 @@ package io.github.foundationgames.phonos.block.entity;
 
 import io.github.foundationgames.phonos.block.AudioSwitchBlock;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
-import io.github.foundationgames.phonos.block.RadioTransceiverBlock;
 import io.github.foundationgames.phonos.sound.emitter.SecondaryEmitterHolder;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitter;
 import io.github.foundationgames.phonos.sound.emitter.SoundSource;
@@ -150,6 +149,11 @@ public class AudioSwitchBlockEntity extends AbstractConnectionHubBlockEntity imp
                     action.accept(emitter.emitterId());
                 }
             });
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + " {(%s) %s}".formatted(getPos().toShortString(), UniqueId.debugNameOf(emitterId()));
         }
     }
 }

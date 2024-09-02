@@ -39,6 +39,7 @@
     "block.phonos.electronic_note_block": "Electronic Note Block",
     "block.phonos.connection_hub": "Connection Hub",
     "block.phonos.radio_transceiver": "Radio Transceiver",
+    "block.phonos.satellite_receiver": "Satellite Receiver",
     "block.phonos.radio_loudspeaker": "Radio Loudspeaker",
     "block.phonos.satellite_station": "Satellite Station",
     "block.phonos.audio_switch": "Audio Switch",
@@ -65,6 +66,7 @@
     "item.phonos.yellow_audio_cable": "Yellow Audio Cable",
     "item.phonos.headset": "Headset",
     "item.phonos.portable_radio": "Portable Radio",
+    "item.phonos.portable_satellite_radio": "Portable Satellite Radio",
     "item.phonos.portable_record_player": "Portable Record Player",
 
     "tooltip.phonos.item.glowing": "Glowing",

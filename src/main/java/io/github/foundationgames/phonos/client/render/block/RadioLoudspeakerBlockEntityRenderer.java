@@ -15,6 +15,9 @@ public class RadioLoudspeakerBlockEntityRenderer implements BlockEntityRenderer<
     public static int TEXT_COLOR = 0xFF2A2A;
     public static int OUTLINE_COLOR = 0x4F0000;
 
+    public static int SATELLITE_TEXT_COLOR = 0x2A2AFF;
+    public static int SATELLITE_OUTLINE_COLOR = 0x00004F;
+
     private final TextRenderer font;
 
     public RadioLoudspeakerBlockEntityRenderer(BlockEntityRendererFactory.Context ctx) {

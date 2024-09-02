@@ -27,6 +27,10 @@ public class PortableRadioItem extends Item implements SoundEmitterItem {
         return isSatellite ? RadioStorage.SATELLITE_CHANNEL_COUNT : RadioStorage.RADIO_CHANNEL_COUNT;
     }
 
+    private int transformChannel(int channel) {
+        return isSatellite ? RadioStorage.toSatelliteBand(channel) : channel;
+    }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!world.isClient()) {
@@ -65,6 +69,6 @@ public class PortableRadioItem extends Item implements SoundEmitterItem {
 
     @Override
     public long getParentEmitter(ItemStack stack) {
-        return RadioStorage.RADIO_EMITTERS.getLong(MathHelper.clamp(getChannel(stack), 0, getChannelCount()));
+        return RadioStorage.RADIO_EMITTERS.getLong(transformChannel(MathHelper.clamp(getChannel(stack), 0, getChannelCount())));
     }
 }
