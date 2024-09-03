@@ -13,6 +13,7 @@
     "client.BipedEntityRendererMixin",
     "client.ControllerWidgetMixin",
     "client.HeldItemRendererMixin",
+    "client.OggAudioStreamMixin",
     "client.OptionListMixin",
     "client.OptionListMixin$ListGroupSeparatorEntryMixin",
     "client.OptionListMixin$OptionEntryMixin",

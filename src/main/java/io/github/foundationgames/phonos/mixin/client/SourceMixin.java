@@ -2,19 +2,25 @@ package io.github.foundationgames.phonos.mixin.client;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.github.foundationgames.phonos.Phonos;
+import io.github.foundationgames.phonos.mixin_interfaces.ISeekableAudioStream;
 import io.github.foundationgames.phonos.mixin_interfaces.ISkippableSource;
 import io.github.foundationgames.phonos.util.BufferUtil;
 import net.minecraft.client.sound.AudioStream;
 import net.minecraft.client.sound.Source;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 import javax.sound.sampled.AudioFormat;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 @Mixin(Source.class)
 public class SourceMixin implements ISkippableSource {
+    @Shadow private @Nullable AudioStream stream;
     @Unique
     private long phonos$ticksToSkip = 0;
 
@@ -28,6 +34,16 @@ public class SourceMixin implements ISkippableSource {
     private ByteBuffer skipRead(AudioStream instance, int size, Operation<ByteBuffer> original) {
         if (phonos$ticksToSkip <= 0)
             return original.call(instance, size);
+
+        if (this.stream instanceof ISeekableAudioStream seekableAudioStream) {
+            try {
+                seekableAudioStream.phonos$seekForwardFromHere(phonos$ticksToSkip / 20.0f);
+            } catch (IOException e) {
+                Phonos.LOG.error("Failed to skip audio stream", e);
+            }
+            phonos$ticksToSkip = 0;
+            return original.call(instance, size);
+        }
 
         AudioFormat format = instance.getFormat();
         float conversionFactor = format.getFrameRate() * format.getFrameSize();
