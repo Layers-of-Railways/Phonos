@@ -1,7 +1,6 @@
 package io.github.foundationgames.phonos.sound;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.config.PhonosClientConfig;
 import io.github.foundationgames.phonos.item.HeadsetItem;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
@@ -169,11 +168,6 @@ public class MultiSourceSoundInstance extends AbstractSoundInstance implements T
 
     public MultiSourceSoundInstance withSkippedTicks(long skippedTicks) {
         this.skippedTicks = skippedTicks;
-        if (skippedTicks != 0) { // fixme remove
-            this.setDone();
-            this.skippedTicks = 0;
-            Phonos.LOG.warn("Discarding resumed sound as debug measure");
-        }
         return this;
     }
 
