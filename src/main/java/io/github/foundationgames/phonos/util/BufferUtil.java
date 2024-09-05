@@ -11,7 +11,7 @@ public final class BufferUtil {
 
     private BufferUtil() {}
 
-    private static final sun.misc.Unsafe unsafe = ((Supplier<Unsafe>) () -> {
+    private static final Unsafe UNSAFE = ((Supplier<Unsafe>) () -> {
         try {
             Field f = Unsafe.class.getDeclaredField("theUnsafe");
             f.setAccessible(true);
@@ -34,7 +34,7 @@ public final class BufferUtil {
             return false;
         }
         try {
-            unsafe.invokeCleaner(directBuffer);
+            UNSAFE.invokeCleaner(directBuffer);
             return true;
         } catch (IllegalArgumentException ex) {
             Phonos.LOG.error("Failed to free direct buffer", ex);
