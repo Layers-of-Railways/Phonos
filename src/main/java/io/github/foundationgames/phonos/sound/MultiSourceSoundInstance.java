@@ -49,6 +49,11 @@ public class MultiSourceSoundInstance extends AbstractSoundInstance implements T
     }
 
     @Override
+    public boolean shouldAlwaysPlay() {
+        return true;
+    }
+
+    @Override
     public double getX() {
         return x;
     }
@@ -147,7 +152,7 @@ public class MultiSourceSoundInstance extends AbstractSoundInstance implements T
             this.camX = camPos.x;
             this.camZ = camPos.z;
         } else {
-            this.volMultiplier = 1;
+            this.volMultiplier = 0;
         }
     }
 
