@@ -137,6 +137,8 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
             if (this.isPlaying && this.getStack().isEmpty() && this.getSkippedTicks() > 5) {
                 this.updateState(null, false);
                 this.stopPlaying();
+            } else if (!this.isPlaying && this.getStack().isEmpty() && getCachedState().get(JukeboxBlock.HAS_RECORD)) {
+                this.updateState(null, false);
             }
             this.markDirty();
 
