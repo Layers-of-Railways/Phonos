@@ -120,6 +120,31 @@ public class CleanableBufferedInputStream extends BufferedInputStream {
         gcBuf();
     }
 
+    /**
+     * Adds the given history and sets the mark position to the beginning of the buffer.
+     * @param history externally-derived history to be prepended to the buffer
+     * @param readlimit the maximum number of bytes that can be read before the mark position becomes invalid
+     * @see java.io.InputStream#mark(int)
+     */
+    public synchronized void addHistoryResetAndMark(byte[] history, int readlimit) throws IOException {
+        gcBuf(true); // so it is a simple operation to add history
+
+        byte[] buffer = getBufIfOpen();
+
+        byte[] nbuf = new byte[buffer.length + history.length];
+        System.arraycopy(history, 0, nbuf, 0, history.length);
+        System.arraycopy(buffer, 0, nbuf, history.length, buffer.length);
+
+        if (!U.compareAndSwapObject(this, BUF_OFFSET, buffer, nbuf)) {
+            throw new RuntimeException("Stream closed");
+        }
+
+        this.marklimit = readlimit;
+        this.markpos = 0;
+        this.pos = 0;
+        this.count += history.length;
+    }
+
     @SuppressWarnings("SameParameterValue")
     private static String summary(byte[] buf, int startLength, int endLength) {
         if (startLength + endLength >= buf.length) {
