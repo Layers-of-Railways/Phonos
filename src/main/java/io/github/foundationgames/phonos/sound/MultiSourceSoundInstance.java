@@ -26,7 +26,7 @@ public class MultiSourceSoundInstance extends AbstractSoundInstance implements T
     protected float volMultiplier = 1;
 
     private long skippedTicks = 0;
-    
+
     private boolean done;
 
     protected MultiSourceSoundInstance(SoundEmitterTree tree, Identifier sound, SoundCategory category, Random random, float volume, float pitch) {
@@ -178,6 +178,15 @@ public class MultiSourceSoundInstance extends AbstractSoundInstance implements T
 
     @Override
     public long getSkippedTicks() {
+        /* for stress-testing seeking
+
+        int minutes = 30;
+        int seconds = minutes * 60;
+
+        //seconds = 5;
+
+        return seconds * 20;*/
+
         return skippedTicks;
     }
 }
