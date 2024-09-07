@@ -86,6 +86,8 @@ public class CleanableBufferedInputStream extends BufferedInputStream {
             markpos -= unnecessary;
         }
 
+        buffer = getBufIfOpen();
+
         // throw away unnecessary trailing bytes
         if (buffer.length > size && buffer.length > count) {
             int nsize = Math.max(size, count);

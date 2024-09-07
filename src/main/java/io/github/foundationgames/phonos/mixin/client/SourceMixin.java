@@ -19,8 +19,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 @Mixin(Source.class)
-public class SourceMixin implements ISkippableSource {
+public abstract class SourceMixin implements ISkippableSource {
     @Shadow private @Nullable AudioStream stream;
+
+    @Shadow public abstract void stop();
+
     @Unique
     private long phonos$ticksToSkip = 0;
 
@@ -40,6 +43,7 @@ public class SourceMixin implements ISkippableSource {
                 seekableAudioStream.phonos$seekForwardFromHere(phonos$ticksToSkip / 20.0f);
             } catch (IOException e) {
                 Phonos.LOG.error("Failed to skip audio stream", e);
+                this.stop();
             }
             phonos$ticksToSkip = 0;
             return original.call(instance, size);

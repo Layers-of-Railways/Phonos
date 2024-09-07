@@ -57,7 +57,7 @@ public record OggSeeker(
         final int targetSample = (int) (seconds * samplesPerSecond);
 
         // this is a totally arbitrary number that seeks to help approximate the right position to start at
-        final int compressionFactor = 5;
+        final int compressionFactor = 4;
 
         // How much to increase by to find the right bound
         final int increaseStep = (int) (bytesPerSecond * seconds / (4 * compressionFactor));
@@ -225,6 +225,8 @@ public record OggSeeker(
                 Phonos.LOG.warn("Unexpectedly decoded {} samples while acquiring post-seek", numSamples);
             }
         }
+
+        is.clearMark();
 
         return targetSample - sampleOffset;
     }
