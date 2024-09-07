@@ -57,14 +57,26 @@ public final class PayloadPackets {
             });
         });*/
 
-        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("request_satellite_crash"), (server, player, handler, buf, responseSender) -> {
+        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("request_satellite_action"), (server, player, handler, buf, responseSender) -> {
             var pos = buf.readBlockPos();
+            int actionId = buf.readInt();
+            int data = buf.readInt();
 
             server.execute(() -> {
                 var world = player.getWorld();
 
-                if (world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity entity && entity.canCrash(player)) {
-                    entity.performAction(SatelliteStationBlockEntity.ACTION_CRASH);
+                switch (actionId) {
+                    case SatelliteStationBlockEntity.ACTION_LAUNCH -> {
+                        if (world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity entity && entity.canLaunch(player)) {
+                            entity.performAction(SatelliteStationBlockEntity.ACTION_LAUNCH, data);
+                        }
+                    }
+
+                    case SatelliteStationBlockEntity.ACTION_CRASH -> {
+                        if (world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity entity && entity.canCrash(player)) {
+                            entity.performAction(SatelliteStationBlockEntity.ACTION_CRASH, data);
+                        }
+                    }
                 }
             });
         });
@@ -131,11 +143,12 @@ public final class PayloadPackets {
         ServerPlayNetworking.send(player, Phonos.id("sound_update"), buf);
     }
 
-    public static void sendOpenSatelliteStationCrashScreen(ServerPlayerEntity player, BlockPos pos) {
+    public static void sendOpenSatelliteStationScreen(ServerPlayerEntity player, BlockPos pos, int screenType) {
         var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeBlockPos(pos);
+        buf.writeInt(screenType);
 
-        ServerPlayNetworking.send(player, Phonos.id("open_satellite_station_crash_screen"), buf);
+        ServerPlayNetworking.send(player, Phonos.id("open_satellite_station_screen"), buf);
     }
 
     public static void sendUploadStop(ServerPlayerEntity player, long uploadId) {
@@ -169,10 +182,11 @@ public final class PayloadPackets {
         ServerPlayNetworking.send(player, Phonos.id("audio_stream_end"), buf);
     }
 
-    public static Packet<ClientPlayPacketListener> pktSatelliteAction(SatelliteStationBlockEntity be, int action) {
+    public static Packet<ClientPlayPacketListener> pktSatelliteAction(SatelliteStationBlockEntity be, int action, int data) {
         var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeBlockPos(be.getPos());
         buf.writeInt(action);
+        buf.writeInt(data);
 
         return ServerPlayNetworking.createS2CPacket(Phonos.id("satellite_action"), buf);
     }

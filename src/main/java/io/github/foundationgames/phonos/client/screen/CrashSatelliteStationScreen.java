@@ -14,7 +14,7 @@ public class CrashSatelliteStationScreen extends ConfirmScreen {
     public CrashSatelliteStationScreen(SatelliteStationBlockEntity blockEntity) {
         super(ok -> {
             if (ok) {
-                ClientPayloadPackets.sendRequestSatelliteCrash(blockEntity);
+                ClientPayloadPackets.sendRequestSatelliteAction(blockEntity, SatelliteStationBlockEntity.ACTION_CRASH, 0);
             }
             MinecraftClient.getInstance().setScreen(null);
         }, TITLE, MESSAGE);

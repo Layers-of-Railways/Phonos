@@ -37,6 +37,9 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
     public static final int ACTION_CRASH = 0;
     public static final int ACTION_LAUNCH = 1;
 
+    public static final int SCREEN_CRASH = 0;
+    public static final int SCREEN_LAUNCH = 1;
+
     private Vec3d launchpadPos = null;
     private Status status = Status.NONE;
 
@@ -95,12 +98,12 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
         }
     }
 
-    public void performAction(int action) {
+    public void performAction(int action, int data) {
         if (world instanceof ServerWorld sWorld) {
             for (var player : sWorld.getPlayers()) {
                 sWorld.sendToPlayerIfNearby(player,
                         true, this.getPos().getX(), this.getPos().getY(), this.getPos().getZ(),
-                        PayloadPackets.pktSatelliteAction(this, action));
+                        PayloadPackets.pktSatelliteAction(this, action, data));
             }
         }
 
@@ -112,6 +115,11 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
 
                 this.status = Status.LAUNCHING;
                 this.rocket.inFlight = true;
+
+                if (world instanceof ServerWorld) {
+                    int channel = MathHelper.clamp(data, 0, RadioStorage.SATELLITE_CHANNEL_COUNT - 1);
+                    this.setAndUpdateChannel(channel);
+                }
             }
             case ACTION_CRASH -> {
                 this.status = Status.NONE;
@@ -262,8 +270,12 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
         sync();
     }
 
+    public boolean canLaunch(ServerPlayerEntity player) {
+        return player.getPos().squaredDistanceTo(this.getPos().toCenterPos()) < 96 && player.canModifyBlocks() && getStatus().canLaunch();
+    }
+
     public boolean canCrash(ServerPlayerEntity player) {
-        return player.getPos().squaredDistanceTo(this.getPos().toCenterPos()) < 96 && player.canModifyBlocks();
+        return player.getPos().squaredDistanceTo(this.getPos().toCenterPos()) < 96 && player.canModifyBlocks() && getStatus().canCrash();
     }
 
     public Direction getRotation() {
@@ -274,16 +286,24 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
         if (this.status == Status.LAUNCHING) {
             player.sendMessageToClient(Text.translatable("message.phonos.satellite_launching").formatted(Formatting.GOLD), true);
         } else if (this.status == Status.IN_ORBIT) {
-            PayloadPackets.sendOpenSatelliteStationCrashScreen(player, pos);
+            PayloadPackets.sendOpenSatelliteStationScreen(player, pos, SCREEN_CRASH);
         } else if (this.rocket == null) {
             player.sendMessageToClient(Text.translatable("message.phonos.no_satellite").formatted(Formatting.RED), true);
         } else {
-            performAction(ACTION_LAUNCH);
+            PayloadPackets.sendOpenSatelliteStationScreen(player, pos, SCREEN_LAUNCH);
         }
     }
 
     public enum Status {
         NONE, IN_ORBIT, LAUNCHING;
+
+        public boolean canLaunch() {
+            return this == NONE;
+        }
+
+        public boolean canCrash() {
+            return this == IN_ORBIT;
+        }
     }
 
     public Vec3d somewhereInTheSky() {

@@ -19,6 +19,11 @@
     "display.phonos.satellite_station.in_orbit": "ORBIT",
 
     "message.phonos.crash_satellite_station": "Crash the currently orbiting satellite?",
+    "message.phonos.launch_satellite_station.select": "Select a channel (0 - %s) to launch the satellite on.",
+    "message.phonos.launch_satellite_station.launch": "Launch",
+    "message.phonos.launch_satellite_station.no_channel": "No channel selected!",
+    "message.phonos.launch_satellite_station.invalid_channel": "Invalid channel selected! Must be between 0 and %s.",
+    "message.phonos.launch_satellite_station.non_numerical_channel": "Channel must be a number between 0 and %s!",
     "message.phonos.satellite_launching": "Launch in progress!",
     "message.phonos.no_satellite": "Place a satellite on the launch pad first!",
 

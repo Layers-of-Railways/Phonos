@@ -9,6 +9,7 @@
         "phonos:satellite_receiver",
         "phonos:radio_loudspeaker",
         "phonos:audio_switch",
-        "phonos:microphone_base"
+        "phonos:microphone_base",
+        "phonos:satellite_station"
     ]
 }

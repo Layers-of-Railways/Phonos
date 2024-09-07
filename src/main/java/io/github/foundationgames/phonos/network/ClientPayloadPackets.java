@@ -5,6 +5,7 @@ import dev.isxander.yacl3.config.v2.api.FieldAccess;
 import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity;
 import io.github.foundationgames.phonos.client.screen.CrashSatelliteStationScreen;
+import io.github.foundationgames.phonos.client.screen.LaunchSatelliteStationScreen;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.config.serializers.NetworkConfigSerializer;
 import io.github.foundationgames.phonos.sound.SoundStorage;
@@ -47,12 +48,18 @@ public final class ClientPayloadPackets {
             client.execute(() -> SoundStorage.getInstance(client.world).update(delta));
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(Phonos.id("open_satellite_station_crash_screen"), (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(Phonos.id("open_satellite_station_screen"), (client, handler, buf, responseSender) -> {
             var pos = buf.readBlockPos();
+
+            int screenType = buf.readInt();
 
             client.execute(() -> {
                 if (client.world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity sat) {
-                    client.setScreen(new CrashSatelliteStationScreen(sat));
+                    client.setScreen(switch (screenType) {
+                        case SatelliteStationBlockEntity.SCREEN_LAUNCH -> new LaunchSatelliteStationScreen(sat);
+                        case SatelliteStationBlockEntity.SCREEN_CRASH -> new CrashSatelliteStationScreen(sat);
+                        default -> null;
+                    });
                 }
             });
         });
@@ -93,10 +100,11 @@ public final class ClientPayloadPackets {
         ClientPlayNetworking.registerGlobalReceiver(Phonos.id("satellite_action"), (client, handler, buf, responseSender) -> {
             var pos = buf.readBlockPos();
             int action = buf.readInt();
+            int data = buf.readInt();
 
             client.execute(() -> {
                 if (client.world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity be) {
-                    be.performAction(action);
+                    be.performAction(action, data);
                 }
             });
         });
@@ -138,11 +146,13 @@ public final class ClientPayloadPackets {
         ClientPlayNetworking.send(Phonos.id("request_satellite_upload_session"), buf);
     }
 
-    public static void sendRequestSatelliteCrash(SatelliteStationBlockEntity entity) {
+    public static void sendRequestSatelliteAction(SatelliteStationBlockEntity entity, int actionId, int data) {
         var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeBlockPos(entity.getPos());
+        buf.writeInt(actionId);
+        buf.writeInt(data);
 
-        ClientPlayNetworking.send(Phonos.id("request_satellite_crash"), buf);
+        ClientPlayNetworking.send(Phonos.id("request_satellite_action"), buf);
     }
 
     public static void sendAudioUploadPacket(long streamId, int sampleRate, ByteBuffer samples, boolean last) {
