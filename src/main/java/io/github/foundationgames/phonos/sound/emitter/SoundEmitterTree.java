@@ -84,7 +84,7 @@ public class SoundEmitterTree {
                         radioChanges.add(channel, metadata);
                     }
 
-                    final int searchUntil = index; // fixme should this be index + 1?
+                    final int searchUntil = index;
                     RadioLongConsumer[] consumerRef = new RadioLongConsumer[1];
                     RadioLongConsumer consumer = (child, metadata) -> {
                         if (emitters.isLoaded(child) && emitters.getEmitter(child) instanceof RadioStorage.RadioEmitter radioEmitter && radioEmitter.isRadio()) {

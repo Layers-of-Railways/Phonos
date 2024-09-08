@@ -45,7 +45,6 @@ public record OggSeeker(
     public int seek(
         final float seconds
     ) throws IOException {
-        // todo find a better return value for failure
         if (this.pointer == 0L) {
             Phonos.LOG.warn("Attempted to seek an Ogg stream with a null pointer");
             return 0;

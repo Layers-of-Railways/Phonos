@@ -2,9 +2,9 @@ package io.github.foundationgames.phonos.world.command;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.entity.AbstractOutputBlockEntity;
+import io.github.foundationgames.phonos.block.entity.EnderMusicBoxBlockEntity;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.util.PhonosUtil;
@@ -35,7 +35,7 @@ public class PhonosCommands {
 
             phonos
                 .then($radar())
-                .then($satellite());
+                .then($ender_music_box());
 
             if (Phonos.DEBUG) {
                 phonos.then($debug());
@@ -58,10 +58,10 @@ public class PhonosCommands {
             );
     }
 
-    private static LiteralArgumentBuilder<ServerCommandSource> $satellite() {
-        return literal("satellite")
+    private static LiteralArgumentBuilder<ServerCommandSource> $ender_music_box() {
+        return literal("ender_music_box")
             .then(literal("inspect").then(argument("pos", BlockPosArgumentType.blockPos())
-                    .executes(ctx -> satelliteInspect(
+                    .executes(ctx -> enderMusicBoxInspect(
                         ctx.getSource(),
                         ctx.getArgument("pos", PosArgument.class).toAbsoluteBlockPos(ctx.getSource())
                     ))
@@ -69,18 +69,9 @@ public class PhonosCommands {
             )
             .then(literal("list")
                 .requires(src -> src.hasPermissionLevel(2))
-                .executes(ctx -> satelliteList(
+                .executes(ctx -> enderMusicBoxList(
                     ctx.getSource()
                 ))
-            )
-            .then(literal("crash")
-                .requires(src -> src.hasPermissionLevel(4) && src.getPlayer() != null)
-                .then(argument("id", new SatelliteArgumentType())
-                    .executes(ctx -> satelliteCrash(
-                        ctx.getSource(),
-                        ctx.getArgument("id", Long.class)
-                    ))
-                )
             );
     }
 
@@ -112,42 +103,47 @@ public class PhonosCommands {
         return 1;
     }
 
-    public static int satelliteInspect(ServerCommandSource source, BlockPos pos) {
+    public static int enderMusicBoxInspect(ServerCommandSource source, BlockPos pos) {
         var world = source.getWorld();
 
         if (!ServerCustomAudio.loaded()) {
-            source.sendError(Text.translatable("command.phonos.satellite.not_loaded"));
+            source.sendError(Text.translatable("command.phonos.ender_music_box.not_loaded"));
 
             return 1;
         }
 
-/*        if (world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity be) {
-            long id = be.streamId;
+        if (world.getBlockEntity(pos) instanceof EnderMusicBoxBlockEntity be) {
+            boolean[] any = {false};
 
-            if (!ServerCustomAudio.SAVED.containsKey(id)) {
-                source.sendError(Text.translatable("command.phonos.satellite.inspect.no_upload"));
+            be.forEachStream((id, name) -> {
+                var aud = ServerCustomAudio.SAVED.get((long) id);
+                if (aud == null)
+                    return;
 
-                return 1;
-            }
-
-            var aud = ServerCustomAudio.SAVED.get(id);
-            double sizeKB = (double)(aud.originalSize / 100) / 10D;
-            int duration = (int) Math.ceil((double) aud.originalSize / aud.sampleRate);
-            source.sendMessage(Text.translatable("command.phonos.satellite.entry",
+                double sizeKB = (double)(aud.originalSize / 100) / 10D;
+                int duration = (int) Math.ceil((double) aud.originalSize / aud.sampleRate);
+                source.sendMessage(Text.translatable("command.phonos.ender_music_box.entry.named",
+                    name,
                     Long.toHexString(id),
                     PhonosUtil.duration(duration),
                     sizeKB));
+                any[0] = true;
+            });
+
+            if (!any[0]) {
+                source.sendError(Text.translatable("command.phonos.ender_music_box.inspect.no_upload"));
+            }
 
             return 1;
-        }*/ // todo restore
+        }
 
-        source.sendError(Text.translatable("command.phonos.satellite.inspect.invalid"));
+        source.sendError(Text.translatable("command.phonos.ender_music_box.inspect.invalid"));
         return 1;
     }
 
-    public static int satelliteList(ServerCommandSource source) {
+    public static int enderMusicBoxList(ServerCommandSource source) {
         if (!ServerCustomAudio.loaded()) {
-            source.sendError(Text.translatable("command.phonos.satellite.not_loaded"));
+            source.sendError(Text.translatable("command.phonos.ender_music_box.not_loaded"));
 
             return 1;
         }
@@ -155,7 +151,7 @@ public class PhonosCommands {
         var set = ServerCustomAudio.SAVED.long2ObjectEntrySet();
 
         if (set.isEmpty()) {
-            source.sendError(Text.translatable("command.phonos.satellite.list.none"));
+            source.sendError(Text.translatable("command.phonos.ender_music_box.list.none"));
 
             return 1;
         }
@@ -165,7 +161,7 @@ public class PhonosCommands {
         for (var entry : set) {
             double sizeKB = (double)(entry.getValue().originalSize / 100) / 10D;
             int duration = (int) Math.ceil((double) entry.getValue().originalSize / entry.getValue().sampleRate);
-            source.sendMessage(Text.translatable("command.phonos.satellite.entry",
+            source.sendMessage(Text.translatable("command.phonos.ender_music_box.entry",
                     Long.toHexString(entry.getLongKey()),
                     PhonosUtil.duration(duration),
                     sizeKB));
@@ -173,23 +169,7 @@ public class PhonosCommands {
         }
 
         totalSizeKB = (double)((int)totalSizeKB / 100) / 10D;
-        source.sendMessage(Text.translatable("command.phonos.satellite.list.info", set.size(), totalSizeKB));
-
-        return 1;
-    }
-
-    public static int satelliteCrash(ServerCommandSource source, long id) throws CommandSyntaxException {
-        if (!ServerCustomAudio.loaded()) {
-            source.sendError(Text.translatable("command.phonos.satellite.not_loaded"));
-
-            return 1;
-        }
-
-        var idStr = Long.toHexString(id);
-        Phonos.LOG.info("Satellite {} was crashed via command by player {}.", idStr, source.getPlayerOrThrow());
-
-        ServerCustomAudio.deleteSaved(source.getServer(), id);
-        source.sendMessage(Text.translatable("command.phonos.satellite.crash", idStr));
+        source.sendMessage(Text.translatable("command.phonos.ender_music_box.list.info", set.size(), totalSizeKB));
 
         return 1;
     }

@@ -4,6 +4,7 @@ import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.ConfigField;
 import dev.isxander.yacl3.config.v2.api.FieldAccess;
 import io.github.foundationgames.phonos.Phonos;
+import io.github.foundationgames.phonos.block.entity.EnderMusicBoxBlockEntity;
 import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.config.serializers.NetworkConfigSerializer;
@@ -37,25 +38,40 @@ public final class PayloadPackets {
                     onto.getItem().onClicked(onto, with, null, click, player, StackReference.EMPTY));
         });
 
-        /*ServerPlayNetworking.registerGlobalReceiver(Phonos.id("request_satellite_upload_session"), (server, player, handler, buf, responseSender) -> {
+        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("request_ender_music_box_upload_session"), (server, player, handler, buf, responseSender) -> {
             var pos = buf.readBlockPos();
+            var name = buf.readString(512);
 
             server.execute(() -> {
                 var world = player.getWorld();
 
-                if (world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity entity) {
-                    if (entity.canUpload(player)) {
-                        ServerCustomAudio.beginUploadSession(player, entity.streamId);
-                        sendUploadStatus(player, entity.streamId, true);
+                if (world.getBlockEntity(pos) instanceof EnderMusicBoxBlockEntity entity) {
+                    Long streamId;
+                    if (entity.canModifyStreams(player) && (streamId = entity.allocateStreamId(name)) != null) {
+                        ServerCustomAudio.beginUploadSession(player, streamId);
+                        sendUploadStatus(player, streamId, true);
 
-                        Phonos.LOG.info("Allowed player {} to upload audio at satellite station {}. Will be saved to <world>/phonos/{}",
-                                player, pos, Long.toHexString(entity.streamId) + ServerCustomAudio.FILE_EXT);
+                        Phonos.LOG.info("Allowed player {} to upload audio at ender music box {}. Will be saved to <world>/phonos/{}",
+                                player, pos, Long.toHexString(streamId) + ServerCustomAudio.FILE_EXT);
                     } else {
-                        sendUploadStatus(player, entity.streamId, false);
+                        sendUploadStatus(player, entity.emitterId(), false);
                     }
                 }
             });
-        });*/
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("delete_ender_music_box_stream"), (server, player, handler, buf, responseSender) -> {
+            var pos = buf.readBlockPos();
+            var streamId = buf.readLong();
+
+            server.execute(() -> {
+                var world = player.getWorld();
+
+                if (world.getBlockEntity(pos) instanceof EnderMusicBoxBlockEntity entity && entity.canModifyStreams(player)) {
+                    entity.deleteStream(streamId);
+                }
+            });
+        });
 
         ServerPlayNetworking.registerGlobalReceiver(Phonos.id("request_satellite_action"), (server, player, handler, buf, responseSender) -> {
             var pos = buf.readBlockPos();
@@ -151,9 +167,17 @@ public final class PayloadPackets {
         ServerPlayNetworking.send(player, Phonos.id("open_satellite_station_screen"), buf);
     }
 
-    public static void sendUploadStop(ServerPlayerEntity player, long uploadId) {
+    public static void sendOpenEnderMusicBoxScreen(ServerPlayerEntity player, BlockPos pos) {
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeBlockPos(pos);
+
+        ServerPlayNetworking.send(player, Phonos.id("open_ender_music_box_screen"), buf);
+    }
+
+    public static void sendUploadStop(ServerPlayerEntity player, long uploadId, Text message) {
         var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeLong(uploadId);
+        buf.writeText(message);
 
         ServerPlayNetworking.send(player, Phonos.id("audio_upload_stop"), buf);
     }

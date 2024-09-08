@@ -1,6 +1,7 @@
 package io.github.foundationgames.phonos.sound.custom;
 
 import io.github.foundationgames.phonos.Phonos;
+import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.sound.stream.AudioDataQueue;
 import io.github.foundationgames.phonos.util.PhonosUtil;
@@ -10,6 +11,7 @@ import it.unimi.dsi.fastutil.objects.Object2LongMaps;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -36,7 +38,6 @@ public class ServerCustomAudio {
 
     private static int TOTAL_SAVED_SIZE = 0;
 
-    public static final Long2ObjectMap<String> ERRORS = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
     public static final LongSet SUCCESSES = new LongOpenHashSet();
 
     private static final Object2LongMap<UUID> UPLOAD_SESSIONS = Object2LongMaps.synchronize(new Object2LongOpenHashMap<>());
@@ -77,12 +78,10 @@ public class ServerCustomAudio {
             var aud = UPLOADING.computeIfAbsent(id, k -> new AudioDataQueue(sampleRate));
             aud.push(samples);
 
-            int maxAud = srv.getGameRules().getInt(Phonos.PHONOS_UPLOAD_LIMIT_KB) * 1000;
+            int maxAud = PhonosServerConfig.get(srv.getOverworld()).uploadLimitKB * 1000;
             if (maxAud > 0 && TOTAL_SAVED_SIZE + aud.originalSize > maxAud) {
                 endUploadSession(player.getUuid());
-                PayloadPackets.sendUploadStop(player, id);
-
-                ERRORS.put(id, "upload_limit");
+                PayloadPackets.sendUploadStop(player, id, Text.translatable("error.phonos.ender_music_box.upload_limit"));
                 return;
             }
 
@@ -115,7 +114,7 @@ public class ServerCustomAudio {
                 TOTAL_SAVED_SIZE -= aud.originalSize;
             }
         } catch (IOException ex) {
-            Phonos.LOG.error("Error saving uploaded sound", ex);
+            Phonos.LOG.error("Error deleting saved sound", ex);
         }
     }
 
@@ -130,6 +129,8 @@ public class ServerCustomAudio {
         var aud = SAVED.get(id);
         var filename = Long.toHexString(id) + FILE_EXT;
         var path = folder.resolve(filename);
+
+        TOTAL_SAVED_SIZE += aud.originalSize;
 
         try (var out = Files.newOutputStream(path)) {
             aud.write(out);
@@ -179,6 +180,7 @@ public class ServerCustomAudio {
     }
 
     public static void load(Path folder) throws IOException {
+        TOTAL_SAVED_SIZE = 0;
         final var startTime = Instant.now();
 
         SAVED.clear();

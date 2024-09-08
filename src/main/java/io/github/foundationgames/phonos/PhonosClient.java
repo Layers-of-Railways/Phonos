@@ -76,6 +76,7 @@ public class PhonosClient implements ClientModInitializer {
         BlockEntityRendererFactories.register(PhonosBlocks.RADIO_LOUDSPEAKER_ENTITY, RadioLoudspeakerBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(PhonosBlocks.SATELLITE_STATION_ENTITY, SatelliteStationBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(PhonosBlocks.AUDIO_SWITCH_ENTITY, CableOutputBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(PhonosBlocks.ENDER_MUSIC_BOX_ENTITY, EnderMusicBoxBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(PhonosBlocks.MICROPHONE_BASE_ENTITY, MicrophoneBaseBlockEntityRenderer::new);
 
         ColorProviderRegistry.BLOCK.register((state, world, pos, tintIndex) ->

@@ -3,10 +3,7 @@ package io.github.foundationgames.phonos.config;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
-import dev.isxander.yacl3.config.v2.api.autogen.AutoGen;
-import dev.isxander.yacl3.config.v2.api.autogen.FloatSlider;
-import dev.isxander.yacl3.config.v2.api.autogen.IntField;
-import dev.isxander.yacl3.config.v2.api.autogen.IntSlider;
+import dev.isxander.yacl3.config.v2.api.autogen.*;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.config.serializers.NoOpConfigSerializer;
@@ -43,6 +40,16 @@ public class PhonosServerConfig {
     @AutoGen(category = "general")
     @IntSlider(min = 2, max = 32, step = 1)
     public int maxMicrophoneRange = 8;
+
+    @SerialEntry(comment = "Restrict Ender Music Box uploads to OPs")
+    @AutoGen(category = "general", group = "ender_music_box")
+    @TickBox
+    public boolean restrictEnderMusicBoxUploads = false;
+
+    @SerialEntry(comment = "Max Upload Size in KB [0 for unlimited, 100000]")
+    @AutoGen(category = "general", group = "ender_music_box")
+    @IntSlider(min = 0, max = 100*1000, step = 100) // max 100MB
+    public int uploadLimitKB = 0;
 
     @SerialEntry(comment = "Base Radio Range [16, 4096]")
     @AutoGen(category = "radio")

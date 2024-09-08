@@ -25,8 +25,6 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.block.DispenserBlock;
@@ -40,7 +38,6 @@ import net.minecraft.registry.Registry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPointer;
-import net.minecraft.world.GameRules;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,10 +48,6 @@ public class Phonos implements ModInitializer {
     public static final Logger LOG = LogManager.getLogger("phonos");
 
     public static final ItemGroupQueue PHONOS_ITEMS = new ItemGroupQueue(id("phonos"));
-
-    // fixme turn this into a config option
-    public static final GameRules.Key<GameRules.IntRule> PHONOS_UPLOAD_LIMIT_KB = GameRuleRegistry.register(
-            "phonosUploadLimitKB", GameRules.Category.MISC, GameRuleFactory.createIntRule(-1, -1));
 
     public static final Identifier STREAMED_SOUND = Phonos.id("streamed");
 

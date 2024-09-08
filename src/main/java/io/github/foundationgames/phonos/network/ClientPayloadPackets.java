@@ -3,8 +3,10 @@ package io.github.foundationgames.phonos.network;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.FieldAccess;
 import io.github.foundationgames.phonos.Phonos;
+import io.github.foundationgames.phonos.block.entity.EnderMusicBoxBlockEntity;
 import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity;
 import io.github.foundationgames.phonos.client.screen.CrashSatelliteStationScreen;
+import io.github.foundationgames.phonos.client.screen.EnderMusicBoxScreen;
 import io.github.foundationgames.phonos.client.screen.LaunchSatelliteStationScreen;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.config.serializers.NetworkConfigSerializer;
@@ -21,6 +23,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
 
 import java.nio.ByteBuffer;
@@ -64,11 +67,24 @@ public final class ClientPayloadPackets {
             });
         });
 
+        ClientPlayNetworking.registerGlobalReceiver(Phonos.id("open_ender_music_box_screen"), (client, handler, buf, responseSender) -> {
+            var pos = buf.readBlockPos();
+
+            client.execute(() -> {
+                if (client.world.getBlockEntity(pos) instanceof EnderMusicBoxBlockEntity box) {
+                    client.setScreen(new EnderMusicBoxScreen(box));
+                }
+            });
+        });
+
         ClientPlayNetworking.registerGlobalReceiver(Phonos.id("audio_upload_status"), (client, handler, buf, responseSender) -> {
             long id = buf.readLong();
             boolean ok = buf.readBoolean();
 
             client.execute(() -> {
+                if (client.currentScreen instanceof EnderMusicBoxScreen screen) {
+                    screen.onAudioUploadStatus(id, ok);
+                }
                 if (ok) {
                     ClientCustomAudioUploader.sendUploadPackets(id);
                 } else {
@@ -79,8 +95,15 @@ public final class ClientPayloadPackets {
 
         ClientPlayNetworking.registerGlobalReceiver(Phonos.id("audio_upload_stop"), (client, handler, buf, responseSender) -> {
             long id = buf.readLong();
+            Text message = buf.readText();
 
-            client.execute(() -> ClientCustomAudioUploader.cancelUpload(id));
+            client.execute(() -> {
+                if (client.currentScreen instanceof EnderMusicBoxScreen screen) {
+                    screen.onAudioUploadCancel(message);
+                }
+
+                ClientCustomAudioUploader.cancelUpload(id);
+            });
         });
 
         ClientPlayNetworking.registerGlobalReceiver(Phonos.id("audio_stream_data"), (client, handler, buf, responseSender) -> {
@@ -139,11 +162,20 @@ public final class ClientPayloadPackets {
         ClientPlayNetworking.send(Phonos.id("fake_creative_slot_click"), buf);
     }
 
-    public static void sendRequestSatelliteUploadSession(SatelliteStationBlockEntity entity) {
+    public static void sendRequestEnderMusicBoxUploadSession(EnderMusicBoxBlockEntity entity, String name) {
         var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeBlockPos(entity.getPos());
+        buf.writeString(name, 512);
 
-        ClientPlayNetworking.send(Phonos.id("request_satellite_upload_session"), buf);
+        ClientPlayNetworking.send(Phonos.id("request_ender_music_box_upload_session"), buf);
+    }
+
+    public static void sendDeleteEnderMusicBoxStream(EnderMusicBoxBlockEntity entity, long streamId) {
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeBlockPos(entity.getPos());
+        buf.writeLong(streamId);
+
+        ClientPlayNetworking.send(Phonos.id("delete_ender_music_box_stream"), buf);
     }
 
     public static void sendRequestSatelliteAction(SatelliteStationBlockEntity entity, int actionId, int data) {

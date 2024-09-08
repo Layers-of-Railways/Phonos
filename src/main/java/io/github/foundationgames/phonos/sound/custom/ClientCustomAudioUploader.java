@@ -1,10 +1,12 @@
 package io.github.foundationgames.phonos.sound.custom;
 
+import io.github.foundationgames.phonos.client.screen.EnderMusicBoxScreen;
 import io.github.foundationgames.phonos.network.ClientPayloadPackets;
 import io.github.foundationgames.phonos.sound.stream.AudioDataQueue;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.client.MinecraftClient;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,6 +34,13 @@ public class ClientCustomAudioUploader {
         }
 
         UPLOAD_QUEUE.remove(id);
+
+        MinecraftClient mc = MinecraftClient.getInstance();
+        mc.execute(() -> {
+            if (mc.currentScreen instanceof EnderMusicBoxScreen screen) {
+                screen.onFinishUpload();
+            }
+        });
     }
 
     public static void cancelUpload(long id) {
