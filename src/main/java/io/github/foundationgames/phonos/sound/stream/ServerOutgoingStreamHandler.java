@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,6 +32,14 @@ public class ServerOutgoingStreamHandler {
 
     public static void reset() {
         STREAMS.clear();
+    }
+
+    public static void resumeStream(ServerPlayerEntity player, long streamId) {
+        var stream = STREAMS.get(streamId);
+
+        if (stream != null) {
+            stream.listeners.add(player.getUuid());
+        }
     }
 
     public static class Streaming {

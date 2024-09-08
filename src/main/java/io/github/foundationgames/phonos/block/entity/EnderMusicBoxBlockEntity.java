@@ -11,7 +11,6 @@ import io.github.foundationgames.phonos.sound.stream.ServerOutgoingStreamHandler
 import io.github.foundationgames.phonos.util.UniqueId;
 import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
-import io.github.foundationgames.phonos.world.sound.data.SoundDataTypes;
 import io.github.foundationgames.phonos.world.sound.data.StreamSoundData;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
@@ -81,7 +80,7 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
 
             this.playingSound = new SoundEmitterTree(this.emitterId);
             SoundStorage.getInstance(this.world).play(this.world,
-                new StreamSoundData(SoundDataTypes.STREAM, this.emitterId(), this.s2cStreamId, SoundCategory.MASTER, 2, 1),
+                StreamSoundData.create(this.emitterId(), this.s2cStreamId, SoundCategory.MASTER, 2, 1),
                 this.playingSound);
 
             this.playingTimer = this.playDuration = (int) ((aud.originalSize * 20f) / aud.sampleRate);
