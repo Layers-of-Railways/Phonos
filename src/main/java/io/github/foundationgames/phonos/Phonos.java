@@ -8,6 +8,7 @@ import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.recipe.ItemGlowRecipe;
+import io.github.foundationgames.phonos.sound.MusicDiscOverrides;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SecondaryEmitterHolder;
@@ -27,6 +28,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.block.dispenser.FallibleItemDispenserBehavior;
 import net.minecraft.item.ArmorItem;
@@ -35,6 +37,7 @@ import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialRecipeSerializer;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPointer;
@@ -136,6 +139,8 @@ public class Phonos implements ModInitializer {
                 rec.removeReceiver();
             }
         });
+
+        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(MusicDiscOverrides.ReloadListener.INSTANCE);
 
         DispenserBlock.registerBehavior(PhonosItems.HEADSET, new FallibleItemDispenserBehavior() {
             @Override

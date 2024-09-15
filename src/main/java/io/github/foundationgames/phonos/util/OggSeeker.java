@@ -230,7 +230,7 @@ public record OggSeeker(
         return targetSample - sampleOffset;
     }
 
-    private static String explain(int vorbisErrorCode) {
+    public static String explain(int vorbisErrorCode) {
         return switch (vorbisErrorCode) {
             case STBVorbis.VORBIS__no_error                        -> "No error";
             case STBVorbis.VORBIS_need_more_data                   -> "Need more data";

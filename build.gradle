@@ -28,6 +28,12 @@ repositories {
 		name 'Xander Maven'
 		url 'https://maven.isxander.dev/releases'
 	}
+	maven {
+		url 'https://repo.sleeping.town'
+		content {
+			includeGroup 'com.unascribed'
+		}
+	}
 }
 
 dependencies {
@@ -54,6 +60,13 @@ dependencies {
 	if (project.enable_create.toBoolean()) {
 		// Create - dependencies are added transitively
 		modLocalRuntime("com.simibubi.create:create-fabric-${project.minecraft_version}:${project.create_fabric_version}")
+	}
+
+	if (project.enable_music_disc_mods.toBoolean()) {
+		modLocalRuntime("maven.modrinth:more-music-discs:${project.more_music_discs_version}") { transitive = false }
+		modLocalRuntime("maven.modrinth:spindlemark:${project.spindlemark_version}") { transitive = false }
+		modLocalRuntime("com.unascribed:lib39-core:${project.lib39_version}")
+		modLocalRuntime("com.unascribed:lib39-keygen:${project.lib39_version}")
 	}
 }
 

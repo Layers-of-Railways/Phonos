@@ -4,6 +4,7 @@
   "package": "io.github.foundationgames.phonos.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "MusicDiscItemMixin",
     "compat.LocationSoundPacketAccessor",
     "compat.SoundPacketAccessor"
   ],
@@ -18,7 +19,10 @@
     "client.OptionListMixin$ListGroupSeparatorEntryMixin",
     "client.OptionListMixin$OptionEntryMixin",
     "client.PlayerEntityRendererMixin",
+    "client.SoundLoaderAccessor",
+    "client.SoundManagerAccessor",
     "client.SoundOptionsScreenMixin",
+    "client.SoundSystemAccessor",
     "client.SoundSystemMixin",
     "client.SourceMixin",
     "client.WorldRendererAccess",
