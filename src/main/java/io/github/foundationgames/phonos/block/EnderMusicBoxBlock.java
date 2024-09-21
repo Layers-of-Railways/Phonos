@@ -100,6 +100,8 @@ public class EnderMusicBoxBlock extends Block implements BlockEntityProvider {
 
         BlockPos offset = sourcePos.subtract(pos);
         Direction direction = Direction.fromVector(offset.getX(), offset.getY(), offset.getZ());
+
+        if (direction == null) return;
         int power = world.getEmittedRedstonePower(pos.offset(direction), direction);
 
         if (direction == Direction.DOWN) {
