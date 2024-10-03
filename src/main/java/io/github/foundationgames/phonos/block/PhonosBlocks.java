@@ -23,6 +23,7 @@ public class PhonosBlocks {
     public static final Block AUDIO_SWITCH = register(new AudioSwitchBlock(FabricBlockSettings.copy(Blocks.OAK_SLAB)), "audio_switch");
     public static final Block ENDER_MUSIC_BOX = register(new EnderMusicBoxBlock(FabricBlockSettings.copy(Blocks.NOTE_BLOCK)), "ender_music_box");
     public static final Block MICROPHONE_BASE = register(new MicrophoneBaseBlock(FabricBlockSettings.copy(Blocks.OAK_PLANKS).nonOpaque()), "microphone_base");
+    public static final Block WIRELESS_MICROPHONE_BASE = register(new WirelessMicrophoneBaseBlock(FabricBlockSettings.copy(Blocks.OAK_PLANKS).nonOpaque()), "wireless_microphone_base");
 
     public static BlockEntityType<ElectronicNoteBlockEntity> ELECTRONIC_NOTE_BLOCK_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Phonos.id("electronic_note_block"),
@@ -54,6 +55,9 @@ public class PhonosBlocks {
     public static BlockEntityType<MicrophoneBaseBlockEntity> MICROPHONE_BASE_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Phonos.id("microphone_base"),
             BlockEntityType.Builder.create(MicrophoneBaseBlockEntity::new, MICROPHONE_BASE).build(null));
+    public static BlockEntityType<WirelessMicrophoneBaseBlockEntity> WIRELESS_MICROPHONE_BASE_ENTITY = Registry.register(
+            Registries.BLOCK_ENTITY_TYPE, Phonos.id("wireless_microphone_base"),
+            BlockEntityType.Builder.create(WirelessMicrophoneBaseBlockEntity::new, WIRELESS_MICROPHONE_BASE).build(null));
 
     private static Block register(Block block, String name) {
         var item = Registry.register(Registries.ITEM, Phonos.id(name), new BlockItem(block, new Item.Settings()));

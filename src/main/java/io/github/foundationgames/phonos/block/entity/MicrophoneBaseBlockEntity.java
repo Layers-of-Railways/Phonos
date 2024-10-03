@@ -83,7 +83,6 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
 
             if (serverPlayer instanceof IMicrophoneHoldingServerPlayerEntity mhp) {
                 mhp.phonos$setBaseStation(this);
-                notifyIfNeeded(serverPlayer, true);
             }
 
             if (PhonosVoicechatProxy.startStream(serverPlayer, this.streamId)) {
@@ -107,9 +106,7 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
             if (this.serverPlayer != null) {
                 ServerPlayerEntity player = this.serverPlayer.get();
                 if (player instanceof IMicrophoneHoldingServerPlayerEntity mhp) {
-                    if (mhp.phonos$clearBaseStation(this)) {
-                        notifyIfNeeded(player, false);
-                    }
+                    mhp.phonos$clearBaseStation(this);
                 }
             }
         }
@@ -117,9 +114,6 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
         this.serverPlayer = null;
         sync();
     }
-
-    /** Event hook for subclasses */
-    protected void notifyIfNeeded(ServerPlayerEntity player, boolean start) {}
 
     public boolean isPlaying() {
         return this.playingSound != null;
@@ -148,8 +142,7 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
             var player = serverPlayer.get();
             if (
                 player == null || player.isRemoved() ||
-                    !player.getMainHandStack().isEmpty() ||
-                    !player.getPos().isInRange(getPos().toCenterPos(), getRange())
+                    !canStart(player)
             ) {
                 this.stop();
                 ((MicrophoneBaseBlock) state.getBlock()).updatePower(world, pos);

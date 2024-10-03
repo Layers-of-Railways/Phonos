@@ -34,6 +34,8 @@ import org.joml.Vector3f;
 
 import java.util.UUID;
 
+import static io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClientPlayerEntity.State.WIRED;
+
 public class MicrophoneBaseBlockEntityRenderer extends CableOutputBlockEntityRenderer<MicrophoneBaseBlockEntity> {
     private MutableCablePlugPoint start;
     private MutableCablePlugPoint end;
@@ -117,7 +119,7 @@ public class MicrophoneBaseBlockEntityRenderer extends CableOutputBlockEntityRen
                     return;
 
                 if (player instanceof IMicrophoneHoldingClientPlayerEntity armPoseOverridable) {
-                    armPoseOverridable.phonos$setHolding(true);
+                    armPoseOverridable.phonos$setHoldingState(WIRED);
                 }
 
                 var renderLayer = cableEndModel.getLayer(TEXTURE);

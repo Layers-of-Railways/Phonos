@@ -13,6 +13,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClientPlayerEntity.State.WIRED;
+
 @Mixin(BipedEntityModel.class)
 public class BipedEntityModelMixin<T extends LivingEntity> {
     @Shadow @Final public ModelPart rightArm;
@@ -24,7 +26,7 @@ public class BipedEntityModelMixin<T extends LivingEntity> {
     @Inject(method = "positionLeftArm", at = @At("HEAD"), cancellable = true)
     private void phonos$positionLeftArm(T entity, CallbackInfo ci) {
         if (entity instanceof PlayerEntity player && entity instanceof IMicrophoneHoldingClientPlayerEntity microphoneHolding) {
-            if (player.getMainArm() != Arm.LEFT || !microphoneHolding.phonos$isHolding())
+            if (player.getMainArm() != Arm.LEFT || microphoneHolding.phonos$getHoldingState() != WIRED)
                 return;
 
             this.leftArm.pitch = /*MathHelper.clamp(*/this.head.pitch - 1.9198622f - (entity.isInSneakingPose() ? 0.2617994f : 0.0f)/*, -2.4f, 3.3f)*/;
@@ -38,7 +40,7 @@ public class BipedEntityModelMixin<T extends LivingEntity> {
     @Inject(method = "positionRightArm", at = @At("HEAD"), cancellable = true)
     private void phonos$positionRightArm(T entity, CallbackInfo ci) {
         if (entity instanceof PlayerEntity player && entity instanceof IMicrophoneHoldingClientPlayerEntity microphoneHolding) {
-            if (player.getMainArm() != Arm.RIGHT || !microphoneHolding.phonos$isHolding())
+            if (player.getMainArm() != Arm.RIGHT || microphoneHolding.phonos$getHoldingState() != WIRED)
                 return;
 
             this.rightArm.pitch = /*MathHelper.clamp(*/this.head.pitch - 1.9198622f - (entity.isInSneakingPose() ? 0.2617994f : 0.0f)/*, -2.4f, 3.3f)*/;

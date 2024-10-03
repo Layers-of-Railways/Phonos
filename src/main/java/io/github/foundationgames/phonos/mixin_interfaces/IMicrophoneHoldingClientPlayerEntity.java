@@ -5,8 +5,14 @@ import net.fabricmc.api.Environment;
 
 public interface IMicrophoneHoldingClientPlayerEntity {
     @Environment(EnvType.CLIENT)
-    void phonos$setHolding(boolean holding);
+    void phonos$setHoldingState(State state);
 
     @Environment(EnvType.CLIENT)
-    boolean phonos$isHolding();
+    State phonos$getHoldingState();
+
+    enum State {
+        NONE,
+        WIRED,
+        WIRELESS
+    }
 }

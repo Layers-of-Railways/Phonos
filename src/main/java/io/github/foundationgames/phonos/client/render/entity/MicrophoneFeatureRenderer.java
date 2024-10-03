@@ -21,6 +21,8 @@ import net.minecraft.util.Arm;
 import net.minecraft.util.math.RotationAxis;
 import org.joml.Quaternionf;
 
+import static io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClientPlayerEntity.State.WIRED;
+
 public class MicrophoneFeatureRenderer<E extends PlayerEntity, M extends PlayerEntityModel<E>> extends FeatureRenderer<E, M> {
     public MicrophoneFeatureRenderer(FeatureRendererContext<E, M> context, EntityModelLoader models) {
         super(context);
@@ -29,7 +31,7 @@ public class MicrophoneFeatureRenderer<E extends PlayerEntity, M extends PlayerE
     @Override
     public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, E entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         boolean leftHanded = entity.getMainArm() == Arm.LEFT;
-        if (!(entity instanceof IMicrophoneHoldingClientPlayerEntity microphoneHolding) || !microphoneHolding.phonos$isHolding())
+        if (!(entity instanceof IMicrophoneHoldingClientPlayerEntity microphoneHolding) || microphoneHolding.phonos$getHoldingState() != WIRED)
             return;
 
         BakedModel model = PhonosPartialModels.MICROPHONE.get();

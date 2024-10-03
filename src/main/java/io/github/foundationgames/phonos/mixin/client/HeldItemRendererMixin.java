@@ -21,6 +21,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClientPlayerEntity.State.WIRED;
+
 @Mixin(HeldItemRenderer.class)
 public abstract class HeldItemRendererMixin {
     @Shadow @Final private MinecraftClient client;
@@ -31,7 +33,7 @@ public abstract class HeldItemRendererMixin {
 
     @Inject(method = "renderArmHoldingItem", at = @At("RETURN"))
     private void phonos$renderMic(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float equipProgress, float swingProgress, Arm arm, CallbackInfo ci) {
-        if (this.client.player instanceof IMicrophoneHoldingClientPlayerEntity microphoneHolding && microphoneHolding.phonos$isHolding()) {
+        if (this.client.player instanceof IMicrophoneHoldingClientPlayerEntity microphoneHolding && microphoneHolding.phonos$getHoldingState() == WIRED) {
             RenderLayer renderLayer = TexturedRenderLayers.getEntityTranslucentCull();
             boolean rightHanded = arm == Arm.RIGHT;
 

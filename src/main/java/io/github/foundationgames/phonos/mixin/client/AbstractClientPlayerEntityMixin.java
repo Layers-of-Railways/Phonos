@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Unique;
 @Mixin(AbstractClientPlayerEntity.class)
 public abstract class AbstractClientPlayerEntityMixin extends PlayerEntity implements IMicrophoneHoldingClientPlayerEntity {
     @Unique
-    private boolean phonos$isHolding = false;
+    private State phonos$holdingState = State.NONE;
 
     @Unique
     private int phonos$armPoseOverrideExpiration = 0;
@@ -24,17 +24,17 @@ public abstract class AbstractClientPlayerEntityMixin extends PlayerEntity imple
 
     @Override
     @Final
-    public void phonos$setHolding(boolean holding) {
-        phonos$isHolding = holding;
+    public void phonos$setHoldingState(State state) {
+        phonos$holdingState = state;
         phonos$armPoseOverrideExpiration = this.age + 2;
     }
 
     @Override
     @Final
-    public boolean phonos$isHolding() {
+    public State phonos$getHoldingState() {
         if (this.age > phonos$armPoseOverrideExpiration) {
-            phonos$isHolding = false;
+            phonos$holdingState = State.NONE;
         }
-        return phonos$isHolding;
+        return phonos$holdingState;
     }
 }

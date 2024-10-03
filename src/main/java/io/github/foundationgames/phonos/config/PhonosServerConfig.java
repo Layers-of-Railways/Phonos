@@ -41,6 +41,11 @@ public class PhonosServerConfig {
     @IntSlider(min = 2, max = 32, step = 1)
     public int maxMicrophoneRange = 8;
 
+    @SerialEntry(comment = "Max Wireless Microphone Range [2, 96]")
+    @AutoGen(category = "general")
+    @IntSlider(min = 2, max = 96, step = 1)
+    public int maxWirelessMicrophoneRange = 32;
+
     @SerialEntry(comment = "Restrict Ender Music Box uploads to OPs")
     @AutoGen(category = "general", group = "ender_music_box")
     @TickBox

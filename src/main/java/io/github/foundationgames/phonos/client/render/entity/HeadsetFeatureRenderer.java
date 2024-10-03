@@ -25,7 +25,7 @@ public class HeadsetFeatureRenderer<E extends LivingEntity, M extends BipedEntit
     public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, E entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         var headset = entity.getEquippedStack(EquipmentSlot.HEAD);
         if (headset.getItem() instanceof HeadsetItem item) {
-            this.headsetModel.render(matrices, vertexConsumers, this.getContextModel().getHead().getTransform(), light, OverlayTexture.DEFAULT_UV, headset, item);
+            this.headsetModel.render(entity, matrices, vertexConsumers, this.getContextModel().getHead().getTransform(), light, OverlayTexture.DEFAULT_UV, headset, item);
         }
     }
 }
