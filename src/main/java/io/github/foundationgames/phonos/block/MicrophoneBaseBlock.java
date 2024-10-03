@@ -152,15 +152,23 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
                     }
                 }
 
-                if (be.isPlaying()) {
-                    be.stop();
-                    updatePower(world, pos);
-                    return ActionResult.SUCCESS;
-                } else if (player instanceof ServerPlayerEntity serverPlayer) {
-                    if (player.getMainHandStack().isEmpty())
-                        be.start(serverPlayer);
-                    updatePower(world, pos);
-                    return ActionResult.SUCCESS;
+                if (player instanceof ServerPlayerEntity serverPlayer) {
+                    if (be.isPlaying()) {
+                        if (be.isSpeakingPlayer(serverPlayer)) {
+                            be.stop();
+                            updatePower(world, pos);
+                            return ActionResult.SUCCESS;
+                        } else {
+                            serverPlayer.sendMessageToClient(Text.translatable("block.phonos.microphone_base.already_playing")
+                                .setStyle(Style.EMPTY.withColor(Formatting.RED)), true);
+                            return ActionResult.FAIL;
+                        }
+                    } else {
+                        if (be.canStart(serverPlayer))
+                            be.start(serverPlayer);
+                        updatePower(world, pos);
+                        return ActionResult.SUCCESS;
+                    }
                 }
             }
         }

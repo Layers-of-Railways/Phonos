@@ -2,7 +2,7 @@ package io.github.foundationgames.phonos.mixin.client;
 
 import io.github.foundationgames.phonos.client.model.PhonosPartialModels;
 import io.github.foundationgames.phonos.client.render.block.MicrophoneBaseBlockEntityRenderer;
-import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingPlayerEntity;
+import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClientPlayerEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
@@ -31,7 +31,7 @@ public abstract class HeldItemRendererMixin {
 
     @Inject(method = "renderArmHoldingItem", at = @At("RETURN"))
     private void phonos$renderMic(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float equipProgress, float swingProgress, Arm arm, CallbackInfo ci) {
-        if (this.client.player instanceof IMicrophoneHoldingPlayerEntity microphoneHolding && microphoneHolding.phonos$isHolding()) {
+        if (this.client.player instanceof IMicrophoneHoldingClientPlayerEntity microphoneHolding && microphoneHolding.phonos$isHolding()) {
             RenderLayer renderLayer = TexturedRenderLayers.getEntityTranslucentCull();
             boolean rightHanded = arm == Arm.RIGHT;
 

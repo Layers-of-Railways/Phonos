@@ -6,7 +6,7 @@ import io.github.foundationgames.phonos.client.model.PhonosPartialModels;
 import io.github.foundationgames.phonos.client.render.CableRenderer;
 import io.github.foundationgames.phonos.config.PhonosClientConfig;
 import io.github.foundationgames.phonos.mixin.client.WorldRendererAccess;
-import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingPlayerEntity;
+import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClientPlayerEntity;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.util.Pose3f;
 import io.github.foundationgames.phonos.world.sound.CablePlugPoint;
@@ -116,7 +116,7 @@ public class MicrophoneBaseBlockEntityRenderer extends CableOutputBlockEntityRen
                 if (player == null)
                     return;
 
-                if (player instanceof IMicrophoneHoldingPlayerEntity armPoseOverridable) {
+                if (player instanceof IMicrophoneHoldingClientPlayerEntity armPoseOverridable) {
                     armPoseOverridable.phonos$setHolding(true);
                 }
 

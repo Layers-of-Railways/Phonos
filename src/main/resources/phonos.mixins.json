@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "MusicDiscItemMixin",
+    "ServerPlayerEntityMixin",
     "compat.LocationSoundPacketAccessor",
     "compat.SoundPacketAccessor"
   ],

@@ -4,6 +4,7 @@ import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.item.ItemGroupQueue;
 import io.github.foundationgames.phonos.item.PhonosItems;
+import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingServerPlayerEntity;
 import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioStorage;
@@ -23,9 +24,11 @@ import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.data.SoundDataTypes;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -39,6 +42,8 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPointer;
 import org.apache.logging.log4j.LogManager;
@@ -148,6 +153,23 @@ public class Phonos implements ModInitializer {
                 this.setSuccess(ArmorItem.dispenseArmor(pointer, stack));
                 return stack;
             }
+        });
+
+        UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+            if (player instanceof IMicrophoneHoldingServerPlayerEntity sourceMHP && entity instanceof ServerPlayerEntity target && target instanceof IMicrophoneHoldingServerPlayerEntity targetMHP) {
+                var sourceStation = sourceMHP.phonos$getBaseStation();
+                if (sourceStation != null && targetMHP.phonos$getBaseStation() == null && sourceStation.canStart(target)) {
+                    sourceStation.stop();
+                    sourceStation.start(target);
+
+                    player.sendMessage(Text.translatable("message.phonos.transferred_microphone_to", target.getDisplayName()), true);
+                    target.sendMessage(Text.translatable("message.phonos.received_microphone_from", player.getDisplayName()), true);
+
+                    return ActionResult.SUCCESS;
+                }
+            }
+
+            return ActionResult.PASS;
         });
 
         RadioStorage.init();

@@ -2,7 +2,7 @@ package io.github.foundationgames.phonos.client.render.entity;
 
 import io.github.foundationgames.phonos.client.model.PhonosPartialModels;
 import io.github.foundationgames.phonos.client.render.block.MicrophoneBaseBlockEntityRenderer;
-import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingPlayerEntity;
+import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClientPlayerEntity;
 import net.minecraft.client.model.ModelTransform;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
@@ -29,7 +29,7 @@ public class MicrophoneFeatureRenderer<E extends PlayerEntity, M extends PlayerE
     @Override
     public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, E entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         boolean leftHanded = entity.getMainArm() == Arm.LEFT;
-        if (!(entity instanceof IMicrophoneHoldingPlayerEntity microphoneHolding) || !microphoneHolding.phonos$isHolding())
+        if (!(entity instanceof IMicrophoneHoldingClientPlayerEntity microphoneHolding) || !microphoneHolding.phonos$isHolding())
             return;
 
         BakedModel model = PhonosPartialModels.MICROPHONE.get();

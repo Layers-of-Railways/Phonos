@@ -4,6 +4,7 @@ import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.MicrophoneBaseBlock;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
+import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingServerPlayerEntity;
 import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
@@ -59,9 +60,19 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
         return this.serverPlayer != null && this.serverPlayer.get() == player;
     }
 
+    protected int getRange() {
+        return PhonosServerConfig.get(world).maxMicrophoneRange;
+    }
+
+    public boolean canStart(ServerPlayerEntity serverPlayer) {
+        return serverPlayer.getMainHandStack().isEmpty() &&
+            serverPlayer.getPos().isInRange(getPos().toCenterPos(), getRange()) &&
+            !PhonosVoicechatProxy.isStreaming(serverPlayer);
+    }
+
     public void start(ServerPlayerEntity serverPlayer) {
         if (world instanceof ServerWorld) {
-            if (PhonosVoicechatProxy.isStreaming(serverPlayer))
+            if (!canStart(serverPlayer))
                 return;
 
             this.playingSound = new SoundEmitterTree(this.emitterId);
@@ -69,6 +80,11 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
                 StreamSoundData.createMicrophone(this.emitterId(), this.streamId, SoundCategory.MASTER),
                 this.playingSound);
             this.serverPlayer = new WeakReference<>(serverPlayer);
+
+            if (serverPlayer instanceof IMicrophoneHoldingServerPlayerEntity mhp) {
+                mhp.phonos$setBaseStation(this);
+                notifyIfNeeded(serverPlayer, true);
+            }
 
             if (PhonosVoicechatProxy.startStream(serverPlayer, this.streamId)) {
                 Phonos.LOG.info("Started microphone stream for player {} with stream ID {}", serverPlayer, this.streamId);
@@ -87,11 +103,23 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
 
             PhonosVoicechatProxy.stopStreaming(this.streamId);
             Phonos.LOG.info("Stopped microphone stream for player {} with stream ID {}", this.serverPlayer, this.streamId);
+
+            if (this.serverPlayer != null) {
+                ServerPlayerEntity player = this.serverPlayer.get();
+                if (player instanceof IMicrophoneHoldingServerPlayerEntity mhp) {
+                    if (mhp.phonos$clearBaseStation(this)) {
+                        notifyIfNeeded(player, false);
+                    }
+                }
+            }
         }
 
         this.serverPlayer = null;
         sync();
     }
+
+    /** Event hook for subclasses */
+    protected void notifyIfNeeded(ServerPlayerEntity player, boolean start) {}
 
     public boolean isPlaying() {
         return this.playingSound != null;
@@ -121,7 +149,7 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
             if (
                 player == null || player.isRemoved() ||
                     !player.getMainHandStack().isEmpty() ||
-                    !player.getPos().isInRange(getPos().toCenterPos(), PhonosServerConfig.get(world).maxMicrophoneRange)
+                    !player.getPos().isInRange(getPos().toCenterPos(), getRange())
             ) {
                 this.stop();
                 ((MicrophoneBaseBlock) state.getBlock()).updatePower(world, pos);
@@ -189,5 +217,12 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
 
     public @Nullable UUID getClientPlayer() {
         return clientPlayer;
+    }
+
+    @Override
+    public void markRemoved() {
+        super.markRemoved();
+
+        stop();
     }
 }

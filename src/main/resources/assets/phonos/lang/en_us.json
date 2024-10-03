@@ -53,6 +53,10 @@
     "block.phonos.ender_music_box": "Ender Music Box",
     "block.phonos.microphone_base": "Microphone Base",
     "block.phonos.microphone_base.voicechat_not_installed": "Install Simple Voice Chat to use this block",
+    "block.phonos.microphone_base.already_playing": "A different player is already using this microphone",
+
+    "message.phonos.transferred_microphone_to": "You gave your microphone to %s!",
+    "message.phonos.received_microphone_from": "%s gave you a microphone!",
 
     "item.phonos.satellite": "Satellite",
     "item.phonos.audio_cable": "Audio Cable",

@@ -1,6 +1,6 @@
 package io.github.foundationgames.phonos.mixin.client;
 
-import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingPlayerEntity;
+import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClientPlayerEntity;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.entity.LivingEntity;
@@ -23,7 +23,7 @@ public class BipedEntityModelMixin<T extends LivingEntity> {
 
     @Inject(method = "positionLeftArm", at = @At("HEAD"), cancellable = true)
     private void phonos$positionLeftArm(T entity, CallbackInfo ci) {
-        if (entity instanceof PlayerEntity player && entity instanceof IMicrophoneHoldingPlayerEntity microphoneHolding) {
+        if (entity instanceof PlayerEntity player && entity instanceof IMicrophoneHoldingClientPlayerEntity microphoneHolding) {
             if (player.getMainArm() != Arm.LEFT || !microphoneHolding.phonos$isHolding())
                 return;
 
@@ -37,7 +37,7 @@ public class BipedEntityModelMixin<T extends LivingEntity> {
 
     @Inject(method = "positionRightArm", at = @At("HEAD"), cancellable = true)
     private void phonos$positionRightArm(T entity, CallbackInfo ci) {
-        if (entity instanceof PlayerEntity player && entity instanceof IMicrophoneHoldingPlayerEntity microphoneHolding) {
+        if (entity instanceof PlayerEntity player && entity instanceof IMicrophoneHoldingClientPlayerEntity microphoneHolding) {
             if (player.getMainArm() != Arm.RIGHT || !microphoneHolding.phonos$isHolding())
                 return;
 
