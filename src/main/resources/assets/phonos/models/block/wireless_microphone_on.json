@@ -1,0 +1,26 @@
+{
+  "credit": "Made with Blockbench",
+  "parent": "block/block",
+  "textures": {
+    "base": "phonos:block/microphone_base",
+    "particle": "phonos:block/speaker_wood"
+  },
+  "ambientocclusion": false,
+  "elements": [
+    {
+      "from": [9.25, 15.25, 9.25],
+      "to": [6.75, 12.75, 6.75],
+      "rotation": {"angle": 0, "axis": "y", "origin": [7, 13, 7]},
+      "shade": false,
+      "faces": {
+        "north": {"uv": [8, 6, 10, 8], "texture": "#base"},
+        "east": {"uv": [8, 6, 10, 8], "texture": "#base"},
+        "south": {"uv": [8, 6, 10, 8], "texture": "#base"},
+        "west": {"uv": [8, 6, 10, 8], "texture": "#base"},
+        "up": {"uv": [8, 6, 10, 8], "texture": "#base"},
+        "down": {"uv": [8, 6, 10, 8], "texture": "#base"}
+      }
+    }
+  ],
+  "display": {}
+}

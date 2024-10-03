@@ -3,7 +3,6 @@ package io.github.foundationgames.phonos.block.entity;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.item.PhonosItems;
-import io.github.foundationgames.phonos.util.compat.PhonosVoicechatProxy;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -20,10 +19,9 @@ public class WirelessMicrophoneBaseBlockEntity extends MicrophoneBaseBlockEntity
     }
 
     @Override
-    public boolean canStart(ServerPlayerEntity serverPlayer) {
+    public boolean canContinue(ServerPlayerEntity serverPlayer) {
         // gets rid of empty-hand condition and adds headset condition
         return serverPlayer.getPos().isInRange(getPos().toCenterPos(), getRange()) &&
-            !PhonosVoicechatProxy.isStreaming(serverPlayer) &&
             serverPlayer.getEquippedStack(EquipmentSlot.HEAD).getItem() == PhonosItems.HEADSET;
     }
 }

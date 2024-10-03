@@ -46,22 +46,24 @@ public class RadioReceiverBlockEntityRenderer extends CableOutputBlockEntityRend
 
         matrices.pop();
 
-        RenderLayer renderLayer = TexturedRenderLayers.getEntityCutout();
-        matrices.push();
+        if (!satellite) {
+            RenderLayer renderLayer = TexturedRenderLayers.getEntityCutout();
+            matrices.push();
 
-        matrices.translate(0, entity.getTransmissionTowerHeight(), 0);
-        matrices.translate(0.5, 0.5, 0.5);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 - entity.getRotation().asRotation()));
-        matrices.translate(-0.5, -0.5, -0.5);
+            matrices.translate(0, entity.getTransmissionTowerHeight(), 0);
+            matrices.translate(0.5, 0.5, 0.5);
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 - entity.getRotation().asRotation()));
+            matrices.translate(-0.5, -0.5, -0.5);
 
-        renderBakedItemModel(
-            (satellite ? PhonosPartialModels.SATELLITE_DISH : PhonosPartialModels.RADIO_ANTENNA).get(),
-            light,
-            overlay,
-            matrices,
-            vertexConsumers.getBuffer(renderLayer)
-        );
+            renderBakedItemModel(
+                PhonosPartialModels.RADIO_ANTENNA.get(),
+                light,
+                overlay,
+                matrices,
+                vertexConsumers.getBuffer(renderLayer)
+            );
 
-        matrices.pop();
+            matrices.pop();
+        }
     }
 }

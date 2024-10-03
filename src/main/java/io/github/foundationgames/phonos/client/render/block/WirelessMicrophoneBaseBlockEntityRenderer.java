@@ -7,6 +7,7 @@ import io.github.foundationgames.phonos.client.model.PhonosPartialModels;
 import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClientPlayerEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.TexturedRenderLayers;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -54,7 +55,10 @@ public class WirelessMicrophoneBaseBlockEntityRenderer extends CableOutputBlockE
             PartialModel model = self
                 ? PhonosPartialModels.WIRELESS_MICROPHONE_ON_SELF
                 : PhonosPartialModels.WIRELESS_MICROPHONE_ON;
-            renderBakedItemModel(model.get(), light, overlay, matrices, vertexConsumers.getBuffer(renderLayer));
+            renderBakedItemModel(model.get(), LightmapTextureManager.pack(
+                LightmapTextureManager.getBlockLightCoordinates(LightmapTextureManager.MAX_LIGHT_COORDINATE),
+                LightmapTextureManager.getSkyLightCoordinates(light)
+            ), overlay, matrices, vertexConsumers.getBuffer(renderLayer));
 
             matrices.pop();
         }

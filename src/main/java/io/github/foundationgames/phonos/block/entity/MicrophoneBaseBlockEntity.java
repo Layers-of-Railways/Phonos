@@ -65,9 +65,12 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
     }
 
     public boolean canStart(ServerPlayerEntity serverPlayer) {
+        return canContinue(serverPlayer) && !PhonosVoicechatProxy.isStreaming(serverPlayer);
+    }
+
+    protected boolean canContinue(ServerPlayerEntity serverPlayer) {
         return serverPlayer.getMainHandStack().isEmpty() &&
-            serverPlayer.getPos().isInRange(getPos().toCenterPos(), getRange()) &&
-            !PhonosVoicechatProxy.isStreaming(serverPlayer);
+            serverPlayer.getPos().isInRange(getPos().toCenterPos(), getRange());
     }
 
     public void start(ServerPlayerEntity serverPlayer) {
@@ -142,7 +145,7 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
             var player = serverPlayer.get();
             if (
                 player == null || player.isRemoved() ||
-                    !canStart(player)
+                    !canContinue(player)
             ) {
                 this.stop();
                 ((MicrophoneBaseBlock) state.getBlock()).updatePower(world, pos);

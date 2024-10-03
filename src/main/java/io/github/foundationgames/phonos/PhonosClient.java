@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.foundationgames.jsonem.JsonEM;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.client.model.PartialModel;
@@ -9,6 +10,7 @@ import io.github.foundationgames.phonos.client.render.block.*;
 import io.github.foundationgames.phonos.config.PhonosClientConfig;
 import io.github.foundationgames.phonos.config.widgets.PhonosOptionRegistry;
 import io.github.foundationgames.phonos.item.*;
+import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClientPlayerEntity;
 import io.github.foundationgames.phonos.network.ClientPayloadPackets;
 import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioStorage;
@@ -30,15 +32,22 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.Identifier;
+import org.joml.Matrix4f;
 
 public class PhonosClient implements ClientModInitializer {
     public static final EntityModelLayer AUDIO_CABLE_END_LAYER = new EntityModelLayer(Phonos.id("audio_cable_end"), "main");
@@ -173,6 +182,57 @@ public class PhonosClient implements ClientModInitializer {
             }
         });
 
+        HudRenderCallback.EVENT.register((context, tickDelta) -> {
+            if (MinecraftClient.getInstance().player instanceof IMicrophoneHoldingClientPlayerEntity mhp && mhp.phonos$getHoldingState() == IMicrophoneHoldingClientPlayerEntity.State.WIRELESS) {
+                renderWirelessMicHud(context, tickDelta);
+            }
+        });
+
         //ScreenRegistry.<RadioJukeboxGuiDescription, RadioJukeboxScreen>register(Phonos.RADIO_JUKEBOX_HANDLER, (gui, inventory, title) -> new RadioJukeboxScreen(gui, inventory.player));
+    }
+
+    private static void renderWirelessMicHud(DrawContext context, float tickDelta) {
+        int x = 6;
+        int y = 6;
+        RenderSystem.enableDepthTest();
+
+        MatrixStack ms = context.getMatrices();
+
+        ms.push();
+
+        ms.translate(0, 0, -90.0f);
+        context.drawTexture(new Identifier("textures/gui/widgets.png"), x-3, y-4, 24, 22, 29, 24);
+        context.setShaderColor(0.2f, 0.8f, 1.0f, 1.0f);
+        context.drawTexture(new Identifier("textures/gui/widgets.png"), x-4, y-4, 0, 22, 24, 24);
+        context.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+        ms.pop();
+
+        ms.push();
+
+        ms.translate(x + 8, y + 8, 150);
+        ms.multiplyPositionMatrix(new Matrix4f().scaling(1.0f, -1.0f, 1.0f));
+        ms.scale(16, 16, 16);
+        BakedModel model = PhonosPartialModels.MICROPHONE.get();
+        boolean notSideLit = !model.isSideLit();
+        if (notSideLit)
+            DiffuseLighting.disableGuiDepthLighting();
+
+        {
+            ms.push();
+
+            model.getTransformation().getTransformation(ModelTransformationMode.GUI).apply(false, ms);
+            ms.translate(-0.5, -0.5, -0.5);
+
+            MicrophoneBaseBlockEntityRenderer.renderBakedItemModel(model, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, ms, context.getVertexConsumers().getBuffer(TexturedRenderLayers.getEntityTranslucentCull()));
+
+            ms.pop();
+        }
+
+        context.draw();
+        if (notSideLit)
+            DiffuseLighting.enableGuiDepthLighting();
+
+        ms.pop();
     }
 }

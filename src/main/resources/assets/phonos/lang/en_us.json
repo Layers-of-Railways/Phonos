@@ -52,6 +52,7 @@
     "block.phonos.audio_switch": "Audio Switch",
     "block.phonos.ender_music_box": "Ender Music Box",
     "block.phonos.microphone_base": "Microphone Base",
+    "block.phonos.wireless_microphone_base": "Wireless Microphone Base",
     "block.phonos.microphone_base.voicechat_not_installed": "Install Simple Voice Chat to use this block",
     "block.phonos.microphone_base.already_playing": "A different player is already using this microphone",
 
@@ -119,6 +120,7 @@
     "yacl3.config.phonos:server_config.transmissionTowerMultiplier": "Added Range per Transmission Tower Block",
     "yacl3.config.phonos:server_config.maxTransmissionTowerHeight": "Max Height for Transmission Tower",
     "yacl3.config.phonos:server_config.maxMicrophoneRange": "Max Microphone Cable Length",
+    "yacl3.config.phonos:server_config.maxWirelessMicrophoneRange": "Max Wireless Microphone Range",
     "yacl3.config.phonos:server_config.restrictEnderMusicBoxUploads": "Restrict Uploads to OPs",
     "yacl3.config.phonos:server_config.uploadLimitKB": "Upload Limit",
     "yacl3.config.phonos:server_config.uploadLimitKB.fmt": "%s KB",

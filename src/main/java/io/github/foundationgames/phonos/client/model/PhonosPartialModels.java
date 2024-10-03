@@ -6,7 +6,6 @@ public class PhonosPartialModels {
     public static final PartialModel
         MICROPHONE = block("microphone"),
         RADIO_ANTENNA = block("radio_transceiver_antenna"),
-        SATELLITE_DISH = block("satellite_dish"),
         WIRELESS_MICROPHONE_ON = block("wireless_microphone_on"),
         WIRELESS_MICROPHONE_ON_SELF = block("wireless_microphone_on_self")
     ;
