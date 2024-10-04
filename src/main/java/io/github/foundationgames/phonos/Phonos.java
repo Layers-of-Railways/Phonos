@@ -61,10 +61,9 @@ public class Phonos implements ModInitializer {
 
     public static final Identifier SVC_STREAMED_SOUND = Phonos.id("svc_streamed");
 
-    public static final RecipeSerializer<ItemGlowRecipe> ITEM_GLOW_RECIPE_SERIALIZER = Registry.register(
-            Registries.RECIPE_SERIALIZER, Phonos.id("crafting_special_itemglow"), new SpecialRecipeSerializer<>(ItemGlowRecipe::new));
+    public static final RecipeSerializer<ItemGlowRecipe> ITEM_GLOW_RECIPE_SERIALIZER = new SpecialRecipeSerializer<>(ItemGlowRecipe::new);
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     @Override
     public void onInitialize() {
@@ -73,6 +72,8 @@ public class Phonos implements ModInitializer {
                 .displayName(PHONOS_ITEMS.displayName())
                 .entries(PHONOS_ITEMS)
                 .build());
+
+        Registry.register(Registries.RECIPE_SERIALIZER, Phonos.id("crafting_special_itemglow"), ITEM_GLOW_RECIPE_SERIALIZER);
 
         PayloadPackets.initCommon();
 
