@@ -1,7 +1,7 @@
 {
     "itemGroup.phonos.phonos": "Phonos",
 
-    "container.phonos.satellite_station": "Satellite Station",
+    "container.phonos.satellite_station": "Satellite Broadcast Station",
 
     "container.phonos.ender_music_box": "Ender Music Box",
     "hint.phonos.ender_music_box.drag": "+ Drag and drop .ogg file to upload",
@@ -48,7 +48,7 @@
     "block.phonos.radio_transceiver": "Radio Transceiver",
     "block.phonos.satellite_receiver": "Satellite Receiver",
     "block.phonos.radio_loudspeaker": "Radio Loudspeaker",
-    "block.phonos.satellite_station": "Satellite Station",
+    "block.phonos.satellite_station": "Satellite Broadcast Station",
     "block.phonos.audio_switch": "Audio Switch",
     "block.phonos.ender_music_box": "Ender Music Box",
     "block.phonos.microphone_base": "Microphone Base",

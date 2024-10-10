@@ -9,11 +9,14 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -84,7 +87,7 @@ public class SoundEmitterTree {
                         radioChanges.add(channel, metadata);
                     }
 
-                    final int searchUntil = index;
+                    final int searchUntil = index + 1; // this is intentionally higher than the client version, since the client does more complicated radio logic
                     RadioLongConsumer[] consumerRef = new RadioLongConsumer[1];
                     RadioLongConsumer consumer = (child, metadata) -> {
                         if (emitters.isLoaded(child) && emitters.getEmitter(child) instanceof RadioStorage.RadioEmitter radioEmitter && radioEmitter.isRadio()) {
@@ -135,11 +138,18 @@ public class SoundEmitterTree {
     // immediate effects regardless of server speed/latency
     public void updateClient(World world) {
         var emitters = SoundEmitterStorage.getInstance(world);
+        Int2ObjectOpenHashMap<HashSet<RadioMetadata>> backupSources = new Int2ObjectOpenHashMap<>(radioSources);
         radioSources.clear();
 
         int index = 0;
 
+        LongSet nonIgnoredRadioEmitters;
+        LongSet nextNonIgnoredRadioEmitters = new LongOpenHashSet();
+
         while (index < this.levels.size() && !this.levels.get(index).empty()) {
+            nonIgnoredRadioEmitters = nextNonIgnoredRadioEmitters;
+            nextNonIgnoredRadioEmitters = new LongOpenHashSet();
+
             if (index + 1 == this.levels.size()) {
                 this.levels.add(new Level(new LongArrayList(), new LongArrayList()));
             }
@@ -151,14 +161,31 @@ public class SoundEmitterTree {
             nextLevel.active().clear();
             for (long l : nextLevel.inactive()) if (RadioStorage.RADIO_EMITTERS.contains(l)) {
                 nextLevel.active().add(l);
+                nextNonIgnoredRadioEmitters.add(l);
             }
             nextLevel.inactive().removeAll(nextLevel.active());
 
             for (long emId : level.active()) {
                 if (emitters.isLoaded(emId)) {
+                    HashSet<RadioMetadata> overriddenRadioSources;
+
                     var emitter = emitters.getEmitter(emId);
-                    if (emitter instanceof RadioStorage.RadioEmitter radioEmitter && radioEmitter.isRadio())
-                        continue;
+                    if (emitter instanceof RadioStorage.RadioEmitter radioEmitter && radioEmitter.isRadio()) {
+                        if (nonIgnoredRadioEmitters.contains(emId)) {
+                            nextNonIgnoredRadioEmitters.remove(emId);
+                            var sources = backupSources.get(radioEmitter.channel);
+
+                            if (sources != null) {
+                                radioSources.put(radioEmitter.channel, new HashSet<>(sources));
+                            }
+
+                            overriddenRadioSources = sources;
+                        } else {
+                            continue;
+                        }
+                    } else {
+                        overriddenRadioSources = null;
+                    }
 
                     if (emitter instanceof RadioDevice.Transmitter radioTransmitter) {
                         int channel = radioTransmitter.getChannel();
@@ -169,19 +196,32 @@ public class SoundEmitterTree {
 
                     final int searchUntil = index;
                     RadioLongConsumer[] consumerRef = new RadioLongConsumer[1];
+                    LongSet finalNextNonIgnoredRadioEmitters = nextNonIgnoredRadioEmitters;
+
+                    int[] depth = new int[] {0};
+
                     RadioLongConsumer consumer = (child, metadata) -> {
                         if (emitters.isLoaded(child) && emitters.getEmitter(child) instanceof RadioStorage.RadioEmitter radioEmitter && radioEmitter.isRadio()) {
+                            depth[0]++;
                             radioEmitter.forEachChild(consumerRef[0]);
+                            depth[0]--;
                         }
 
                         if (this.contains(child, searchUntil)) {
                             return;
                         }
 
-                        if (metadata != null && emitter instanceof RadioDevice radioDevice) {
-                            RadioMetadata emitterMetadata = radioDevice.getMetadata();
-                            if (!emitterMetadata.shouldTransmitTo(metadata)) {
-                                return;
+                        if (metadata != null) {
+                            if (emitter instanceof RadioDevice radioDevice) {
+                                RadioMetadata emitterMetadata = radioDevice.getMetadata();
+                                if (!emitterMetadata.shouldTransmitTo(metadata)) {
+                                    return;
+                                }
+                            }
+                            if (depth[0] == 0 && emitter instanceof RadioStorage.RadioEmitter && overriddenRadioSources != null) {
+                                if (overriddenRadioSources.stream().noneMatch(source -> source.shouldTransmitTo(metadata))) {
+                                    return;
+                                }
                             }
                         }
 
@@ -189,6 +229,7 @@ public class SoundEmitterTree {
 
                         if (!nextLevel.active().contains(child)) {
                             nextLevel.active().add(child);
+                            finalNextNonIgnoredRadioEmitters.remove(child);
                         }
                     };
                     consumerRef[0] = consumer;
@@ -245,9 +286,11 @@ public class SoundEmitterTree {
     public void forEachSource(World world, Consumer<SoundSource> action) {
         var emitters = SoundEmitterStorage.getInstance(world);
 
+        LongSet deduplication = new LongOpenHashSet();
+
         for (var level : this.levels)
             for (long em : level.active) {
-            if (emitters.isLoaded(em)) {
+            if (deduplication.add(em) && emitters.isLoaded(em)) {
                 var emitter = emitters.getEmitter(em);
                 emitter.forEachSource(emitter instanceof RadioStorage.RadioEmitter radioEmitter && radioEmitter.isRadio()
                     ? new SmartSoundSourceConsumer(action, radioEmitter.channel)
