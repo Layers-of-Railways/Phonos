@@ -44,6 +44,8 @@ public abstract class SourceMixin implements ISkippableSource {
             } catch (IOException e) {
                 Phonos.LOG.error("Failed to skip audio stream", e);
                 this.stop();
+                phonos$ticksToSkip = 0;
+                return null;
             }
             phonos$ticksToSkip = 0;
             return original.call(instance, size);
