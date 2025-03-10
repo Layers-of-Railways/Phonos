@@ -57,6 +57,8 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
 
     private Boolean lastPowered = null;
 
+    private int lastComparatorOutput = -1;
+
     @ApiStatus.Internal
     public boolean playingClient = false;
 
@@ -153,7 +155,11 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
                 this.stop();
             }
 
-            markDirty();
+            int comparatorOutput = getComparatorOutput();
+            if (comparatorOutput != lastComparatorOutput) {
+                lastComparatorOutput = comparatorOutput;
+                markDirty();
+            }
         }
 
         if (this.playingSound != null) {
