@@ -20,8 +20,8 @@ public final class UniqueId {
         return obf(channel + 0xFADECAB);
     }
 
-    public static long ofSatelliteChannel(int channel) {
-        return ofRadioChannel(RadioStorage.toSatelliteBand(channel));
+    public static long ofSatelliteChannel(String channel) {
+        return obf(channel.hashCode());
     }
 
     public static long obf(long uniqueId) {

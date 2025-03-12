@@ -162,7 +162,7 @@ public class SatelliteStationBlock extends HorizontalFacingBlock implements Bloc
 
             if (world instanceof ServerWorld sWorld) {
                 if (pluggedIn) {
-                    RadarPoints.get(sWorld).add(RadioStorage.toSatelliteBand(be.getChannel()), pos);
+                    RadarPoints.get(sWorld).add(be.getChannel(), pos);
                 } else {
                     boolean remove = true;
                     for (boolean in : be.inputs) if (in) {
@@ -171,7 +171,7 @@ public class SatelliteStationBlock extends HorizontalFacingBlock implements Bloc
                     }
 
                     if (remove) {
-                        RadarPoints.get(sWorld).remove(RadioStorage.toSatelliteBand(be.getChannel()), pos);
+                        RadarPoints.get(sWorld).remove(be.getChannel(), pos);
                     }
                 }
             }

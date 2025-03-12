@@ -1,7 +1,6 @@
 package io.github.foundationgames.phonos.client.render;
 
 import com.google.common.hash.Hashing;
-import io.github.foundationgames.phonos.block.entity.RadioReceiverBlockEntity;
 import io.github.foundationgames.phonos.block.entity.RadioTransceiverBlockEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -27,7 +26,7 @@ public class RadioDebugRenderer {
         var world = MinecraftClient.getInstance().world;
         if (world == null)
             return;
-        if (!(world.getBlockEntity(pos) instanceof RadioReceiverBlockEntity be))
+        if (!(world.getBlockEntity(pos) instanceof RadioTransceiverBlockEntity be))
             return;
 
         targets.put(pos, new DebugMeta(be.getMetadata().transmissionRange(), colorFromLong(be.emitterId())));

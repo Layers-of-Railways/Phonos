@@ -4,9 +4,13 @@ import io.github.foundationgames.phonos.block.entity.Ticking;
 import io.github.foundationgames.phonos.item.AudioCableItem;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
@@ -21,6 +25,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -34,6 +39,7 @@ import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 public enum PhonosUtil {;
     public static final float SQRT2DIV2 = (float) (Math.sqrt(2) / 2);
@@ -205,6 +211,32 @@ public enum PhonosUtil {;
         buffer.rewind();
 
         return buffer;
+    }
+
+    public static void runIfClient(Supplier<Runnable> runnable) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            runnable.get().run();
+        }
+    }
+
+    public static <T> T getIfClient(Supplier<Supplier<T>> supplier) {
+        return getIfClient(supplier, null);
+    }
+
+    public static <T> T getIfClient(Supplier<Supplier<T>> supplier, T defaultValue) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            return supplier.get().get();
+        }
+        return defaultValue;
+    }
+
+    @Environment(EnvType.CLIENT)
+    private static World $getClientWorld() {
+        return MinecraftClient.getInstance().world;
+    }
+
+    public static @Nullable World getClientWorld() {
+        return getIfClient(() -> PhonosUtil::$getClientWorld, null);
     }
 
     static {

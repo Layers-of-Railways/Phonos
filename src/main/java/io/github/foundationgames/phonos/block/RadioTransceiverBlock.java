@@ -1,7 +1,7 @@
 package io.github.foundationgames.phonos.block;
 
-import io.github.foundationgames.phonos.block.entity.RadioReceiverBlockEntity;
 import io.github.foundationgames.phonos.block.entity.RadioTransceiverBlockEntity;
+import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.RadarPoints;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
@@ -11,8 +11,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.Items;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -26,6 +31,29 @@ public class RadioTransceiverBlock extends RadioReceiverBlock implements BlockEn
 
     public RadioTransceiverBlock(Settings settings) {
         super(settings);
+    }
+
+    @Override
+    protected ActionResult onUseFace(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        var stack = player.getStackInHand(hand);
+
+        int inc = player.isSneaking() ? -1 : 1;
+        if (world.getBlockEntity(pos) instanceof RadioTransceiverBlockEntity be) {
+            int goal = be.getChannel() + inc;
+
+            if (stack.isOf(Items.NAME_TAG) && stack.hasCustomName()) {
+                String customName = stack.getName().getString();
+                if (customName.matches("\\d+")) {
+                    goal = Integer.parseInt(customName);
+                    goal = MathHelper.clamp(goal, 0, RadioStorage.CHANNEL_COUNT -1);
+                }
+            }
+
+            be.setAndUpdateChannel(goal);
+            be.markDirty();
+        }
+
+        return ActionResult.CONSUME;
     }
 
     @Override
@@ -52,7 +80,7 @@ public class RadioTransceiverBlock extends RadioReceiverBlock implements BlockEn
 
     @Override
     public boolean isInputPluggedIn(int inputIndex, BlockState state, World world, BlockPos pos) {
-        if (world.getBlockEntity(pos) instanceof RadioReceiverBlockEntity be) {
+        if (world.getBlockEntity(pos) instanceof RadioTransceiverBlockEntity be) {
             inputIndex = MathHelper.clamp(inputIndex, 0, be.inputs.length - 1);
 
             return be.inputs[inputIndex];
@@ -63,7 +91,7 @@ public class RadioTransceiverBlock extends RadioReceiverBlock implements BlockEn
 
     @Override
     public void setInputPluggedIn(int inputIndex, boolean pluggedIn, BlockState state, World world, BlockPos pos) {
-        if (world.getBlockEntity(pos) instanceof RadioReceiverBlockEntity be) {
+        if (world.getBlockEntity(pos) instanceof RadioTransceiverBlockEntity be) {
             inputIndex = MathHelper.clamp(inputIndex, 0, be.inputs.length - 1);
             be.inputs[inputIndex] = pluggedIn;
 

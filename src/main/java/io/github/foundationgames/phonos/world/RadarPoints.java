@@ -10,11 +10,27 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.PersistentState;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 public class RadarPoints extends PersistentState {
-    private Int2ObjectMap<LongSet> channelToSources = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<LongSet> channelToSources = new Int2ObjectOpenHashMap<>();
+    private final Map<String, LongSet> satelliteChannelToSources = new HashMap<>();
+
+    public Collection<String> getSatelliteChannels() {
+        return satelliteChannelToSources.keySet();
+    }
 
     public void add(int channel, BlockPos pos) {
-        var set = channelToSources.computeIfAbsent(channel, LongOpenHashSet::new);
+        var set = channelToSources.computeIfAbsent(channel, $ -> new LongOpenHashSet());
+        set.add(pos.asLong());
+        markDirty();
+    }
+
+    public void add(String channel, BlockPos pos) {
+        var set = satelliteChannelToSources.computeIfAbsent(channel, $ -> new LongOpenHashSet());
         set.add(pos.asLong());
         markDirty();
     }
@@ -26,29 +42,63 @@ public class RadarPoints extends PersistentState {
         }
     }
 
+    public void remove(String channel, BlockPos pos) {
+        if (satelliteChannelToSources.containsKey(channel)) {
+            satelliteChannelToSources.get(channel).remove(pos.asLong());
+            markDirty();
+        }
+    }
+
     public LongSet getPoints(int channel) {
         return channelToSources.get(channel);
+    }
+
+    public LongSet getPoints(String channel) {
+        return satelliteChannelToSources.get(channel);
     }
 
     public static RadarPoints get(ServerWorld world) {
         return world.getPersistentStateManager().getOrCreate(RadarPoints::readNbt, RadarPoints::new, "phonos_radar_points");
     }
 
+    private static int[] packPosSet(LongSet posSet) {
+        var packedPosSet = new int[posSet.size() * 2];
+
+        int idx = 0;
+        for (long pos : posSet) {
+            packedPosSet[idx] = (int) (pos >> 32);
+            packedPosSet[idx + 1] = (int) pos;
+
+            idx += 2;
+        }
+
+        return packedPosSet;
+    }
+
+    private static LongSet unpackPosSet(int[] packed) {
+        var posSet = new LongOpenHashSet();
+
+        for (int i = 0; i < packed.length; i += 2) {
+            long upper = packed[i];
+            long lower = packed[i + 1];
+
+            posSet.add(lower | (upper << 32));
+        }
+
+        return posSet;
+    }
+
     @Override
     public NbtCompound writeNbt(NbtCompound nbt) {
-        for (var entry : channelToSources.int2ObjectEntrySet()) if (entry.getValue().size() > 0) {
-            var packedPosSet = new int[entry.getValue().size() * 2];
-
-            int idx = 0;
-            for (long pos : entry.getValue()) {
-                packedPosSet[idx] = (int) (pos >> 32);
-                packedPosSet[idx + 1] = (int) pos;
-
-                idx += 2;
-            }
-
-            nbt.putIntArray("ch" + entry.getIntKey(), packedPosSet);
+        for (var entry : channelToSources.int2ObjectEntrySet()) if (!entry.getValue().isEmpty()) {
+            nbt.putIntArray("ch" + entry.getIntKey(), packPosSet(entry.getValue()));
         }
+
+        NbtCompound sat = new NbtCompound();
+        for (var entry : satelliteChannelToSources.entrySet()) if (!entry.getValue().isEmpty()) {
+            sat.putIntArray(entry.getKey(), packPosSet(entry.getValue()));
+        }
+        nbt.put("sat", sat);
 
         return nbt;
     }
@@ -56,21 +106,18 @@ public class RadarPoints extends PersistentState {
     public static RadarPoints readNbt(NbtCompound nbt) {
         var state = new RadarPoints();
 
-        for (int ch = 0; ch < RadioStorage.RADIO_CHANNEL_COUNT; ch++) {
+        for (int ch = 0; ch < RadioStorage.CHANNEL_COUNT; ch++) {
             var key = "ch" + ch;
 
             if (nbt.contains(key)) {
-                var packedPosSet = nbt.getIntArray(key);
-                var posSet = new LongOpenHashSet();
+                state.channelToSources.put(ch, unpackPosSet(nbt.getIntArray(key)));
+            }
+        }
 
-                for (int i = 0; i < packedPosSet.length; i += 2) {
-                    long upper = packedPosSet[i];
-                    long lower = packedPosSet[i + 1];
-
-                    posSet.add(lower | (upper << 32));
-                }
-
-                state.channelToSources.put(ch, posSet);
+        if (nbt.contains("sat")) {
+            var sat = nbt.getCompound("sat");
+            for (String key : sat.getKeys()) {
+                state.satelliteChannelToSources.put(key, unpackPosSet(sat.getIntArray(key)));
             }
         }
 

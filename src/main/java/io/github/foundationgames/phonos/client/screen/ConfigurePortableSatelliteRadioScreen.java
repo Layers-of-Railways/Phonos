@@ -12,23 +12,20 @@ import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
-public class LaunchSatelliteStationScreen extends Screen {
-    public static final Text TITLE = Text.translatable("container.phonos.satellite_station");
-    public static final Text SELECT = Text.translatable("message.phonos.launch_satellite_station.select");
-    public static final Text LAUNCHING = Text.translatable("message.phonos.satellite_launching");
-    public static final Text LAUNCH = Text.translatable("message.phonos.launch_satellite_station.launch");
+public class ConfigurePortableSatelliteRadioScreen extends Screen {
+    public static final Text TITLE = Text.translatable("item.phonos.portable_satellite_radio");
+    public static final Text SELECT = Text.translatable("message.phonos.portable_satellite_radio.select");
+    public static final Text CONFIGURE = Text.translatable("message.phonos.portable_satellite_radio.configure");
 
-    protected final SatelliteStationBlockEntity station;
+    private final int toolbarSlot;
 
     private TextFieldWidget channelField;
-    private ButtonWidget launchButton;
+    private ButtonWidget configureButton;
 
-    private boolean launched;
-
-    public LaunchSatelliteStationScreen(SatelliteStationBlockEntity entity) {
+    public ConfigurePortableSatelliteRadioScreen(int toolbarSlot) {
         super(TITLE);
 
-        this.station = entity;
+        this.toolbarSlot = toolbarSlot;
     }
 
     @Override
@@ -49,12 +46,12 @@ public class LaunchSatelliteStationScreen extends Screen {
             }
         });
 
-        this.launchButton = this.addDrawableChild(ButtonWidget.builder(LAUNCH, b -> this.launch())
+        this.configureButton = this.addDrawableChild(ButtonWidget.builder(CONFIGURE, b -> this.configure())
             .position(this.width / 2 - 80, 180)
             .size(160, 20)
             .build());
 
-        this.launchButton.active = this.validateChannel() == null;
+        this.configureButton.active = this.validateChannel() == null;
         this.channelField.active = true;
 
         this.setInitialFocus(this.channelField);
@@ -67,13 +64,11 @@ public class LaunchSatelliteStationScreen extends Screen {
         super.render(context, mouseX, mouseY, delta);
 
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 80, 0xFFFFFF);
-        context.drawCenteredTextWithShadow(this.textRenderer, launched ? LAUNCHING : SELECT, this.width  / 2, 100, 0xDDDDDD);
+        context.drawCenteredTextWithShadow(this.textRenderer, SELECT, this.width  / 2, 100, 0xDDDDDD);
 
-        if (!launched) {
-            var validationMessage = this.validateChannel();
-            if (validationMessage != null) {
-                context.drawCenteredTextWithShadow(this.textRenderer, validationMessage, this.width / 2, 120, 0xDDDDDD);
-            }
+        var validationMessage = this.validateChannel();
+        if (validationMessage != null) {
+            context.drawCenteredTextWithShadow(this.textRenderer, validationMessage, this.width / 2, 120, 0xDDDDDD);
         }
     }
 
@@ -81,10 +76,14 @@ public class LaunchSatelliteStationScreen extends Screen {
     public void tick() {
         super.tick();
 
-        this.launchButton.active = this.validateChannel() == null && !launched;
-        this.launchButton.visible = !launched;
+        this.configureButton.active = this.validateChannel() == null;
+        this.configureButton.visible = true;
 
-        this.channelField.active = this.channelField.visible = !launched;
+        this.channelField.active = this.channelField.visible = true;
+
+        if (client == null || client.player == null || client.player.getInventory().selectedSlot != this.toolbarSlot) {
+            this.close();
+        }
     }
 
     private @Nullable Text validateChannel() {
@@ -108,18 +107,18 @@ public class LaunchSatelliteStationScreen extends Screen {
         return null;
     }
 
-    private void launch() {
+    private void configure() {
         if (this.validateChannel() != null)
             return;
 
-        var channel = this.channelField.getText();
-        ClientPayloadPackets.sendRequestSatelliteAction(this.station, SatelliteStationBlockEntity.ACTION_LAUNCH, channel);
+        if (client == null || client.player == null)
+            return;
 
-        launchButton.active = false;
-        launchButton.visible = false;
-        channelField.active = false;
-        channelField.visible = false;
+        if (client.player.getInventory().selectedSlot != this.toolbarSlot)
+            return;
 
-        launched = true;
+        ClientPayloadPackets.sendConfigurePortableSatelliteRadioChannel(this.channelField.getText());
+
+        close();
     }
 }

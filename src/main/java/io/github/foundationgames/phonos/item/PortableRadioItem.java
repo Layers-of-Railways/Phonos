@@ -16,19 +16,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class PortableRadioItem extends Item implements SoundEmitterItem {
-    public final boolean isSatellite;
 
-    public PortableRadioItem(Settings settings, boolean isSatellite) {
+    public PortableRadioItem(Settings settings) {
         super(settings);
-        this.isSatellite = isSatellite;
-    }
-
-    private int getChannelCount() {
-        return isSatellite ? RadioStorage.SATELLITE_CHANNEL_COUNT : RadioStorage.RADIO_CHANNEL_COUNT;
-    }
-
-    private int transformChannel(int channel) {
-        return isSatellite ? RadioStorage.toSatelliteBand(channel) : channel;
     }
 
     @Override
@@ -36,10 +26,10 @@ public class PortableRadioItem extends Item implements SoundEmitterItem {
         if (!world.isClient()) {
             var stack = user.getStackInHand(hand);
 
-            int channel = Math.floorMod(getChannel(stack) + (user.isSneaking() ? -1 : 1), getChannelCount());
+            int channel = Math.floorMod(getChannel(stack) + (user.isSneaking() ? -1 : 1), RadioStorage.CHANNEL_COUNT);
             this.setChannel(stack, channel);
             user.sendMessage(Text.translatable("tooltip.phonos.item.channel", channel)
-                .formatted(isSatellite ? Formatting.BLUE : Formatting.RED), true);
+                .formatted(Formatting.RED), true);
 
             return TypedActionResult.consume(stack);
         }
@@ -69,6 +59,6 @@ public class PortableRadioItem extends Item implements SoundEmitterItem {
 
     @Override
     public long getParentEmitter(ItemStack stack) {
-        return RadioStorage.RADIO_EMITTERS.getLong(transformChannel(MathHelper.clamp(getChannel(stack), 0, getChannelCount())));
+        return RadioStorage.RADIO_EMITTERS.getLong(MathHelper.clamp(getChannel(stack), 0, RadioStorage.CHANNEL_COUNT));
     }
 }

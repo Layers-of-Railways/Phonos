@@ -14,6 +14,7 @@ import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClien
 import io.github.foundationgames.phonos.network.ClientPayloadPackets;
 import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioStorage;
+import io.github.foundationgames.phonos.satellite_radio.SatelliteRadioStorage;
 import io.github.foundationgames.phonos.sound.ClientSoundStorage;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.custom.ClientCustomAudioUploader;
@@ -81,7 +82,7 @@ public class PhonosClient implements ClientModInitializer {
         BlockEntityRendererFactories.register(PhonosBlocks.ELECTRONIC_JUKEBOX_ENTITY, CableOutputBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(PhonosBlocks.CONNECTION_HUB_ENTITY, CableOutputBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(PhonosBlocks.RADIO_TRANSCEIVER_ENTITY, RadioReceiverBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(PhonosBlocks.SATELLITE_RECEIVER_ENTITY, RadioReceiverBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(PhonosBlocks.SATELLITE_RECEIVER_ENTITY, SatelliteReceiverBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(PhonosBlocks.RADIO_LOUDSPEAKER_ENTITY, RadioLoudspeakerBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(PhonosBlocks.SATELLITE_STATION_ENTITY, SatelliteStationBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(PhonosBlocks.AUDIO_SWITCH_ENTITY, CableOutputBlockEntityRenderer::new);
@@ -137,6 +138,7 @@ public class PhonosClient implements ClientModInitializer {
         ClientEntityEvents.ENTITY_LOAD.register((entity, world) -> {
             if (entity == MinecraftClient.getInstance().player) {
                 RadioStorage.clientReset();
+                SatelliteRadioStorage.clientReset();
                 SoundStorage.clientReset();
                 SoundEmitterStorage.clientReset();
                 RadioDebugRenderer.clearTargets();
@@ -148,7 +150,16 @@ public class PhonosClient implements ClientModInitializer {
             ClientCustomAudioUploader.reset();
         });
 
-        ClientTickEvents.END_WORLD_TICK.register(world -> SoundStorage.getInstance(world).tick(world));
+        ClientTickEvents.END_WORLD_TICK.register(world -> {
+            if (world == null) return;
+
+            SoundStorage.getInstance(world).tick(world);
+            RadioDebugRenderer.tick(world);
+
+            if ((world.getTime() & 127) == 0) { // every 127 ticks (6.35 seconds)
+                SatelliteRadioStorage.getInstance(world).gc();
+            }
+        });
         ClientTickEvents.START_CLIENT_TICK.register(HeadsetSoundSource.INSTANCE::tick);
 
         ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register((be, world) -> {
@@ -175,12 +186,6 @@ public class PhonosClient implements ClientModInitializer {
         });
 
         WorldRenderEvents.AFTER_ENTITIES.register((context) -> RadioDebugRenderer.render(context.matrixStack(), context.consumers()));
-
-        ClientTickEvents.END_WORLD_TICK.register(world -> {
-            if (world != null) {
-                RadioDebugRenderer.tick(world);
-            }
-        });
 
         HudRenderCallback.EVENT.register((context, tickDelta) -> {
             if (MinecraftClient.getInstance().player instanceof IMicrophoneHoldingClientPlayerEntity mhp && mhp.phonos$getHoldingState() == IMicrophoneHoldingClientPlayerEntity.State.WIRELESS) {

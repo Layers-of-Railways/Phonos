@@ -123,7 +123,7 @@ public final class ClientPayloadPackets {
         ClientPlayNetworking.registerGlobalReceiver(Phonos.id("satellite_action"), (client, handler, buf, responseSender) -> {
             var pos = buf.readBlockPos();
             int action = buf.readInt();
-            int data = buf.readInt();
+            String data = buf.readString(256);
 
             client.execute(() -> {
                 if (client.world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity be) {
@@ -178,11 +178,11 @@ public final class ClientPayloadPackets {
         ClientPlayNetworking.send(Phonos.id("delete_ender_music_box_stream"), buf);
     }
 
-    public static void sendRequestSatelliteAction(SatelliteStationBlockEntity entity, int actionId, int data) {
+    public static void sendRequestSatelliteAction(SatelliteStationBlockEntity entity, int actionId, String data) {
         var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeBlockPos(entity.getPos());
         buf.writeInt(actionId);
-        buf.writeInt(data);
+        buf.writeString(data, 256);
 
         ClientPlayNetworking.send(Phonos.id("request_satellite_action"), buf);
     }
@@ -204,5 +204,12 @@ public final class ClientPayloadPackets {
         NetworkConfigSerializer.write(buf, access);
 
         ClientPlayNetworking.send(Phonos.id("config_change"), buf);
+    }
+
+    public static void sendConfigurePortableSatelliteRadioChannel(String channel) {
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeString(channel);
+
+        ClientPlayNetworking.send(Phonos.id("configure_portable_satellite_radio_channel"), buf);
     }
 }

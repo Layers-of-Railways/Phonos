@@ -3,7 +3,7 @@ package io.github.foundationgames.phonos.block.entity;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.item.PhonosItems;
 import io.github.foundationgames.phonos.network.PayloadPackets;
-import io.github.foundationgames.phonos.radio.RadioStorage;
+import io.github.foundationgames.phonos.satellite_radio.SatelliteRadioStorage;
 import io.github.foundationgames.phonos.sound.emitter.ForwardingSoundEmitter;
 import io.github.foundationgames.phonos.sound.emitter.SoundSource;
 import io.github.foundationgames.phonos.util.UniqueId;
@@ -14,6 +14,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.particle.ParticleTypes;
@@ -27,9 +28,11 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
@@ -45,8 +48,9 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
 
     private Rocket rocket = null;
 
-    private int channel = 0;
+    private String channel = "";
     private boolean needsAdd = false;
+    private boolean unmigrated = false;
 
     public final boolean[] inputs = new boolean[2];
 
@@ -98,7 +102,28 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
         }
     }
 
-    public void performAction(int action, int data) {
+    public static String cleanChannel(String data) {
+        return data.toUpperCase(Locale.ROOT);
+    }
+
+    public static boolean validateChannel(String data) {
+        return validateChannel(data, null);
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public static boolean validateChannel(String data, @Nullable MutableObject<String> reason) {
+        if (data.length() < 2 || data.length() > 4) {
+            if (reason != null) {
+                reason.setValue("length");
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public void performAction(int action, String data) {
+        if (action == ACTION_LAUNCH && !validateChannel(data)) return;
+
         if (world instanceof ServerWorld sWorld) {
             for (var player : sWorld.getPlayers()) {
                 sWorld.sendToPlayerIfNearby(player,
@@ -117,8 +142,7 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
                 this.rocket.inFlight = true;
 
                 if (world instanceof ServerWorld) {
-                    int channel = MathHelper.clamp(data, 0, RadioStorage.SATELLITE_CHANNEL_COUNT - 1);
-                    this.setAndUpdateChannel(channel);
+                    this.setAndUpdateChannel(data);
                 }
             }
             case ACTION_CRASH -> {
@@ -153,7 +177,7 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
 
     public void onDestroyed() {
         if (world instanceof ServerWorld sWorld) {
-            RadarPoints.get(sWorld).remove(RadioStorage.toSatelliteBand(this.getChannel()), this.pos);
+            RadarPoints.get(sWorld).remove(this.getChannel(), this.pos);
             if (status == Status.IN_ORBIT) {
                 spawnCrashingSatellite();
             } else if (this.rocket != null) {
@@ -193,11 +217,30 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
             inputs[i] = nbt.getBoolean("Input" + i);
         }
 
+        String channel;
+        if (nbt.contains("channel", NbtElement.INT_TYPE)) {
+            unmigrated = true;
+            channel = "N" + nbt.getInt("channel");
+        } else {
+            channel = nbt.getString("channel");
+            unmigrated = nbt.getBoolean("unmigrated");
+        }
+
+        if (unmigrated) {
+            String migrated = SatelliteRadioStorage.convertLegacyChannel(channel);
+            if (migrated != null) {
+                channel = migrated;
+                unmigrated = false;
+            }
+        }
+
         if (this.world == null) {
             this.needsAdd = true;
-            this.channel = nbt.getInt("channel");
+            this.channel = channel;
         } else {
-            this.setAndUpdateChannel(nbt.getInt("channel"));
+            var um = unmigrated;
+            this.setAndUpdateChannel(channel);
+            unmigrated = um;
         }
     }
 
@@ -217,7 +260,10 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
             nbt.putBoolean("Input" + i, inputs[i]);
         }
 
-        nbt.putInt("channel", this.getChannel());
+        nbt.putString("channel", this.getChannel());
+        if (unmigrated) {
+            nbt.putBoolean("unmigrated", true);
+        }
     }
 
     @Override
@@ -249,20 +295,29 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
 
     @Override
     public boolean forwards() {
+        if (world != null && validateChannel(getChannel())) {
+            SatelliteRadioStorage.getInstance(world).keepAlive(getChannel());
+        }
         return true;
     }
 
-    public int getChannel() {
+    public String getChannel() {
         return channel;
     }
 
-    public void setAndUpdateChannel(int channel) {
-        channel = Math.floorMod(channel, RadioStorage.SATELLITE_CHANNEL_COUNT);
-
+    public void setAndUpdateChannel(String channel) {
+        channel = cleanChannel(channel);
+        if (!validateChannel(channel)) {
+            return;
+        }
         if (this.world instanceof ServerWorld sWorld) for (boolean in : this.inputs) if (in) {
-            RadarPoints.get(sWorld).remove(RadioStorage.toSatelliteBand(this.channel), this.pos);
-            RadarPoints.get(sWorld).add(RadioStorage.toSatelliteBand(channel), this.pos);
+            RadarPoints.get(sWorld).remove(this.channel, this.pos);
+            RadarPoints.get(sWorld).add(channel, this.pos);
             break;
+        }
+
+        if (!channel.equals(this.channel)) {
+            unmigrated = false;
         }
 
         this.channel = channel;

@@ -1,4 +1,4 @@
-package io.github.foundationgames.phonos.sound;
+package io.github.foundationgames.phonos.datapack;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

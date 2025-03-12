@@ -75,7 +75,7 @@ public class RadioLoudspeakerBlockEntity extends BlockEntity implements Syncing,
 
     @Override
     public void setAndUpdateChannel(int channel) {
-        channel = Math.floorMod(channel, RadioStorage.RADIO_CHANNEL_COUNT);
+        channel = Math.floorMod(channel, RadioStorage.CHANNEL_COUNT);
 
         var radio = RadioStorage.getInstance(this.world);
 

@@ -20,16 +20,22 @@
     "display.phonos.satellite_station.in_orbit": "ORBIT",
 
     "message.phonos.crash_satellite_station": "Crash the currently orbiting satellite?",
-    "message.phonos.launch_satellite_station.select": "Select a channel (0 - %s) to launch the satellite on.",
+    "message.phonos.launch_satellite_station.select": "Select a channel to launch the satellite on.",
     "message.phonos.launch_satellite_station.launch": "Launch",
     "message.phonos.launch_satellite_station.no_channel": "No channel selected!",
-    "message.phonos.launch_satellite_station.invalid_channel": "Invalid channel selected! Must be between 0 and %s.",
-    "message.phonos.launch_satellite_station.non_numerical_channel": "Channel must be a number between 0 and %s!",
+    "message.phonos.launch_satellite_station.invalid_channel": "Invalid channel name!",
+    "message.phonos.launch_satellite_station.invalid_channel.length": "Invalid channel name: Must be 2-4 characters long!",
     "message.phonos.satellite_launching": "Launch in progress!",
     "message.phonos.no_satellite": "Place a satellite on the launch pad first!",
 
     "command.phonos.radar.none_found": "Found no radio emitters on channel %s.",
+    "command.phonos.radar.none_found.satellite": "Found no satellite emitters on channel '%s'.",
     "command.phonos.radar.success": "Nearest radio emitter located at %s.",
+    "command.phonos.radar.success.satellite": "Nearest satellite emitter located at %s.",
+    "command.phonos.radar.success.all": "Radio emitter located at %s.",
+    "command.phonos.radar.success.satellite.all": "Satellite emitter located at %s.",
+    "command.phonos.list_satellites.none_found": "No satellites in orbit.",
+    "command.phonos.list_satellites.found": "Found satellites:",
 
     "command.phonos.ender_music_box.not_loaded": "Ender Music Boxes are not yet ready.",
     "command.phonos.ender_music_box.inspect.no_upload": "This box has no songs!",
@@ -81,6 +87,9 @@
     "item.phonos.portable_radio": "Portable Radio",
     "item.phonos.portable_satellite_radio": "Portable Satellite Radio",
     "item.phonos.portable_record_player": "Portable Record Player",
+
+    "message.phonos.portable_satellite_radio.select": "Select a channel to listen to.",
+    "message.phonos.portable_satellite_radio.configure": "Configure",
 
     "tooltip.phonos.item.glowing": "Glowing",
     "tooltip.phonos.item.noise_cancelling": "Noise Cancelling ON",

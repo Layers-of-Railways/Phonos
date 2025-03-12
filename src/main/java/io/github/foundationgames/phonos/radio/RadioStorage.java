@@ -18,10 +18,7 @@ import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
 public class RadioStorage {
-    public static final int RADIO_CHANNEL_COUNT = 30;
-    public static final int SATELLITE_CHANNEL_COUNT = 30;
-
-    public static final int CHANNEL_COUNT = RADIO_CHANNEL_COUNT + SATELLITE_CHANNEL_COUNT;
+    public static final int CHANNEL_COUNT = 30;
 
     public static final LongList RADIO_EMITTERS = new LongArrayList();
 
@@ -31,10 +28,6 @@ public class RadioStorage {
     private static final RadioStorage INVALID = new RadioStorage() {};
 
     private final Channel[] channels;
-
-    public static int toSatelliteBand(int satelliteChannel) {
-        return satelliteChannel + RADIO_CHANNEL_COUNT;
-    }
 
     public RadioStorage() {
         channels = new Channel[CHANNEL_COUNT];
@@ -119,14 +112,6 @@ public class RadioStorage {
         @Override
         public long emitterId() {
             return this.emitterId;
-        }
-
-        public boolean isRadio() {
-            return channel < RADIO_CHANNEL_COUNT;
-        }
-
-        public boolean isSatellite() {
-            return channel >= RADIO_CHANNEL_COUNT;
         }
 
         @Override

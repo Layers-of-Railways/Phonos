@@ -3,6 +3,10 @@ package io.github.foundationgames.phonos.sound.emitter;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
+/**
+ * An object in the network that transmits sound further through the network.
+ * Does not play sound itself unless it is also a {@link SoundSource}
+ */
 public interface SoundEmitter {
     long emitterId();
 

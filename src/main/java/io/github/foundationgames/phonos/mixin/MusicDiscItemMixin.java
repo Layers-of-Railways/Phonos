@@ -1,6 +1,6 @@
 package io.github.foundationgames.phonos.mixin;
 
-import io.github.foundationgames.phonos.sound.MusicDiscOverrides;
+import io.github.foundationgames.phonos.datapack.MusicDiscOverrides;
 import net.minecraft.item.MusicDiscItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

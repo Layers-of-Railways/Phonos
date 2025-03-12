@@ -1,6 +1,7 @@
 package io.github.foundationgames.phonos.world.command;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.entity.AbstractOutputBlockEntity;
@@ -9,6 +10,8 @@ import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.RadarPoints;
+import it.unimi.dsi.fastutil.longs.LongList;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.BlockPosArgumentType;
@@ -21,6 +24,9 @@ import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+
+import java.util.Collection;
+import java.util.function.Function;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -53,8 +59,35 @@ public class PhonosCommands {
                 IntegerArgumentType.integer(0, RadioStorage.CHANNEL_COUNT - 1))
                 .executes(ctx -> radar(
                     ctx.getSource(),
-                    ctx.getArgument("channel", Integer.class)
+                    ctx.getArgument("channel", Integer.class),
+                    false
                 ))
+                .then(literal("all")
+                    .executes(ctx -> radar(
+                        ctx.getSource(),
+                        ctx.getArgument("channel", Integer.class),
+                        true
+                    ))
+                )
+            )
+            .then(literal("satellite")
+                .then(argument("channel", StringArgumentType.string())
+                    .executes(ctx -> radar(
+                        ctx.getSource(),
+                        ctx.getArgument("channel", String.class),
+                        false
+                    ))
+                    .then(literal("all")
+                        .executes(ctx -> radar(
+                            ctx.getSource(),
+                            ctx.getArgument("channel", String.class),
+                            true
+                        ))
+                    )
+                )
+            )
+            .then(literal("list_satellites")
+                .executes(ctx -> list_satellites(ctx.getSource()))
             );
     }
 
@@ -174,36 +207,84 @@ public class PhonosCommands {
         return 1;
     }
 
-    public static int radar(ServerCommandSource source, int channel) {
+    public static int radar(ServerCommandSource source, int channel, boolean all) {
+        return genericRadar(source, rp -> rp.getPoints(channel), Text.translatable("command.phonos.radar.none_found", channel), "command.phonos.radar.success", all);
+    }
+
+    public static int radar(ServerCommandSource source, String channel, boolean all) {
+        return genericRadar(source, rp -> rp.getPoints(channel), Text.translatable("command.phonos.radar.none_found.satellite", channel), "command.phonos.radar.success.satellite", all);
+    }
+
+    private static int genericRadar(ServerCommandSource source, Function<RadarPoints, LongSet> pointSupplier, Text failText, String successText, boolean all) {
         var world = source.getWorld();
         var origin = source.getPosition();
 
         var radar = RadarPoints.get(world);
         var pos = new BlockPos.Mutable();
 
-        var result = new BlockPos.Mutable();
-        double minSqDist = Double.POSITIVE_INFINITY;
+        var points = pointSupplier.apply(radar);
+        if (points == null || points.isEmpty()) {
+            source.sendError(failText);
 
-        var points = radar.getPoints(channel);
-        if (points == null || points.size() == 0) {
-            source.sendError(Text.translatable("command.phonos.radar.none_found", channel));
-
-            return 1;
+            return 0;
         }
 
-        for (long l : radar.getPoints(channel)) {
-            pos.set(l);
+        if (all) {
+            LongList forSorting = LongList.of(points.toLongArray());
+            forSorting.sort((a, b) -> {
+                pos.set(a);
+                double distA = origin.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ());
 
-            double sqDist = origin.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ());
-            if (sqDist < minSqDist) {
-                result.set(pos);
-                minSqDist = sqDist;
+                pos.set(b);
+                double distB = origin.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ());
+
+                return Double.compare(distA, distB);
+            });
+            for (long l : forSorting) {
+                pos.set(l);
+                sendCoordinates(source, successText+".all", pos.up());
             }
+        } else {
+            var result = new BlockPos.Mutable();
+            double minSqDist = Double.POSITIVE_INFINITY;
+
+            for (long l : points) {
+                pos.set(l);
+
+                double sqDist = origin.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ());
+                if (sqDist < minSqDist) {
+                    result.set(pos);
+                    minSqDist = sqDist;
+                }
+            }
+
+            sendCoordinates(source, successText, result.up());
         }
 
-        sendCoordinates(source, "command.phonos.radar.success", result.up());
+        return points.size();
+    }
 
-        return 1;
+    public static int list_satellites(ServerCommandSource source) {
+        var world = source.getWorld();
+        var radar = RadarPoints.get(world);
+        var satelliteChannels = radar.getSatelliteChannels();
+
+        if (satelliteChannels.isEmpty()) {
+            source.sendError(Text.translatable("command.phonos.list_satellites.none_found"));
+            return 0;
+        }
+
+        source.sendFeedback(() -> Text.translatable("command.phonos.list_satellites.found"), false);
+        for (var entry : satelliteChannels) {
+            source.sendFeedback(
+                () -> Text.literal("  "+entry).styled(style -> style.withClickEvent(
+                    new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/phonos radar satellite \""+entry+"\" all")
+                )),
+                false
+            );
+        }
+
+        return satelliteChannels.size();
     }
 
     private static void sendCoordinates(ServerCommandSource source, String key, BlockPos pos) {

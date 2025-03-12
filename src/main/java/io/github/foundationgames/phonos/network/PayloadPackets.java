@@ -8,6 +8,7 @@ import io.github.foundationgames.phonos.block.entity.EnderMusicBoxBlockEntity;
 import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.config.serializers.NetworkConfigSerializer;
+import io.github.foundationgames.phonos.item.PortableSatelliteRadioItem;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
 import io.github.foundationgames.phonos.util.PhonosUtil;
@@ -15,6 +16,7 @@ import io.github.foundationgames.phonos.world.sound.data.SoundData;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.inventory.StackReference;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
@@ -76,7 +78,7 @@ public final class PayloadPackets {
         ServerPlayNetworking.registerGlobalReceiver(Phonos.id("request_satellite_action"), (server, player, handler, buf, responseSender) -> {
             var pos = buf.readBlockPos();
             int actionId = buf.readInt();
-            int data = buf.readInt();
+            String data = buf.readString(256);
 
             server.execute(() -> {
                 var world = player.getWorld();
@@ -138,6 +140,24 @@ public final class PayloadPackets {
 
             Phonos.LOG.warn("Failed to find config field with name {}", name);
         }));
+
+        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("configure_portable_satellite_radio_channel"), (server, player, handler, buf, responseSender) -> {
+            var channel = buf.readString(256);
+            channel = SatelliteStationBlockEntity.cleanChannel(channel);
+
+            if (!SatelliteStationBlockEntity.validateChannel(channel)) {
+                Phonos.LOG.warn("Player {} tried to set invalid channel {}", player, channel);
+                return;
+            }
+
+            String finalChannel = channel;
+            server.execute(() -> {
+                ItemStack handStack = player.getMainHandStack();
+                if (handStack.getItem() instanceof PortableSatelliteRadioItem satelliteRadio) {
+                    satelliteRadio.setChannel(handStack, finalChannel);
+                }
+            });
+        });
     }
 
     public static void sendSoundPlay(ServerPlayerEntity player, SoundData data, SoundEmitterTree tree) {
@@ -206,11 +226,11 @@ public final class PayloadPackets {
         ServerPlayNetworking.send(player, Phonos.id("audio_stream_end"), buf);
     }
 
-    public static Packet<ClientPlayPacketListener> pktSatelliteAction(SatelliteStationBlockEntity be, int action, int data) {
+    public static Packet<ClientPlayPacketListener> pktSatelliteAction(SatelliteStationBlockEntity be, int action, String data) {
         var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeBlockPos(be.getPos());
         buf.writeInt(action);
-        buf.writeInt(data);
+        buf.writeString(data, 256);
 
         return ServerPlayNetworking.createS2CPacket(Phonos.id("satellite_action"), buf);
     }

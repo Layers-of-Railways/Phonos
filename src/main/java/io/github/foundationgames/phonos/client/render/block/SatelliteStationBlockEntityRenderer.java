@@ -77,7 +77,7 @@ public class SatelliteStationBlockEntityRenderer implements BlockEntityRenderer<
         matrices.translate(0, 10.75, 0);
 
         var text = switch (entity.getStatus()) {
-            case IN_ORBIT -> RadioLoudspeakerBlockEntityRenderer.getTextForChannel(entity.getChannel());
+            case IN_ORBIT -> Text.literal(entity.getChannel());
             case LAUNCHING -> TEXT_LAUNCHING;
             default -> {
                 if (entity.getRocket() != null) {

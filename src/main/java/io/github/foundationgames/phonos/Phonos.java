@@ -2,6 +2,7 @@ package io.github.foundationgames.phonos;
 
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
+import io.github.foundationgames.phonos.datapack.SatelliteMigrations;
 import io.github.foundationgames.phonos.item.ItemGroupQueue;
 import io.github.foundationgames.phonos.item.PhonosItems;
 import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingServerPlayerEntity;
@@ -9,7 +10,8 @@ import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.recipe.ItemGlowRecipe;
-import io.github.foundationgames.phonos.sound.MusicDiscOverrides;
+import io.github.foundationgames.phonos.satellite_radio.SatelliteRadioStorage;
+import io.github.foundationgames.phonos.datapack.MusicDiscOverrides;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SecondaryEmitterHolder;
@@ -24,7 +26,6 @@ import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.data.SoundDataTypes;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -86,6 +87,7 @@ public class Phonos implements ModInitializer {
 
         ServerLifecycleEvents.SERVER_STARTING.register(e -> {
             RadioStorage.serverReset();
+            SatelliteRadioStorage.serverReset();
             SoundStorage.serverReset();
             SoundEmitterStorage.serverReset();
             ServerOutgoingStreamHandler.reset();
@@ -120,7 +122,15 @@ public class Phonos implements ModInitializer {
                 .registerPlayerWaitingForResume(player);
         }));
 
-        ServerTickEvents.END_WORLD_TICK.register(world -> SoundStorage.getInstance(world).tick(world));
+        ServerTickEvents.END_WORLD_TICK.register(world -> {
+            if (world == null) return;
+
+            SoundStorage.getInstance(world).tick(world);
+
+            if ((world.getTime() & 127) == 0) { // every 127 ticks (6.35 seconds)
+                SatelliteRadioStorage.getInstance(world).gc();
+            }
+        });
         ServerTickEvents.START_SERVER_TICK.register(ServerOutgoingStreamHandler::tick);
 
         ServerBlockEntityEvents.BLOCK_ENTITY_LOAD.register((be, world) -> {
@@ -147,6 +157,7 @@ public class Phonos implements ModInitializer {
         });
 
         ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(MusicDiscOverrides.ReloadListener.INSTANCE);
+        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(SatelliteMigrations.ReloadListener.INSTANCE);
 
         DispenserBlock.registerBehavior(PhonosItems.HEADSET, new FallibleItemDispenserBehavior() {
             @Override
