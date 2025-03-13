@@ -40,18 +40,18 @@ public abstract class RadioReceiverBlock extends HorizontalFacingBlock implement
             return ActionResult.PASS;
         }
 
-        if (side == facing) {
-            if (!world.isClient()) {
-                var result = onUseFace(state, world, pos, player, hand, hit);
-                if (result.isAccepted()) {
-                    return result;
+        if (player.canModifyBlocks()) {
+            if (side == facing) {
+                if (!world.isClient()) {
+                    var result = onUseFace(state, world, pos, player, hand, hit);
+                    if (result.isAccepted()) {
+                        return result;
+                    }
                 }
+
+                return ActionResult.SUCCESS;
             }
 
-            return ActionResult.SUCCESS;
-        }
-
-        if (player.canModifyBlocks()) {
             if (!world.isClient() && world.getBlockEntity(pos) instanceof AbstractConnectionHubBlockEntity be) {
                 if (PhonosUtil.holdingAudioCable(player)) {
                     return ActionResult.PASS;
@@ -66,9 +66,11 @@ public abstract class RadioReceiverBlock extends HorizontalFacingBlock implement
                     return inputBlock.tryRemoveConnection(state, world, pos, hit);
                 }
             }
+
+            return ActionResult.success(side == facing.getOpposite());
         }
 
-        return ActionResult.success(side == facing.getOpposite());
+        return ActionResult.PASS;
     }
 
     @Override

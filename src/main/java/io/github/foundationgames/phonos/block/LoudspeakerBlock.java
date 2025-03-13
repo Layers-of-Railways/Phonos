@@ -41,7 +41,11 @@ public class LoudspeakerBlock extends AbstractLoudspeakerBlock implements InputB
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (!world.isClient() && player.canModifyBlocks() && hit.getSide().equals(state.get(FACING).getOpposite())) {
+        if (!player.canModifyBlocks()) {
+            return ActionResult.PASS;
+        }
+
+        if (!world.isClient() && hit.getSide().equals(state.get(FACING).getOpposite())) {
             if (!PhonosUtil.holdingAudioCable(player)) {
                 return tryRemoveConnection(state, world, pos, hit);
             } else {

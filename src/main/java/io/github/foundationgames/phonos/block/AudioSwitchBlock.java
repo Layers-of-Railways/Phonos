@@ -66,9 +66,11 @@ public class AudioSwitchBlock extends HorizontalFacingBlock implements BlockEnti
                     return tryRemoveConnection(state, world, pos, hit);
                 }
             }
+
+            return ActionResult.SUCCESS;
         }
 
-        return ActionResult.SUCCESS;
+        return ActionResult.PASS;
     }
 
     @Override

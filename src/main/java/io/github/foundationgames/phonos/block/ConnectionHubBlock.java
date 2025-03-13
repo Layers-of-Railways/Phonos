@@ -72,9 +72,11 @@ public class ConnectionHubBlock extends FacingBlock implements BlockEntityProvid
                     return tryRemoveConnection(state, world, pos, hit);
                 }
             }
+
+            return ActionResult.success(side == facing);
         }
 
-        return ActionResult.success(side == facing);
+        return ActionResult.PASS;
     }
 
     @Override

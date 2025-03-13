@@ -57,14 +57,14 @@ public class ElectronicJukeboxBlock extends JukeboxBlock implements BlockEntityP
             return ActionResult.PASS;
         }
 
-        var stack = player.getStackInHand(hand);
-        if (!state.get(HAS_RECORD) && stack.getItem() instanceof MusicDiscItem) {
-            return this.useMusicDisc(world, pos, state, stack, player);
-        } else if (side == Direction.UP) {
-            return super.onUse(state, world, pos, player, hand, hit);
-        }
-
         if (player.canModifyBlocks()) {
+            var stack = player.getStackInHand(hand);
+            if (!state.get(HAS_RECORD) && stack.getItem() instanceof MusicDiscItem) {
+                return this.useMusicDisc(world, pos, state, stack, player);
+            } else if (side == Direction.UP) {
+                return super.onUse(state, world, pos, player, hand, hit);
+            }
+
             if (!world.isClient() && world.getBlockEntity(pos) instanceof ElectronicJukeboxBlockEntity be) {
                 if (!PhonosUtil.holdingAudioCable(player) && be.outputs.tryRemoveConnection(world, hit, !player.isCreative())) {
                     be.sync();
@@ -73,9 +73,11 @@ public class ElectronicJukeboxBlock extends JukeboxBlock implements BlockEntityP
                     return ActionResult.PASS;
                 }
             }
+
+            return ActionResult.SUCCESS;
         }
 
-        return ActionResult.SUCCESS;
+        return ActionResult.PASS;
     }
 
     @Override
