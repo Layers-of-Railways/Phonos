@@ -1,7 +1,6 @@
 plugins {
 	id 'fabric-loom' version '1.7-SNAPSHOT'
 	id 'maven-publish'
-	id 'org.ysb33r.ivypot' version '2.0.2'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -11,17 +10,7 @@ archivesBaseName = project.archives_base_name
 version = "${project.mod_version}+${project.minecraft_version}"
 group = project.maven_group
 
-ivypot {
-	repoDetails {
-		root = '.offline-repo'
-	}
-}
-
 repositories {
-	maven {
-		name = 'minecraft-repo'
-		url = 'https://libraries.minecraft.net/'
-	}
 	maven { url "https://api.modrinth.com/maven" }
 	maven { url = 'https://maven.terraformersmc.com/' }
 	maven { url = "https://maven.maxhenkel.de/repository/public" } // Simple Voice Chat
@@ -45,7 +34,6 @@ repositories {
 			includeGroup 'com.unascribed'
 		}
 	}
-	flatDir name: 'local_libs', dirs: "$projectDir/local_repo"
 }
 
 dependencies {
