@@ -8,8 +8,6 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 
 public class EnderMusicBoxBlockEntityRenderer extends CableOutputBlockEntityRenderer<EnderMusicBoxBlockEntity> {
 
@@ -44,40 +42,35 @@ public class EnderMusicBoxBlockEntityRenderer extends CableOutputBlockEntityRend
             // Render quad
             var vc = vertexConsumers.getBuffer(RenderLayer.getEntityCutout(Phonos.id("textures/entity/ender_music_box_animated.png")));
 
-            Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-            Matrix3f matrix3f = matrices.peek().getNormalMatrix();
+            MatrixStack.Entry entry = matrices.peek();
 
-            vc.vertex(matrix4f, -0.5f, -0.5f, 0)
+            vc.vertex(entry, -0.5f, -0.5f, 0)
                 .color(255, 255, 255, 255)
                 .texture(0, animIndex * 0.25f)
                 .overlay(overlay)
                 .light(15728880)
-                .normal(matrix3f, 0, 1, 0)
-                .next();
+                .normal(entry, 0, 1, 0);
 
-            vc.vertex(matrix4f, -0.5f, 0.5f, 0)
+            vc.vertex(entry, -0.5f, 0.5f, 0)
                 .color(255, 255, 255, 255)
                 .texture(0, (1 + animIndex) * 0.25f)
                 .overlay(overlay)
                 .light(15728880)
-                .normal(matrix3f, 0, 1, 0)
-                .next();
+                .normal(entry, 0, 1, 0);
 
-            vc.vertex(matrix4f, 0.5f, 0.5f, 0)
+            vc.vertex(entry, 0.5f, 0.5f, 0)
                 .color(255, 255, 255, 255)
                 .texture(1, (1 + animIndex) * 0.25f)
                 .overlay(overlay)
                 .light(15728880)
-                .normal(matrix3f, 0, 1, 0)
-                .next();
+                .normal(entry, 0, 1, 0);
 
-            vc.vertex(matrix4f, 0.5f, -0.5f, 0)
+            vc.vertex(entry, 0.5f, -0.5f, 0)
                 .color(255, 255, 255, 255)
                 .texture(1, animIndex * 0.25f)
                 .overlay(overlay)
                 .light(15728880)
-                .normal(matrix3f, 0, 1, 0)
-                .next();
+                .normal(entry, 0, 1, 0);
         }
 
         matrices.pop();

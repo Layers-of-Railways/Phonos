@@ -18,6 +18,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
@@ -202,8 +203,8 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.readNbt(nbt, registryLookup);
 
         this.status = Status.values()[nbt.getInt("status")];
 
@@ -245,8 +246,8 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.writeNbt(nbt, registryLookup);
 
         nbt.putInt("status", this.status.ordinal());
 
@@ -267,9 +268,9 @@ public class SatelliteStationBlockEntity extends BlockEntity implements Syncing,
     }
 
     @Override
-    public NbtCompound toInitialChunkDataNbt() {
+    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
         NbtCompound nbt = new NbtCompound();
-        this.writeNbt(nbt);
+        this.writeNbt(nbt, registryLookup);
         return nbt;
     }
 

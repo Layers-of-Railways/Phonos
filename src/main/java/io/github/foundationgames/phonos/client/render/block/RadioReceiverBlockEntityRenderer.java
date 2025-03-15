@@ -8,6 +8,7 @@ import net.minecraft.client.render.TexturedRenderLayers;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.OrderedText;
 import net.minecraft.util.math.RotationAxis;
 
 import static io.github.foundationgames.phonos.client.render.block.MicrophoneBaseBlockEntityRenderer.renderBakedItemModel;

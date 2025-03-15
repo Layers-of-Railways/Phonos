@@ -9,6 +9,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.ColorHelper;
 
 import static io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClientPlayerEntity.State.WIRELESS;
 
@@ -35,23 +36,20 @@ public class HeadsetModel extends BasicModel {
         this.innerTube.visible = false;
 
         var buffer = buffers.getBuffer(RenderLayer.getEntityCutoutNoCull(texture));
-        this.render(matrices, buffer, light, overlay, 1, 1, 1, 1);
+        this.render(matrices, buffer, light, overlay, -1);
 
         this.main.visible = false;
         this.microphone.visible = false;
         this.innerTube.visible = true;
 
         int color = item.getColor(stack);
-        float r = ((color >> 16) & 0xFF) / 255f;
-        float g = ((color >> 8) & 0xFF) / 255f;
-        float b = (color & 0xFF) / 255f;
 
-        this.render(matrices, buffer, light, overlay, r, g, b, 1);
+        this.render(matrices, buffer, light, overlay, ColorHelper.Argb.fullAlpha(color));
 
         if (item.isGlowing(stack)) {
             buffer = buffers.getBuffer(RenderLayer.getEyes(texture));
 
-            this.render(matrices, buffer, light, overlay, r, g, b, 1);
+            this.render(matrices, buffer, light, overlay, ColorHelper.Argb.fullAlpha(color));
         }
 
         matrices.pop();

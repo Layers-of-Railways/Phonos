@@ -1,11 +1,7 @@
 package io.github.foundationgames.phonos.block.entity;
 
 import io.github.foundationgames.phonos.block.PhonosBlocks;
-import io.github.foundationgames.phonos.block.RadioReceiverBlock;
 import io.github.foundationgames.phonos.block.SatelliteReceiverBlock;
-import io.github.foundationgames.phonos.radio.RadioDevice;
-import io.github.foundationgames.phonos.radio.RadioMetadata;
-import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.satellite_radio.SatelliteRadioDevice;
 import io.github.foundationgames.phonos.satellite_radio.SatelliteRadioStorage;
 import io.github.foundationgames.phonos.util.UniqueId;
@@ -13,18 +9,17 @@ import io.github.foundationgames.phonos.world.RadarPoints;
 import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 public class SatelliteReceiverBlockEntity extends AbstractConnectionHubBlockEntity implements SatelliteRadioDevice.Receiver {
@@ -41,8 +36,8 @@ public class SatelliteReceiverBlockEntity extends AbstractConnectionHubBlockEnti
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.readNbt(nbt, registryLookup);
 
         String channel;
         if (nbt.contains("channel", NbtElement.INT_TYPE)) {
@@ -72,8 +67,8 @@ public class SatelliteReceiverBlockEntity extends AbstractConnectionHubBlockEnti
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.writeNbt(nbt, registryLookup);
 
         nbt.putString("channel", this.getChannel());
         if (unmigrated) {

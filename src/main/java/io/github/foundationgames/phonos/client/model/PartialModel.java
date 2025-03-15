@@ -1,7 +1,6 @@
 package io.github.foundationgames.phonos.client.model;
 
 import io.github.foundationgames.phonos.Phonos;
-import net.fabricmc.fabric.api.client.model.BakedModelManagerHelper;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.minecraft.client.MinecraftClient;
@@ -30,7 +29,7 @@ public class PartialModel {
         ALL.add(this);
     }
 
-    public static void onModelRegistry(ResourceManager manager, Consumer<Identifier> out) {
+    public static void onModelRegistry(Consumer<Identifier> out) {
         for (PartialModel partial : ALL)
             out.accept(partial.getLocation());
 
@@ -39,7 +38,7 @@ public class PartialModel {
 
     public static void onModelBake(BakedModelManager manager) {
         for (PartialModel partial : ALL)
-            partial.set(BakedModelManagerHelper.getModel(manager, partial.getLocation()));
+            partial.set(manager.getModel(partial.getLocation()));
     }
 
     protected void set(BakedModel bakedModel) {

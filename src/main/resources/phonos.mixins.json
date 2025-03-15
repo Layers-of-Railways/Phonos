@@ -4,7 +4,8 @@
   "package": "io.github.foundationgames.phonos.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "MusicDiscItemMixin",
+    "JukeboxSongMixin",
+    "MixinPersistentStateManager",
     "ServerPlayerEntityMixin",
     "compat.LocationSoundPacketAccessor",
     "compat.SoundPacketAccessor"

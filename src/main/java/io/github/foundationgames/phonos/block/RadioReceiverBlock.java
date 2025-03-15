@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.block;
 
+import com.mojang.serialization.MapCodec;
 import io.github.foundationgames.phonos.block.entity.AbstractConnectionHubBlockEntity;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.sound.block.InputBlock;
@@ -9,9 +10,11 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -28,11 +31,31 @@ public abstract class RadioReceiverBlock extends HorizontalFacingBlock implement
         setDefaultState(getDefaultState().with(FACING, Direction.NORTH));
     }
 
-    protected abstract ActionResult onUseFace(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit);
+    @Override
+    protected abstract MapCodec<? extends RadioReceiverBlock> getCodec();
+
+    protected abstract ItemActionResult onUseFace(BlockState state, World world, BlockPos pos, PlayerEntity player, ItemStack stack, BlockHitResult hit);
 
     @Override
-    @SuppressWarnings("deprecation")
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        var side = hit.getSide();
+        var facing = state.get(FACING);
+
+        if (player.canModifyBlocks() && side == facing) {
+            if (!world.isClient()) {
+                var result = onUseFace(state, world, pos, player, stack, hit);
+                if (result.isAccepted())
+                    return result;
+            }
+
+            return ItemActionResult.SUCCESS;
+        }
+
+        return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+    }
+
+    @Override
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         var side = hit.getSide();
         var facing = state.get(FACING);
 
@@ -43,9 +66,9 @@ public abstract class RadioReceiverBlock extends HorizontalFacingBlock implement
         if (player.canModifyBlocks()) {
             if (side == facing) {
                 if (!world.isClient()) {
-                    var result = onUseFace(state, world, pos, player, hand, hit);
+                    var result = onUseFace(state, world, pos, player, ItemStack.EMPTY, hit);
                     if (result.isAccepted()) {
-                        return result;
+                        return result.toActionResult();
                     }
                 }
 
@@ -74,8 +97,7 @@ public abstract class RadioReceiverBlock extends HorizontalFacingBlock implement
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (!newState.isOf(this) && world.getBlockEntity(pos) instanceof AbstractConnectionHubBlockEntity be) {
             be.onDestroyed();
         }
@@ -84,8 +106,7 @@ public abstract class RadioReceiverBlock extends HorizontalFacingBlock implement
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return SHAPE;
     }
 

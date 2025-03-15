@@ -1,17 +1,17 @@
 package io.github.foundationgames.phonos.mixin;
 
 import io.github.foundationgames.phonos.datapack.MusicDiscOverrides;
-import net.minecraft.item.MusicDiscItem;
+import net.minecraft.block.jukebox.JukeboxSong;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(MusicDiscItem.class)
-public class MusicDiscItemMixin {
-    @Inject(method = "getSongLengthInTicks", at = @At("RETURN"), cancellable = true)
-    private void overrideLength(CallbackInfoReturnable<Integer> cir) {
-        Integer length = MusicDiscOverrides.getTickLength((MusicDiscItem)(Object)this);
+@Mixin(JukeboxSong.class)
+public class JukeboxSongMixin {
+    @Inject(method = "lengthInSeconds", at = @At("RETURN"), cancellable = true)
+    private void overrideLength(CallbackInfoReturnable<Float> cir) {
+        Float length = MusicDiscOverrides.getSecondLength((JukeboxSong) (Object)this);
         if(length != null) cir.setReturnValue(length);
     }
 }

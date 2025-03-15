@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.block;
 
+import com.mojang.serialization.MapCodec;
 import io.github.foundationgames.phonos.world.sound.block.SoundDataHandler;
 import io.github.foundationgames.phonos.world.sound.data.NoteBlockSoundData;
 import io.github.foundationgames.phonos.world.sound.data.SoundData;
@@ -15,12 +16,15 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class AbstractLoudspeakerBlock extends HorizontalFacingBlock implements SoundDataHandler {
+public abstract class AbstractLoudspeakerBlock extends HorizontalFacingBlock implements SoundDataHandler {
     public AbstractLoudspeakerBlock(Settings settings) {
         super(settings);
 
         setDefaultState(getDefaultState().with(FACING, Direction.NORTH));
     }
+
+    @Override
+    protected abstract MapCodec<? extends AbstractLoudspeakerBlock> getCodec();
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {

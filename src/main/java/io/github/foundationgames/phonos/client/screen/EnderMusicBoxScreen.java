@@ -45,11 +45,10 @@ public class EnderMusicBoxScreen extends Screen {
 
         this.addDrawableChild(this.streamList = new EnderMusicBoxStreamList(
             this.client,
-            this.width, this.height,
-            25, this.height - 40,
+            this.width, this.height - 40,
+            25,
             20
         ));
-        this.streamList.setRenderSelection(false);
 
         this.fileName = getDragPrompt();
 
@@ -91,8 +90,6 @@ public class EnderMusicBoxScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context);
-
         super.render(context, mouseX, mouseY, delta);
 
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 8, 0xFFFFFF);

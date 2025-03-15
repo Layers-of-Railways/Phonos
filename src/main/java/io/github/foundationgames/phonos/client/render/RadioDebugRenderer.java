@@ -89,10 +89,9 @@ public class RadioDebugRenderer {
                     double y1 = Math.cos(vert * Math.PI / verticalPoints);
                     double z1 = Math.sin(horiz * 2 * Math.PI / horizontalPoints) * Math.sin(vert * Math.PI / verticalPoints);
 
-                    var matrix4f = matrices.peek().getPositionMatrix();
-                    var matrix3f = matrices.peek().getNormalMatrix();
+                    var matEntry = matrices.peek();
 
-                    vc.vertex(matrix4f, (float) (x1*range), (float) (y1*range), (float) (z1*range)).color(r, g, b, 1.0f).normal(matrix3f, 0, 1, 0).next();
+                    vc.vertex(matEntry, (float) (x1*range), (float) (y1*range), (float) (z1*range)).color(r, g, b, 1.0f).normal(matEntry, 0, 1, 0);
                 }
             }
 
@@ -109,12 +108,11 @@ public class RadioDebugRenderer {
                     double y1 = special ? 0 : Math.cos(actualVert * Math.PI / verticalPoints);
                     double z1 = Math.sin(horiz * 2 * Math.PI / horizontalPoints) * Math.sin(actualVert * Math.PI / verticalPoints);
 
-                    var matrix4f = matrices.peek().getPositionMatrix();
-                    var matrix3f = matrices.peek().getNormalMatrix();
+                    var matEntry = matrices.peek();
 
                     float horizRange = special ? 6 : range;
 
-                    vc.vertex(matrix4f, (float) (x1*horizRange), (float) (y1*range), (float) (z1*horizRange)).color(r, g, b, 1.0f).normal(matrix3f, 0, 1, 0).next();
+                    vc.vertex(matEntry, (float) (x1*horizRange), (float) (y1*range), (float) (z1*horizRange)).color(r, g, b, 1.0f).normal(matEntry, 0, 1, 0);
                 }
             }
 

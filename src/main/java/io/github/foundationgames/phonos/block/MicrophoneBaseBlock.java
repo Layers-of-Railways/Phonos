@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.block;
 
+import com.mojang.serialization.MapCodec;
 import io.github.foundationgames.phonos.block.entity.MicrophoneBaseBlockEntity;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.util.VoxelShaper;
@@ -18,7 +19,6 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -29,6 +29,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockEntityProvider {
+    public static final MapCodec<MicrophoneBaseBlock> CODEC = createCodec(MicrophoneBaseBlock::new);
 
     public static final BooleanProperty POWERED = Properties.POWERED;
 
@@ -46,6 +47,11 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
     }
 
     @Override
+    protected MapCodec<? extends HorizontalFacingBlock> getCodec() {
+        return CODEC;
+    }
+
+    @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         super.appendProperties(builder.add(FACING, POWERED));
     }
@@ -57,8 +63,7 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return SHAPE.get(state.get(FACING));
     }
 
@@ -88,20 +93,17 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public boolean emitsRedstonePower(BlockState state) {
+    protected boolean emitsRedstonePower(BlockState state) {
         return true;
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public int getStrongRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
+    protected int getStrongRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
         return state.getWeakRedstonePower(world, pos, direction);
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public int getWeakRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
+    protected int getWeakRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
         if (state.get(POWERED) && direction == Direction.UP) {
             return 15;
         }
@@ -109,8 +111,7 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
+    protected void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
         if (state.isOf(oldState.getBlock())) {
             return;
         }
@@ -122,8 +123,7 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if (!PhonosVoicechatProxy.isLoaded()) {
             if (player instanceof ServerPlayerEntity serverPlayer) {
                 serverPlayer.sendMessageToClient(Text.translatable("block.phonos.microphone_base.voicechat_not_installed")
@@ -173,12 +173,11 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
             }
         }
 
-        return super.onUse(state, world, pos, player, hand, hit);
+        return super.onUse(state, world, pos, player, hit);
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (newState.isOf(this)) {
             return;
         }

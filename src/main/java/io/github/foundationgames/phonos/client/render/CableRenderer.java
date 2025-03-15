@@ -76,7 +76,7 @@ public class CableRenderer {
             lightPos.set(cableStPt.x, cableStPt.y, cableStPt.z);
             startLight = WorldRenderer.getLightmapCoordinates(world, lightPos);
 
-            cableEndModel.render(matrices, immediate, startLight, overlay, 1, 1, 1, 1);
+            cableEndModel.render(matrices, immediate, startLight, overlay);
         matrices.pop();
 
         matrices.push();
@@ -85,7 +85,7 @@ public class CableRenderer {
             lightPos.set(cableEnPt.x, cableEnPt.y, cableEnPt.z);
             endLight = WorldRenderer.getLightmapCoordinates(world, lightPos);
 
-            cableEndModel.render(matrices, immediate, endLight, overlay, 1, 1, 1, 1);
+            cableEndModel.render(matrices, immediate, endLight, overlay);
         matrices.pop();
         // ---
 
@@ -94,13 +94,13 @@ public class CableRenderer {
         int segments = Math.max((int) Math.ceil(4 * length * detail), 1);
 
         if (conn.isStatic() && vboContainer != null) { // Vbo can be used for this connection
-            if (vboContainer.rebuild) {
+            if (vboContainer.rebuild && vboContainer.wipBuilder != null) {
                 if (bounds != null) {
                     bounds.fit(cableStPt.x, cableStPt.y, cableStPt.z);
                     bounds.fit(cableEnPt.x, cableEnPt.y, cableEnPt.z);
                 }
 
-                BufferBuilder buffer = Tessellator.getInstance().getBuffer();
+                BufferBuilder buffer = vboContainer.wipBuilder;
                 matrices = new MatrixStack();
 
                 buildCableGeometry(conn, matrices, buffer, segments, length, detail, startLight, endLight, overlay);
@@ -136,9 +136,9 @@ public class CableRenderer {
         matrices.push();
 
         float vOffset = conn.getColor() != null ? 0.125f : 0;
-        float r = conn.getColor() != null ? conn.getColor().getColorComponents()[0] : 1;
-        float g = conn.getColor() != null ? conn.getColor().getColorComponents()[1] : 1;
-        float b = conn.getColor() != null ? conn.getColor().getColorComponents()[2] : 1;
+        float r = conn.getColor() != null ? ((conn.getColor().getEntityColor() >> 16) & 0xFF) / 255f : 1;
+        float g = conn.getColor() != null ? ((conn.getColor().getEntityColor() >>  8) & 0xFF) / 255f : 1;
+        float b = conn.getColor() != null ? ((conn.getColor().getEntityColor()      ) & 0xFF) / 255f : 1;
 
         final float texUWid = (float) (0.25 / detail);
 
@@ -194,13 +194,13 @@ public class CableRenderer {
                 var nml = cableNormal[i];
 
                 buffer.vertex(currCableStart[i].x, currCableStart[i].y, currCableStart[i].z).color(r, g, b, 1)
-                        .texture(texUWid, 0.3125f + vOffset2).overlay(overlay).light(segStartLight).normal(nml.x, nml.y, nml.z).next();
+                        .texture(texUWid, 0.3125f + vOffset2).overlay(overlay).light(segStartLight).normal(nml.x, nml.y, nml.z);
                 buffer.vertex(currCableEnd[i].x, currCableEnd[i].y, currCableEnd[i].z).color(r, g, b, 1)
-                        .texture(0, 0.3125f + vOffset2).overlay(overlay).light(segEndLight).normal(nml.x, nml.y, nml.z).next();
+                        .texture(0, 0.3125f + vOffset2).overlay(overlay).light(segEndLight).normal(nml.x, nml.y, nml.z);
                 buffer.vertex(currCableEnd[next].x, currCableEnd[next].y, currCableEnd[next].z).color(r, g, b, 1)
-                        .texture(0, 0.375f + vOffset2).overlay(overlay).light(segEndLight).normal(nml.x, nml.y, nml.z).next();
+                        .texture(0, 0.375f + vOffset2).overlay(overlay).light(segEndLight).normal(nml.x, nml.y, nml.z);
                 buffer.vertex(currCableStart[next].x, currCableStart[next].y, currCableStart[next].z).color(r, g, b, 1)
-                        .texture(texUWid, 0.375f + vOffset2).overlay(overlay).light(segStartLight).normal(nml.x, nml.y, nml.z).next();
+                        .texture(texUWid, 0.375f + vOffset2).overlay(overlay).light(segStartLight).normal(nml.x, nml.y, nml.z);
             }
         }
 

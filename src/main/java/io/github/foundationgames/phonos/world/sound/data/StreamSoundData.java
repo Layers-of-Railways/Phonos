@@ -3,6 +3,7 @@ package io.github.foundationgames.phonos.world.sound.data;
 import io.github.foundationgames.phonos.sound.stream.ServerOutgoingStreamHandler;
 import io.github.foundationgames.phonos.util.compat.PhonosVoicechatProxy;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 
@@ -53,7 +54,7 @@ public class StreamSoundData extends SoundData {
     }
 
     @Override
-    public void toPacket(PacketByteBuf buf) {
+    public void toPacket(RegistryByteBuf buf) {
         super.toPacket(buf);
 
         buf.writeLong(this.streamId);

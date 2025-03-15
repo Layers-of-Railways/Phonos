@@ -2,8 +2,6 @@ package io.github.foundationgames.phonos.util;
 
 import io.github.foundationgames.phonos.block.entity.Ticking;
 import io.github.foundationgames.phonos.item.AudioCableItem;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
@@ -17,7 +15,6 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.DyeColor;
 import net.minecraft.util.Hand;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.Direction;
@@ -44,7 +41,6 @@ import java.util.function.Supplier;
 public enum PhonosUtil {;
     public static final float SQRT2DIV2 = (float) (Math.sqrt(2) / 2);
 
-    public static final Object2IntMap<DyeColor> DYE_COLORS = new Object2IntArrayMap<>();
     public static Quaternionf rotationTo(Direction direction) {
         return switch (direction) {
             case NORTH -> RotationAxis.POSITIVE_Y.rotationDegrees(0);
@@ -237,14 +233,5 @@ public enum PhonosUtil {;
 
     public static @Nullable World getClientWorld() {
         return getIfClient(() -> PhonosUtil::$getClientWorld, null);
-    }
-
-    static {
-        for (var dye : DyeColor.values()) {
-            int r = (int) (dye.getColorComponents()[0] * 0xFF);
-            int g = (int) (dye.getColorComponents()[1] * 0xFF);
-            int b = (int) (dye.getColorComponents()[2] * 0xFF);
-            DYE_COLORS.put(dye, b | (g << 8) | (r << 16));
-        }
     }
 }

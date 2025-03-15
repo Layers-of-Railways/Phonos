@@ -27,7 +27,7 @@ public class AudioFileUtil {
         int fadeOutPeriod = sampleRate / 4;
 
         var aud = new AudioDataQueue(sampleRate);
-        var oggBuf = oggStream.getBuffer().rewind();
+        var oggBuf = oggStream.readAll().rewind();
 
         while (oggBuf.remaining() >= 1 + oggSamplesPerAudSample) {
             int cap = Math.min(oggBuf.remaining(), AudioDataQueue.SAMPLE_SECTION);

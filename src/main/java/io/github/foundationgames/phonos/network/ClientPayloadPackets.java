@@ -33,8 +33,8 @@ public final class ClientPayloadPackets {
     @Environment(EnvType.CLIENT)
     public static void initClient() {
         ClientPlayNetworking.registerGlobalReceiver(Phonos.id("sound_play"), (client, handler, buf, responseSender) -> {
-            var data = SoundData.fromPacket(buf);
-            var tree = SoundEmitterTree.fromPacket(buf);
+            var data = SoundData.PACKET_CODEC.decode(buf);
+            var tree = SoundEmitterTree.PACKET_CODEC.decode((PacketByteBuf) buf);
 
             client.execute(() -> SoundStorage.getInstance(client.world).play(client.world, data, tree));
         });
@@ -46,7 +46,7 @@ public final class ClientPayloadPackets {
         });
 
         ClientPlayNetworking.registerGlobalReceiver(Phonos.id("sound_update"), (client, handler, buf, responseSender) -> {
-            SoundEmitterTree.Delta delta = SoundEmitterTree.Delta.fromPacket(buf);
+            SoundEmitterTree.Delta delta = SoundEmitterTree.Delta.PACKET_CODEC.decode((PacketByteBuf) buf);
 
             client.execute(() -> SoundStorage.getInstance(client.world).update(delta));
         });

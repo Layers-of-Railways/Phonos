@@ -88,6 +88,8 @@
     "item.phonos.portable_satellite_radio": "Portable Satellite Radio",
     "item.phonos.portable_record_player": "Portable Record Player",
 
+    "tag.block.phonos.transmission_towers": "Radio Transmission Towers",
+
     "message.phonos.portable_satellite_radio.select": "Select a channel to listen to.",
     "message.phonos.portable_satellite_radio.configure": "Configure",
 
@@ -98,6 +100,8 @@
     "tooltip.phonos.item.no_disc": "Empty",
     "tooltip.phonos.item.record_player_hint": "Right click with Music Disc to play",
     "tooltip.phonos.item.playing": "Playing:",
+
+    "message.phonos.network.version_mismatch": "Phonos on the client uses a different network format than the server. You should use the same version of the mod on both sides.",
 
     "text.config.phonos.title": "Phonos Configs",
     "text.config.phonos.client_title": "Phonos Client Config",

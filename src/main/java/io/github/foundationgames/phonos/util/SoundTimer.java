@@ -6,6 +6,7 @@ import io.github.foundationgames.phonos.mixin.client.SoundSystemAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
 import org.lwjgl.stb.STBVorbis;

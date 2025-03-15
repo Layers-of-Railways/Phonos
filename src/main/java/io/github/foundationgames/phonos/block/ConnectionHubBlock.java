@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.block;
 
+import com.mojang.serialization.MapCodec;
 import io.github.foundationgames.phonos.block.entity.ConnectionHubBlockEntity;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
@@ -13,7 +14,6 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -24,6 +24,8 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class ConnectionHubBlock extends FacingBlock implements BlockEntityProvider, InputBlock {
+    public static final MapCodec<ConnectionHubBlock> CODEC = createCodec(ConnectionHubBlock::new);
+
     public static final VoxelShape UP_SHAPE = createCuboidShape(4, 0, 4, 12, 4, 12);
     public static final VoxelShape DOWN_SHAPE = createCuboidShape(4, 12, 4, 12, 16, 12);
     public static final VoxelShape NORTH_SHAPE = createCuboidShape(4, 4, 12, 12, 12, 16);
@@ -42,14 +44,20 @@ public class ConnectionHubBlock extends FacingBlock implements BlockEntityProvid
         setDefaultState(getDefaultState().with(FACING, Direction.UP));
     }
 
+    @Override
+    protected MapCodec<? extends FacingBlock> getCodec() {
+        return CODEC;
+    }
+
     @Nullable
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return super.getPlacementState(ctx).with(FACING, ctx.getSide());
+        BlockState state = super.getPlacementState(ctx);
+        return state == null ? null : state.with(FACING, ctx.getSide());
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         var side = hit.getSide();
         var facing = state.get(FACING);
 
@@ -80,7 +88,7 @@ public class ConnectionHubBlock extends FacingBlock implements BlockEntityProvid
     }
 
     @Override
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (!newState.isOf(this) && world.getBlockEntity(pos) instanceof ConnectionHubBlockEntity be) {
             be.onDestroyed();
         }
@@ -101,7 +109,7 @@ public class ConnectionHubBlock extends FacingBlock implements BlockEntityProvid
     }
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         var facing = state.get(FACING);
 
         return switch (facing) {

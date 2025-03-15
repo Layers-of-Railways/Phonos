@@ -14,6 +14,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.ApiStatus;
@@ -59,8 +60,8 @@ public abstract class AbstractOutputBlockEntity extends BlockEntity implements S
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.readNbt(nbt, registryLookup);
 
         this.pendingNbt = nbt.getCompound("Outputs").copy();
 
@@ -70,20 +71,20 @@ public abstract class AbstractOutputBlockEntity extends BlockEntity implements S
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.writeNbt(nbt, registryLookup);
 
         var outputsNbt = this.pendingNbt != null ? this.pendingNbt.copy() : new NbtCompound();
-        outputs.writeNbt(outputsNbt);
+        outputs.writeNbt(outputsNbt, registryLookup);
         nbt.put("Outputs", outputsNbt);
     }
 
     protected void writeClientNbt(NbtCompound nbt) {}
 
     @Override
-    public NbtCompound toInitialChunkDataNbt() {
+    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
         NbtCompound nbt = new NbtCompound();
-        this.writeNbt(nbt);
+        this.writeNbt(nbt, registryLookup);
         this.writeClientNbt(nbt);
         return nbt;
     }

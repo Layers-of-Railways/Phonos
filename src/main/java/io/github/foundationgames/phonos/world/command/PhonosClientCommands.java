@@ -16,8 +16,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.command.argument.PosArgument;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.JukeboxPlayableComponent;
 import net.minecraft.item.Item;
-import net.minecraft.item.MusicDiscItem;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -171,11 +172,24 @@ public class PhonosClientCommands {
 
         for (var entry : Registries.ITEM.getIndexedEntries()) {
             Item item = entry.value();
-            if (!(item instanceof MusicDiscItem musicDisc)) continue;
+            JukeboxPlayableComponent songComponent = item.getComponents().get(DataComponentTypes.JUKEBOX_PLAYABLE);
+            if (songComponent == null) continue;
 
-            Identifier itemID = entry.getKey().get().getValue();
+            Identifier sound;
+            float reportedLengthInSeconds;
 
-            Identifier sound = musicDisc.getSound().getId();
+            {
+                var songPair = songComponent.song();
+
+                var songEntry = songPair.getEntry(source.getRegistryManager());
+                if (songEntry.isEmpty()) continue;
+
+                var songRegistryEntry = songEntry.get();
+                var song = songRegistryEntry.value();
+
+                sound = song.soundEvent().value().getId();
+                reportedLengthInSeconds = song.lengthInSeconds();
+            }
             CompletableFuture.runAsync(() -> {
                 float length;
                 try {
@@ -185,22 +199,19 @@ public class PhonosClientCommands {
                     return;
                 }
 
-                int actualTickLength = Math.round(length) * 20;
-                int reportedLength = musicDisc.getSongLengthInTicks();
-
-                if (actualTickLength == reportedLength) {
+                if (length == reportedLengthInSeconds) {
                     return;
                 }
-                source.sendFeedback(Text.of("Sound length of %s: (reported: %s ticks) (actual: %s ticks)".formatted(sound, reportedLength, actualTickLength)));
+                source.sendFeedback(Text.of("Sound length of %s: (reported: %s seconds) (actual: %s seconds)".formatted(sound, reportedLengthInSeconds, length)));
 
-                Path modPath = dataPath.resolve(itemID.getNamespace());
+                Path modPath = dataPath.resolve(sound.getNamespace());
                 if (!modPath.toFile().exists() && !modPath.toFile().mkdirs()) {
                     source.sendError(Text.of("Error creating directory: %s".formatted(modPath)));
                     return;
                 }
 
-                Path soundPath = modPath.resolve(itemID.getPath() + ".json");
-                if (!write(soundPath, "{\n  \"length\": %s\n}".formatted(actualTickLength))) {
+                Path soundPath = modPath.resolve(sound.getPath() + ".json");
+                if (!write(soundPath, "{\n  \"length_seconds\": %s\n}".formatted(length))) {
                     source.sendError(Text.of("Error writing file: %s".formatted(soundPath)));
                     return;
                 }

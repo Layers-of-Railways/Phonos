@@ -1,8 +1,7 @@
 package io.github.foundationgames.phonos.world.sound.data;
 
 import io.github.foundationgames.phonos.world.sound.block.ResumableSoundHolder;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.Registries;
+import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -29,9 +28,9 @@ public class SoundEventSoundData extends SoundData {
         }
     }
 
-    public SoundEventSoundData(Type<?> type, PacketByteBuf buf) {
+    public SoundEventSoundData(Type<?> type, RegistryByteBuf buf) {
         super(type, buf);
-        this.sound = buf.readRegistryEntry(Registries.SOUND_EVENT.getIndexedEntries(), SoundEvent::fromBuf);
+        this.sound = SoundEvent.ENTRY_PACKET_CODEC.decode(buf);
         this.skippedTicks = buf.readVarLong();
         this.soundId = -1;
         this.holder = null;
@@ -64,9 +63,9 @@ public class SoundEventSoundData extends SoundData {
     }
 
     @Override
-    public void toPacket(PacketByteBuf buf) {
+    public void toPacket(RegistryByteBuf buf) {
         super.toPacket(buf);
-        buf.writeRegistryEntry(Registries.SOUND_EVENT.getIndexedEntries(), sound, (rbuf, sound) -> sound.writeBuf(rbuf));
+        SoundEvent.ENTRY_PACKET_CODEC.encode(buf, sound);
         buf.writeVarLong(skippedTicks);
     }
 }

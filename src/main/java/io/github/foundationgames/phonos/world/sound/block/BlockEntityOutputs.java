@@ -7,6 +7,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
@@ -114,12 +115,12 @@ public class BlockEntityOutputs implements ConnectionCollection {
         return changed;
     }
 
-    public void writeNbt(NbtCompound nbt) {
+    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         for (int i = 0; i < connections.length; i++) {
             var conn = connections[i];
             if (conn != null) {
                 var connNbt = new NbtCompound();
-                conn.writeNbt(connNbt);
+                conn.writeNbt(connNbt, registryLookup);
 
                 nbt.put(Integer.toString(i), connNbt);
             }

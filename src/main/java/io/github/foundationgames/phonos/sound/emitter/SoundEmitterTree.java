@@ -14,6 +14,8 @@ import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -310,17 +312,13 @@ public class SoundEmitterTree {
             return active.isEmpty() && inactive.isEmpty();
         }
 
-        public static void toPacket(PacketByteBuf buf, Level level) {
-            buf.writeCollection(level.active, PacketByteBuf::writeLong);
-            buf.writeCollection(level.inactive, PacketByteBuf::writeLong);
-        }
-
-        public static Level fromPacket(PacketByteBuf buf) {
-            var active = buf.readCollection(LongArrayList::new, PacketByteBuf::readLong);
-            var inactive = buf.readCollection(LongArrayList::new, PacketByteBuf::readLong);
-
-            return new Level(active, inactive);
-        }
+        public static final PacketCodec<PacketByteBuf, Level> PACKET_CODEC = PacketCodec.tuple(
+            PacketCodecs.collection(LongArrayList::new, PacketCodecs.VAR_LONG),
+            Level::active,
+            PacketCodecs.collection(LongArrayList::new, PacketCodecs.VAR_LONG),
+            Level::inactive,
+            Level::new
+        );
     }
 
     public void debugLevels(BiConsumer<Integer, Long> action) {
@@ -331,38 +329,26 @@ public class SoundEmitterTree {
         }
     }
 
-    public void toPacket(PacketByteBuf buf) {
-        buf.writeLong(this.rootId);
-        buf.writeCollection(this.levels, Level::toPacket);
-        buf.writeMap(this.radioSources, PacketByteBuf::writeInt, (b, s) -> {
-            b.writeCollection(s, RadioMetadata::write);
-        });
-    }
-
-    public static SoundEmitterTree fromPacket(PacketByteBuf buf) {
-        return new SoundEmitterTree(
-            buf.readLong(),
-            buf.readCollection(ArrayList::new, Level::fromPacket),
-            buf.readMap(Int2ObjectOpenHashMap::new, PacketByteBuf::readInt,
-                b -> b.readCollection(HashSet::new, RadioMetadata::new)
-            )
-        );
-    }
+    public static final PacketCodec<PacketByteBuf, SoundEmitterTree> PACKET_CODEC = PacketCodec.tuple(
+        PacketCodecs.VAR_LONG,
+        s -> s.rootId,
+        PacketCodecs.collection(ArrayList::new, Level.PACKET_CODEC),
+        s -> s.levels,
+        RadioSourceChangeList.COMPONENT_PACKET_CODEC,
+        s -> s.radioSources,
+        SoundEmitterTree::new
+    );
 
     public record Delta(long rootId, Int2ObjectMap<Level> deltas, RadioSourceChangeList radioDeltas) {
-        public static void toPacket(PacketByteBuf buf, Delta delta) {
-            buf.writeLong(delta.rootId);
-            buf.writeMap(delta.deltas, PacketByteBuf::writeInt, Level::toPacket);
-            RadioSourceChangeList.toPacket(buf, delta.radioDeltas);
-        }
-
-        public static Delta fromPacket(PacketByteBuf buf) {
-            var id = buf.readLong();
-            var deltas = buf.readMap(Int2ObjectOpenHashMap::new, PacketByteBuf::readInt, Level::fromPacket);
-            var radioDeltas = RadioSourceChangeList.fromPacket(buf);
-
-            return new Delta(id, deltas, radioDeltas);
-        }
+        public static final PacketCodec<PacketByteBuf, Delta> PACKET_CODEC = PacketCodec.tuple(
+            PacketCodecs.VAR_LONG,
+            Delta::rootId,
+            PacketCodecs.map(Int2ObjectOpenHashMap::new, PacketCodecs.INTEGER, Level.PACKET_CODEC),
+            Delta::deltas,
+            RadioSourceChangeList.PACKET_CODEC,
+            Delta::radioDeltas,
+            Delta::new
+        );
 
         public boolean hasChanges() {
             return !this.deltas.isEmpty();
@@ -385,25 +371,21 @@ public class SoundEmitterTree {
     }
 
     public record RadioSourceChangeList(Int2ObjectOpenHashMap<HashSet<RadioMetadata>> add, Int2ObjectOpenHashMap<HashSet<RadioMetadata>> remove) {
-        public static void toPacket(PacketByteBuf buf, RadioSourceChangeList level) {
-            buf.writeMap(level.add, PacketByteBuf::writeInt, (b, s) -> {
-                b.writeCollection(s, RadioMetadata::write);
-            });
-            buf.writeMap(level.remove, PacketByteBuf::writeInt, (b, s) -> {
-                b.writeCollection(s, RadioMetadata::write);
-            });
-        }
-
-        public static RadioSourceChangeList fromPacket(PacketByteBuf buf) {
-            var radioAdd = buf.readMap(Int2ObjectOpenHashMap::new, PacketByteBuf::readInt,
-                b -> b.readCollection(HashSet::new, RadioMetadata::new)
-            );
-            var radioRem = buf.readMap(Int2ObjectOpenHashMap::new, PacketByteBuf::readInt,
-                b -> b.readCollection(HashSet::new, RadioMetadata::new)
-            );
-
-            return new RadioSourceChangeList(radioAdd, radioRem);
-        }
+        private static final PacketCodec<PacketByteBuf, Int2ObjectOpenHashMap<HashSet<RadioMetadata>>> COMPONENT_PACKET_CODEC = PacketCodecs.map(
+            Int2ObjectOpenHashMap::new,
+            PacketCodecs.INTEGER,
+            PacketCodecs.collection(
+                HashSet::new,
+                RadioMetadata.PACKET_CODEC
+            )
+        );
+        public static final PacketCodec<PacketByteBuf, RadioSourceChangeList> PACKET_CODEC = PacketCodec.tuple(
+            COMPONENT_PACKET_CODEC,
+            RadioSourceChangeList::add,
+            COMPONENT_PACKET_CODEC,
+            RadioSourceChangeList::remove,
+            RadioSourceChangeList::new
+        );
 
         public void cancelRemove(int channel, RadioMetadata radioMetadata) {
             if (this.remove.containsKey(channel)) {

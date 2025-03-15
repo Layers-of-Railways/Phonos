@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.block;
 
+import com.mojang.serialization.MapCodec;
 import io.github.foundationgames.phonos.block.entity.EnderMusicBoxBlockEntity;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.network.PayloadPackets;
@@ -17,7 +18,6 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -25,6 +25,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class EnderMusicBoxBlock extends Block implements BlockEntityProvider {
+    public static final MapCodec<EnderMusicBoxBlock> CODEC = createCodec(EnderMusicBoxBlock::new);
     public static final BooleanProperty POWERED = Properties.POWERED;
 
     public EnderMusicBoxBlock(Settings settings) {
@@ -34,8 +35,12 @@ public class EnderMusicBoxBlock extends Block implements BlockEntityProvider {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    protected MapCodec<? extends Block> getCodec() {
+        return CODEC;
+    }
+
+    @Override
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         var side = hit.getSide();
 
         if (side == Direction.DOWN) {
@@ -74,8 +79,7 @@ public class EnderMusicBoxBlock extends Block implements BlockEntityProvider {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (!newState.isOf(this) && world.getBlockEntity(pos) instanceof EnderMusicBoxBlockEntity be) {
             be.onDestroyed();
         }
@@ -91,8 +95,7 @@ public class EnderMusicBoxBlock extends Block implements BlockEntityProvider {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
+    protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
         super.neighborUpdate(state, world, pos, sourceBlock, sourcePos, notify);
 
         if (world.isClient)
@@ -125,14 +128,12 @@ public class EnderMusicBoxBlock extends Block implements BlockEntityProvider {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public boolean hasComparatorOutput(BlockState state) {
+    protected boolean hasComparatorOutput(BlockState state) {
         return true;
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public int getComparatorOutput(BlockState state, World world, BlockPos pos) {
+    protected int getComparatorOutput(BlockState state, World world, BlockPos pos) {
         if (world.getBlockEntity(pos) instanceof EnderMusicBoxBlockEntity be) {
             return be.getComparatorOutput();
         }

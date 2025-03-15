@@ -12,6 +12,7 @@ import io.github.foundationgames.phonos.config.widgets.PhonosOptionRegistry;
 import io.github.foundationgames.phonos.item.*;
 import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClientPlayerEntity;
 import io.github.foundationgames.phonos.network.ClientPayloadPackets;
+import io.github.foundationgames.phonos.network.PhonosPackets;
 import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.satellite_radio.SatelliteRadioStorage;
@@ -30,7 +31,7 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -45,9 +46,11 @@ import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ColorHelper;
 import org.joml.Matrix4f;
 
 public class PhonosClient implements ClientModInitializer {
@@ -61,6 +64,7 @@ public class PhonosClient implements ClientModInitializer {
         if (!PhonosClientConfig.load())
             Phonos.LOG.error("Error loading Phonos client config!");
 
+        PhonosPackets.PACKETS.initClient();
         ClientPayloadPackets.initClient();
         ClientSoundStorage.initClient();
         PhonosClientCommands.initClient();
@@ -69,7 +73,9 @@ public class PhonosClient implements ClientModInitializer {
         JsonEM.registerModelLayer(SATELLITE_LAYER);
         JsonEM.registerModelLayer(HEADSET_LAYER);
 
-        ModelLoadingRegistry.INSTANCE.registerModelProvider(PartialModel::onModelRegistry);
+        ModelLoadingPlugin.register(pluginContext -> {
+            PartialModel.onModelRegistry(pluginContext::addModels);
+        });
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(PartialModel.ResourceReloadListener.INSTANCE);
 
         PhonosPartialModels.init();
@@ -97,7 +103,7 @@ public class PhonosClient implements ClientModInitializer {
 
         ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
             if (tintIndex == 0 && stack.getItem() instanceof AudioCableItem aud && aud.color != null) {
-                return PhonosUtil.DYE_COLORS.getInt(aud.color);
+                return aud.color.getEntityColor();
             }
 
             return 0xFFFFFF;
@@ -105,11 +111,12 @@ public class PhonosClient implements ClientModInitializer {
 
         ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
             if (tintIndex == 0 && stack.getItem() instanceof HeadsetItem item) {
-                if (item.hasColor(stack)) {
-                    return item.isGlowing(stack) ? PhonosUtil.brighten(item.getColor(stack), 0.2f) : item.getColor(stack);
+                var color = stack.get(DataComponentTypes.DYED_COLOR);
+                if (color != null) {
+                    return ColorHelper.Argb.fullAlpha(item.isGlowing(stack) ? PhonosUtil.brighten(color.rgb(), 0.2f) : color.rgb());
                 }
 
-                return item.isGlowing(stack) ? PhonosUtil.brighten(0x4F2E20, 0.2f) : 0x4F2E20;
+                return ColorHelper.Argb.fullAlpha(item.isGlowing(stack) ? PhonosUtil.brighten(0x4F2E20, 0.2f) : 0x4F2E20);
             }
 
             return 0xFFFFFF;
@@ -187,16 +194,16 @@ public class PhonosClient implements ClientModInitializer {
 
         WorldRenderEvents.AFTER_ENTITIES.register((context) -> RadioDebugRenderer.render(context.matrixStack(), context.consumers()));
 
-        HudRenderCallback.EVENT.register((context, tickDelta) -> {
+        HudRenderCallback.EVENT.register((context, renderTickCounter) -> {
             if (MinecraftClient.getInstance().player instanceof IMicrophoneHoldingClientPlayerEntity mhp && mhp.phonos$getHoldingState() == IMicrophoneHoldingClientPlayerEntity.State.WIRELESS) {
-                renderWirelessMicHud(context, tickDelta);
+                renderWirelessMicHud(context);
             }
         });
 
         //ScreenRegistry.<RadioJukeboxGuiDescription, RadioJukeboxScreen>register(Phonos.RADIO_JUKEBOX_HANDLER, (gui, inventory, title) -> new RadioJukeboxScreen(gui, inventory.player));
     }
 
-    private static void renderWirelessMicHud(DrawContext context, float tickDelta) {
+    private static void renderWirelessMicHud(DrawContext context) {
         int x = 6;
         int y = 6;
         RenderSystem.enableDepthTest();
@@ -206,9 +213,9 @@ public class PhonosClient implements ClientModInitializer {
         ms.push();
 
         ms.translate(0, 0, -90.0f);
-        context.drawTexture(new Identifier("textures/gui/widgets.png"), x-3, y-4, 24, 22, 29, 24);
+        context.drawTexture(Identifier.ofVanilla("textures/gui/widgets.png"), x-3, y-4, 24, 22, 29, 24);
         context.setShaderColor(0.2f, 0.8f, 1.0f, 1.0f);
-        context.drawTexture(new Identifier("textures/gui/widgets.png"), x-4, y-4, 0, 22, 24, 24);
+        context.drawTexture(Identifier.ofVanilla("textures/gui/widgets.png"), x-4, y-4, 0, 22, 24, 24);
         context.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         ms.pop();

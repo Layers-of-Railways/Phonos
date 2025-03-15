@@ -20,6 +20,7 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -274,8 +275,8 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.readNbt(nbt, registryLookup);
 
         this.playingTimer = nbt.getInt("PlayingTimer");
         this.playDuration = nbt.getInt("PlayDuration");
@@ -299,8 +300,8 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.writeNbt(nbt, registryLookup);
 
         nbt.putInt("PlayingTimer", this.playingTimer);
         nbt.putInt("PlayDuration", this.playDuration);

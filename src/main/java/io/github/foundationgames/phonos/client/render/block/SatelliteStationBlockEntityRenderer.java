@@ -54,13 +54,13 @@ public class SatelliteStationBlockEntityRenderer implements BlockEntityRenderer<
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45 + entity.getRotation().asRotation()));
 
             satelliteModel.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(TEXTURE)),
-                    light, overlay, 1, 1, 1, 1);
+                    light, overlay, -1);
 
             if (rocket.inFlight) {
                 boolean texFlag = (entity.getWorld().getTime() & 0b11) < 2;
 
                 satelliteModel.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEyes(texFlag ? EXHAUST_TEX_2 : EXHAUST_TEX_1)),
-                        light, overlay, 1, 1, 1, 1);
+                        light, overlay, -1);
             }
 
             matrices.pop();

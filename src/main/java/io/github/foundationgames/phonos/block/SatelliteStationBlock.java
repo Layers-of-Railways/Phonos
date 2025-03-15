@@ -1,8 +1,8 @@
 package io.github.foundationgames.phonos.block;
 
+import com.mojang.serialization.MapCodec;
 import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity;
 import io.github.foundationgames.phonos.item.PhonosItems;
-import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.RadarPoints;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
@@ -13,13 +13,14 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -30,6 +31,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class SatelliteStationBlock extends HorizontalFacingBlock implements BlockEntityProvider, InputBlock {
+    public static final MapCodec<SatelliteStationBlock> CODEC = createCodec(SatelliteStationBlock::new);
     private static final VoxelShape SHAPE = createCuboidShape(0, 0, 0, 16, 7, 16);
 
     public final BlockConnectionLayout inputLayout = new BlockConnectionLayout()
@@ -42,8 +44,37 @@ public class SatelliteStationBlock extends HorizontalFacingBlock implements Bloc
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    protected MapCodec<? extends HorizontalFacingBlock> getCodec() {
+        return CODEC;
+    }
+
+    @Override
+    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        var side = hit.getSide();
+
+        if (side == Direction.DOWN) {
+            return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+
+        if (player.canModifyBlocks() && world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity be) {
+            if (side == Direction.UP && stack.getItem() == PhonosItems.SATELLITE) {
+                if (world.isClient()) {
+                    return ItemActionResult.CONSUME;
+                } else {
+                    if (be.addRocket() && !player.isCreative()) {
+                        stack.decrement(1);
+                    }
+
+                    return ItemActionResult.SUCCESS;
+                }
+            }
+        }
+
+        return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+    }
+
+    @Override
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         var side = hit.getSide();
         var facing = state.get(FACING);
 
@@ -53,18 +84,7 @@ public class SatelliteStationBlock extends HorizontalFacingBlock implements Bloc
 
         if (player.canModifyBlocks() && world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity be) {
             if (side == Direction.UP) {
-                var holding = player.getStackInHand(hand);
-                if (holding.getItem() == PhonosItems.SATELLITE) {
-                    if (world.isClient()) {
-                        return ActionResult.CONSUME;
-                    } else {
-                        if (be.addRocket() && !player.isCreative()) {
-                            holding.decrement(1);
-                        }
-
-                        return ActionResult.SUCCESS;
-                    }
-                } else if (player instanceof ServerPlayerEntity sPlayer) {
+                if (player instanceof ServerPlayerEntity sPlayer) {
                     be.tryOpenScreen(sPlayer);
                 }
 
@@ -84,12 +104,11 @@ public class SatelliteStationBlock extends HorizontalFacingBlock implements Bloc
             }
         }
 
-        return super.onUse(state, world, pos, player, hand, hit);
+        return super.onUse(state, world, pos, player, hit);
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (!newState.isOf(this) && world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity be) {
             be.onDestroyed();
         }
@@ -111,8 +130,7 @@ public class SatelliteStationBlock extends HorizontalFacingBlock implements Bloc
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return SHAPE;
     }
 

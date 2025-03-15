@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.block;
 
+import com.mojang.serialization.MapCodec;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
 import io.github.foundationgames.phonos.world.sound.block.InputBlock;
@@ -10,7 +11,6 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -18,6 +18,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class LoudspeakerBlock extends AbstractLoudspeakerBlock implements InputBlock {
+    public static final MapCodec<LoudspeakerBlock> CODEC = createCodec(LoudspeakerBlock::new);
     public static final BooleanProperty[] INPUTS = BlockProperties.pluggableInputs(4);
 
     public final BlockConnectionLayout inputLayout = new BlockConnectionLayout()
@@ -33,6 +34,11 @@ public class LoudspeakerBlock extends AbstractLoudspeakerBlock implements InputB
     }
 
     @Override
+    protected MapCodec<? extends AbstractLoudspeakerBlock> getCodec() {
+        return CODEC;
+    }
+
+    @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         super.appendProperties(builder);
 
@@ -40,7 +46,7 @@ public class LoudspeakerBlock extends AbstractLoudspeakerBlock implements InputB
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if (!player.canModifyBlocks()) {
             return ActionResult.PASS;
         }

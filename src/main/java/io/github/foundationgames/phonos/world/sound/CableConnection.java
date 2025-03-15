@@ -2,6 +2,8 @@ package io.github.foundationgames.phonos.world.sound;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.DyeColor;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +36,7 @@ public class CableConnection implements RenderableCableConnection {
         return start.isStatic() && end.isStatic();
     }
 
-    public void writeNbt(NbtCompound nbt) {
+    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         if (color != null) {
             nbt.putString("color", color.getName());
         }
@@ -44,7 +46,7 @@ public class CableConnection implements RenderableCableConnection {
 
         nbt.put("EndPoint", endData);
 
-        nbt.put("item", drop.writeNbt(new NbtCompound()));
+        nbt.put("item", ItemStack.OPTIONAL_CODEC.encodeStart(registryLookup.getOps(NbtOps.INSTANCE), drop).getOrThrow());
     }
 
     public static CableConnection readNbt(World world, CablePlugPoint start, NbtCompound nbt) {
@@ -62,7 +64,7 @@ public class CableConnection implements RenderableCableConnection {
         var cableData = nbt.getCompound("item");
         if (cableData == null) return null;
 
-        var cable = ItemStack.fromNbt(cableData);
+        var cable = ItemStack.fromNbtOrEmpty(world.getRegistryManager(), cableData);
         if (cable == null) return null;
 
         return new CableConnection(start, end, color, cable);

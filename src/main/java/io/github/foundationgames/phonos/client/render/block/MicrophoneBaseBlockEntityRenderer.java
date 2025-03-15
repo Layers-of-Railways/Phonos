@@ -179,7 +179,8 @@ public class MicrophoneBaseBlockEntityRenderer extends CableOutputBlockEntityRen
             float r = (float)(color >> 16 & 0xFF) / 255.0f;
             float g = (float)(color >> 8 & 0xFF) / 255.0f;
             float b = (float)(color & 0xFF) / 255.0f;
-            vertices.quad(entry, bakedQuad, r, g, b, light, overlay);
+            float a = 1.0f;
+            vertices.quad(entry, bakedQuad, r, g, b, a, light, overlay);
         }
     }
 

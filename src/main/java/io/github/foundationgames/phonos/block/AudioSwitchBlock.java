@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.block;
 
+import com.mojang.serialization.MapCodec;
 import io.github.foundationgames.phonos.block.entity.AudioSwitchBlockEntity;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
@@ -15,7 +16,6 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -26,6 +26,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class AudioSwitchBlock extends HorizontalFacingBlock implements BlockEntityProvider, InputBlock {
+    public static final MapCodec<AudioSwitchBlock> CODEC = createCodec(AudioSwitchBlock::new);
     public static final BooleanProperty POWERED = Properties.POWERED;
 
     private static final VoxelShape SHAPE = createCuboidShape(0, 0, 0, 16, 7, 16);
@@ -42,8 +43,12 @@ public class AudioSwitchBlock extends HorizontalFacingBlock implements BlockEnti
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    protected MapCodec<AudioSwitchBlock> getCodec() {
+        return CODEC;
+    }
+
+    @Override
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         var side = hit.getSide();
         var facing = state.get(FACING);
 
@@ -74,8 +79,7 @@ public class AudioSwitchBlock extends HorizontalFacingBlock implements BlockEnti
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (!newState.isOf(this) && world.getBlockEntity(pos) instanceof AudioSwitchBlockEntity be) {
             be.onDestroyed();
         }
@@ -84,12 +88,10 @@ public class AudioSwitchBlock extends HorizontalFacingBlock implements BlockEnti
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return SHAPE;
     }
 
-    @Override
     public Direction getRotation(BlockState state) {
         return state.get(FACING);
     }
@@ -103,8 +105,7 @@ public class AudioSwitchBlock extends HorizontalFacingBlock implements BlockEnti
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
+    protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
         if (world.isClient) {
             return;
         }

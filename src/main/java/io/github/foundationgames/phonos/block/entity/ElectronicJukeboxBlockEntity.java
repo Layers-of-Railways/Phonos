@@ -16,30 +16,39 @@ import io.github.foundationgames.phonos.world.sound.data.SoundEventSoundData;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.JukeboxBlock;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.entity.JukeboxBlockEntity;
-import net.minecraft.entity.Entity;
+import net.minecraft.block.jukebox.JukeboxSong;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.inventory.SingleStackInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.item.MusicDiscItem;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.registry.Registries;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.util.Clearable;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
-public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements Syncing, Ticking, OutputBlockEntity, ResumableSoundHolder {
+public class ElectronicJukeboxBlockEntity extends BlockEntity implements Syncing, Ticking, OutputBlockEntity, ResumableSoundHolder, Clearable, SingleStackInventory.SingleStackBlockEntityInventory {
     public static final BlockConnectionLayout OUTPUT_LAYOUT = new BlockConnectionLayout()
             .addPoint(-8, -4, 0, Direction.WEST)
             .addPoint(8, -4, 0, Direction.EAST)
@@ -56,8 +65,13 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
 
     private CableVBOContainer vboContainer;
 
+    private ItemStack recordStack = ItemStack.EMPTY;
+    private long ticksSinceSongStarted;
+    @Nullable
+    private RegistryEntry<JukeboxSong> song;
+
     public ElectronicJukeboxBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-        super(pos, state);
+        super(type, pos, state);
         this.type = type;
         this.emitterId = UniqueId.ofBlock(pos);
 
@@ -81,20 +95,22 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
 
     @Override
     public long getSkippedTicks() {
-        return this.tickCount - this.recordStartTick;
+        return this.ticksSinceSongStarted;
     }
 
-    @Override
-    public void startPlaying() {
-        this.recordStartTick = this.tickCount;
-        this.isPlaying = true;
-        this.world.updateNeighborsAlways(this.getPos(), this.getCachedState().getBlock());
+    public void startPlaying(RegistryEntry<JukeboxSong> song) {
+        if (world == null) return;
 
-        if (this.getStack().getItem() instanceof MusicDiscItem disc && !world.isClient()) {
+        this.song = song;
+        this.ticksSinceSongStarted = 0L;
+        this.world.updateNeighborsAlways(this.getPos(), this.getCachedState().getBlock());
+        this.world.emitGameEvent(GameEvent.JUKEBOX_PLAY, this.getPos(), GameEvent.Emitter.of(this.getCachedState()));
+
+        if (!world.isClient()) {
             this.playingSound = new SoundEmitterTree(this.emitterId);
 
             SoundStorage.getInstance(world).play(world, SoundEventSoundData.create(
-                    emitterId, Registries.SOUND_EVENT.getEntry(disc.getSound()), SoundCategory.RECORDS, 2, 1, this),
+                    emitterId, song.value().soundEvent(), SoundCategory.RECORDS, 2, 1, this),
                     this.playingSound);
             sync();
         }
@@ -102,9 +118,14 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
         this.markDirty();
     }
 
-    @Override
     protected void stopPlaying() {
-        this.isPlaying = false;
+        if (world == null) return;
+
+        if (song != null) {
+            song = null;
+            ticksSinceSongStarted = 0L;
+        }
+
         this.world.emitGameEvent(GameEvent.JUKEBOX_STOP_PLAY, this.getPos(), GameEvent.Emitter.of(this.getCachedState()));
         this.world.updateNeighborsAlways(this.getPos(), this.getCachedState().getBlock());
 
@@ -119,10 +140,10 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
         this.markDirty();
     }
 
-    private void updateState(@Nullable Entity entity, boolean hasRecord) {
-        if (this.world.getBlockState(this.getPos()) == this.getCachedState()) {
-            this.world.setBlockState(this.getPos(), (BlockState)this.getCachedState().with(JukeboxBlock.HAS_RECORD, hasRecord), Block.NOTIFY_LISTENERS);
-            this.world.emitGameEvent(GameEvent.BLOCK_CHANGE, this.getPos(), GameEvent.Emitter.of(entity, this.getCachedState()));
+    private void onRecordStackChanged(boolean hasRecord) {
+        if (this.world != null && this.world.getBlockState(this.getPos()) == this.getCachedState()) {
+            this.world.setBlockState(this.getPos(), this.getCachedState().with(JukeboxBlock.HAS_RECORD, hasRecord), Block.NOTIFY_LISTENERS);
+            this.world.emitGameEvent(GameEvent.BLOCK_CHANGE, this.getPos(), GameEvent.Emitter.of(this.getCachedState()));
         }
     }
 
@@ -133,21 +154,33 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
         }
 
         if (!world.isClient()) {
-            super.tick(world, pos, state);
-            if (this.isPlaying && this.getStack().isEmpty() && this.getSkippedTicks() > 5) {
-                this.updateState(null, false);
+            if (song != null) {
+                if (song.value().shouldStopPlaying(ticksSinceSongStarted)) {
+                    stopPlaying();
+                } else {
+                    if (ticksSinceSongStarted % 20L == 0L) {
+                        world.emitGameEvent(GameEvent.JUKEBOX_PLAY, getPos(), GameEvent.Emitter.of(getCachedState()));
+                        spawnNoteParticles(world, getPos());
+                    }
+
+                    ticksSinceSongStarted++;
+                }
+            }
+
+            if (this.song != null && this.getStack().isEmpty() && this.getSkippedTicks() > 5) {
+                this.onRecordStackChanged(false);
                 this.stopPlaying();
-            } else if (!this.isPlaying && this.getStack().isEmpty() && getCachedState().get(JukeboxBlock.HAS_RECORD)) {
-                this.updateState(null, false);
+            } else if (song == null && this.getStack().isEmpty() && getCachedState().get(JukeboxBlock.HAS_RECORD)) {
+                this.onRecordStackChanged(false);
             }
             this.markDirty();
 
-            if (this.playingSound == null && this.isPlayingRecord() && this.getStack().getItem() instanceof MusicDiscItem disc) {
+            if (this.playingSound == null && song != null) {
                 this.playingSound = new SoundEmitterTree(this.emitterId);
 
                 playingSoundId++;
                 SoundStorage.getInstance(world).play(world, SoundEventSoundData.create(
-                        emitterId, Registries.SOUND_EVENT.getEntry(disc.getSound()), SoundCategory.RECORDS, 2, 1, this),
+                        emitterId, song.value().soundEvent(), SoundCategory.RECORDS, 2, 1, this),
                     this.playingSound);
                 sync();
             }
@@ -167,6 +200,14 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
         }
     }
 
+    private static void spawnNoteParticles(WorldAccess world, BlockPos pos) {
+        if (world instanceof ServerWorld serverWorld) {
+            Vec3d vec3d = Vec3d.ofBottomCenter(pos).add(0.0, 1.2F, 0.0);
+            float f = (float)world.getRandom().nextInt(4) / 24.0F;
+            serverWorld.spawnParticles(ParticleTypes.NOTE, vec3d.getX(), vec3d.getY(), vec3d.getZ(), 0, (double)f, 0.0, 0.0, 1.0);
+        }
+    }
+
     public void onDestroyed() {
         this.outputs.forEach((index, conn) -> {
             this.outputs.dropConnectionItem(world, conn, false);
@@ -174,9 +215,50 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
         });
     }
 
+    public void dropRecord() {
+        if (this.world != null && !this.world.isClient) {
+            BlockPos pos = getPos();
+            ItemStack stack = getStack();
+
+            if (!stack.isEmpty()) {
+                emptyStack();
+                Vec3d dropPos = Vec3d.add(pos, 0.5, 1.01, 0.5).addRandom(world.random, 0.7f);
+                ItemStack stack2 = stack.copy();
+                ItemEntity itemEntity = new ItemEntity(world, dropPos.getX(), dropPos.getY(), dropPos.getZ(), stack2);
+                itemEntity.setToDefaultPickupDelay();
+                world.spawnEntity(itemEntity);
+            }
+        }
+    }
+
+    public int getComparatorOutput() {
+        if (world == null) return 0;
+
+        return JukeboxSong.getSongEntryFromStack(world.getRegistryManager(), recordStack)
+            .map(RegistryEntry::value)
+            .map(JukeboxSong::comparatorOutput)
+            .orElse(0);
+    }
+
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.readNbt(nbt, registryLookup);
+
+        if (nbt.contains("RecordItem", NbtElement.COMPOUND_TYPE)) {
+            this.recordStack = ItemStack.fromNbtOrEmpty(registryLookup, nbt.getCompound("RecordItem"));
+        } else {
+            this.recordStack = ItemStack.EMPTY;
+        }
+
+        if (nbt.contains("ticks_since_song_started", NbtElement.LONG_TYPE)) {
+            JukeboxSong.getSongEntryFromStack(registryLookup, this.recordStack).ifPresent(song -> {
+                long ticksSinceSongStarted = nbt.getLong("ticks_since_song_started");
+                if (!song.value().shouldStopPlaying(ticksSinceSongStarted)) {
+                    this.song = song;
+                    this.ticksSinceSongStarted = ticksSinceSongStarted;
+                }
+            });
+        }
 
         this.pendingNbt = nbt.getCompound("Outputs").copy();
 
@@ -186,18 +268,26 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.writeNbt(nbt, registryLookup);
+
+        if (!this.recordStack.isEmpty()) {
+            nbt.put("RecordItem", this.recordStack.encode(registryLookup));
+        }
+
+        if (song != null) {
+            nbt.putLong("ticks_since_song_started", ticksSinceSongStarted);
+        }
 
         var outputsNbt = this.pendingNbt != null ? this.pendingNbt.copy() : new NbtCompound();
-        outputs.writeNbt(outputsNbt);
+        outputs.writeNbt(outputsNbt, registryLookup);
         nbt.put("Outputs", outputsNbt);
     }
 
     @Override
-    public NbtCompound toInitialChunkDataNbt() {
+    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
         NbtCompound nbt = new NbtCompound();
-        this.writeNbt(nbt);
+        this.writeNbt(nbt, registryLookup);
         return nbt;
     }
 
@@ -293,5 +383,55 @@ public class ElectronicJukeboxBlockEntity extends JukeboxBlockEntity implements 
                 action.accept(emitter.emitterId());
             }
         });
+    }
+
+    @Override
+    public ItemStack getStack() {
+        return recordStack;
+    }
+
+    @Override
+    public ItemStack decreaseStack(int count) {
+        ItemStack stack = recordStack;
+        setStack(ItemStack.EMPTY);
+        return stack;
+    }
+
+    @Override
+    public void setStack(ItemStack stack) {
+        if (world == null) {
+            return;
+        }
+
+        this.recordStack = stack;
+        boolean hasRecord = !recordStack.isEmpty();
+        Optional<RegistryEntry<JukeboxSong>> optional = JukeboxSong.getSongEntryFromStack(world.getRegistryManager(), recordStack);
+        onRecordStackChanged(hasRecord);
+
+        if (hasRecord && optional.isPresent()) {
+            startPlaying(optional.get());
+        } else {
+            stopPlaying();
+        }
+    }
+
+    @Override
+    public int getMaxCountPerStack() {
+        return 1;
+    }
+
+    @Override
+    public BlockEntity asBlockEntity() {
+        return this;
+    }
+
+    @Override
+    public boolean isValid(int slot, ItemStack stack) {
+        return stack.contains(DataComponentTypes.JUKEBOX_PLAYABLE) && getStack(slot).isEmpty();
+    }
+
+    @Override
+    public boolean canTransferTo(Inventory hopperInventory, int slot, ItemStack stack) {
+        return hopperInventory.containsAny(ItemStack::isEmpty);
     }
 }

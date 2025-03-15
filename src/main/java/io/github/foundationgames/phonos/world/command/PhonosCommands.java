@@ -25,7 +25,6 @@ import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.Collection;
 import java.util.function.Function;
 
 import static net.minecraft.server.command.CommandManager.argument;

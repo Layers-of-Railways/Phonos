@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.block;
 
+import com.mojang.serialization.MapCodec;
 import io.github.foundationgames.phonos.block.entity.ElectronicNoteBlockEntity;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
@@ -21,7 +22,6 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -30,6 +30,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class ElectronicNoteBlock extends NoteBlock implements BlockEntityProvider, InputBlock {
+    public static final MapCodec<NoteBlock> CODEC = createCodec(ElectronicNoteBlock::new);
     public final BlockConnectionLayout inputLayout = new BlockConnectionLayout()
             .addPoint(-8, 3.5, -3.5, Direction.WEST)
             .addPoint(8, 3.5, 3.5, Direction.EAST)
@@ -41,7 +42,12 @@ public class ElectronicNoteBlock extends NoteBlock implements BlockEntityProvide
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    public MapCodec<NoteBlock> getCodec() {
+        return CODEC;
+    }
+
+    @Override
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if (player.canModifyBlocks()) {
             if (!world.isClient() && world.getBlockEntity(pos) instanceof ElectronicNoteBlockEntity be) {
                 if (PhonosUtil.holdingAudioCable(player)) {
@@ -60,10 +66,11 @@ public class ElectronicNoteBlock extends NoteBlock implements BlockEntityProvide
             }
         }
 
-        return super.onUse(state, world, pos, player, hand, hit);
+        return super.onUse(state, world, pos, player, hit);
     }
 
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
+    @Override
+    protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
         boolean powered = world.isReceivingRedstonePower(pos);
         if (powered != state.get(POWERED)) {
             if (powered && !world.isClient()) {
@@ -80,7 +87,7 @@ public class ElectronicNoteBlock extends NoteBlock implements BlockEntityProvide
             long id = be.emitterId();
             var instrument = state.get(INSTRUMENT);
             int note = state.get(NOTE);
-            float pitch = instrument.shouldSpawnNoteParticles() ? getNotePitch(note) : 1;
+            float pitch = instrument.canBePitched() ? getNotePitch(note) : 1;
             var sound = instrument.getSound();
 
             if (instrument.hasCustomSound() && world.getBlockEntity(pos.up()) instanceof SkullBlockEntity skull) {
@@ -117,7 +124,7 @@ public class ElectronicNoteBlock extends NoteBlock implements BlockEntityProvide
     }
 
     @Override
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (!newState.isOf(this) && world.getBlockEntity(pos) instanceof ElectronicNoteBlockEntity be) {
             be.onDestroyed();
         }

@@ -2,7 +2,7 @@ package io.github.foundationgames.phonos.block;
 
 import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.entity.*;
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.minecraft.block.AbstractBlock.Settings;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
@@ -12,18 +12,18 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 
 public class PhonosBlocks {
-    public static final Block LOUDSPEAKER = register(new LoudspeakerBlock(FabricBlockSettings.copy(Blocks.NOTE_BLOCK)), "loudspeaker");
-    public static final Block ELECTRONIC_NOTE_BLOCK = register(new ElectronicNoteBlock(FabricBlockSettings.copy(Blocks.NOTE_BLOCK)), "electronic_note_block");
-    public static final Block ELECTRONIC_JUKEBOX = register(new ElectronicJukeboxBlock(FabricBlockSettings.copy(Blocks.JUKEBOX)), "electronic_jukebox");
-    public static final Block CONNECTION_HUB = register(new ConnectionHubBlock(FabricBlockSettings.copy(Blocks.OAK_PLANKS)), "connection_hub");
-    public static final Block RADIO_TRANSCEIVER = register(new RadioTransceiverBlock(FabricBlockSettings.copy(Blocks.OAK_SLAB)), "radio_transceiver");
-    public static final Block SATELLITE_RECEIVER = register(new SatelliteReceiverBlock(FabricBlockSettings.copy(Blocks.OAK_SLAB)), "satellite_receiver");
-    public static final Block RADIO_LOUDSPEAKER = register(new RadioLoudspeakerBlock(FabricBlockSettings.copy(Blocks.NOTE_BLOCK)), "radio_loudspeaker");
-    public static final Block SATELLITE_STATION = register(new SatelliteStationBlock(FabricBlockSettings.copy(Blocks.OAK_SLAB)), "satellite_station");
-    public static final Block AUDIO_SWITCH = register(new AudioSwitchBlock(FabricBlockSettings.copy(Blocks.OAK_SLAB)), "audio_switch");
-    public static final Block ENDER_MUSIC_BOX = register(new EnderMusicBoxBlock(FabricBlockSettings.copy(Blocks.NOTE_BLOCK)), "ender_music_box");
-    public static final Block MICROPHONE_BASE = register(new MicrophoneBaseBlock(FabricBlockSettings.copy(Blocks.OAK_PLANKS).nonOpaque()), "microphone_base");
-    public static final Block WIRELESS_MICROPHONE_BASE = register(new WirelessMicrophoneBaseBlock(FabricBlockSettings.copy(Blocks.OAK_PLANKS).nonOpaque()), "wireless_microphone_base");
+    public static final Block LOUDSPEAKER = register(new LoudspeakerBlock(Settings.copy(Blocks.NOTE_BLOCK)), "loudspeaker");
+    public static final Block ELECTRONIC_NOTE_BLOCK = register(new ElectronicNoteBlock(Settings.copy(Blocks.NOTE_BLOCK)), "electronic_note_block");
+    public static final Block ELECTRONIC_JUKEBOX = register(new ElectronicJukeboxBlock(Settings.copy(Blocks.JUKEBOX)), "electronic_jukebox");
+    public static final Block CONNECTION_HUB = register(new ConnectionHubBlock(Settings.copy(Blocks.OAK_PLANKS)), "connection_hub");
+    public static final Block RADIO_TRANSCEIVER = register(new RadioTransceiverBlock(Settings.copy(Blocks.OAK_SLAB)), "radio_transceiver");
+    public static final Block SATELLITE_RECEIVER = register(new SatelliteReceiverBlock(Settings.copy(Blocks.OAK_SLAB)), "satellite_receiver");
+    public static final Block RADIO_LOUDSPEAKER = register(new RadioLoudspeakerBlock(Settings.copy(Blocks.NOTE_BLOCK)), "radio_loudspeaker");
+    public static final Block SATELLITE_STATION = register(new SatelliteStationBlock(Settings.copy(Blocks.OAK_SLAB)), "satellite_station");
+    public static final Block AUDIO_SWITCH = register(new AudioSwitchBlock(Settings.copy(Blocks.OAK_SLAB)), "audio_switch");
+    public static final Block ENDER_MUSIC_BOX = register(new EnderMusicBoxBlock(Settings.copy(Blocks.NOTE_BLOCK)), "ender_music_box");
+    public static final Block MICROPHONE_BASE = register(new MicrophoneBaseBlock(Settings.copy(Blocks.OAK_PLANKS).nonOpaque()), "microphone_base");
+    public static final Block WIRELESS_MICROPHONE_BASE = register(new WirelessMicrophoneBaseBlock(Settings.copy(Blocks.OAK_PLANKS).nonOpaque()), "wireless_microphone_base");
 
     public static BlockEntityType<ElectronicNoteBlockEntity> ELECTRONIC_NOTE_BLOCK_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Phonos.id("electronic_note_block"),

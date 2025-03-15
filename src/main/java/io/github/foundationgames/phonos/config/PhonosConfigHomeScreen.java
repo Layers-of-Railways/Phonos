@@ -4,7 +4,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.OptionListWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 
@@ -30,8 +29,9 @@ public class PhonosConfigHomeScreen extends Screen {
     protected void init() {
         assert this.client != null;
 
+        /*fixme this doesn't seem to have done much other than render a background perhaps, check.
         var bg = new OptionListWidget(this.client, this.width, this.height, 32, this.height - 32, 25);
-        this.addDrawable(bg);
+        this.addDrawable(bg);*/
 
         this.addDrawableChild(ButtonWidget.builder(CLIENT_TITLE, (button) -> this.client.setScreen(PhonosClientConfig.createScreen(this)))
             .dimensions(this.width / 2 - 75, 40, 150, 20).build());

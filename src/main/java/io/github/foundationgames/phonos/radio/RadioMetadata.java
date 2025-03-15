@@ -1,9 +1,19 @@
 package io.github.foundationgames.phonos.radio;
 
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.util.math.BlockPos;
 
 public record RadioMetadata(BlockPos pos, int transmissionRange) {
+
+    public static final PacketCodec<PacketByteBuf, RadioMetadata> PACKET_CODEC = PacketCodec.tuple(
+        BlockPos.PACKET_CODEC,
+        RadioMetadata::pos,
+        PacketCodecs.VAR_INT,
+        RadioMetadata::transmissionRange,
+        RadioMetadata::new
+    );
 
     public RadioMetadata(PacketByteBuf buf) {
         this(buf.readBlockPos(), buf.readVarInt());

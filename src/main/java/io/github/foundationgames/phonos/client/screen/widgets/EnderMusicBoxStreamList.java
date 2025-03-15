@@ -11,11 +11,14 @@ import org.lwjgl.glfw.GLFW;
 
 public class EnderMusicBoxStreamList extends AlwaysSelectedEntryListWidget<EnderMusicBoxStreamList.Entry> {
 
-    public EnderMusicBoxStreamList(MinecraftClient client, int width, int height, int top, int bottom, int itemHeight) {
-        super(client, width, height, top, bottom, itemHeight);
+    public EnderMusicBoxStreamList(MinecraftClient client, int width, int height, int y, int itemHeight) {
+        super(client, width, height, y, itemHeight);
     }
 
-    public static class Entry extends AlwaysSelectedEntryListWidget.Entry<Entry> {
+    @Override
+    protected void drawSelectionHighlight(DrawContext context, int y, int entryWidth, int entryHeight, int borderColor, int fillColor) {}
+
+    public static class Entry extends AlwaysSelectedEntryListWidget.Entry<io.github.foundationgames.phonos.client.screen.widgets.EnderMusicBoxStreamList.Entry> {
         private final EnderMusicBoxBlockEntity entity;
         public final long id;
         private final String name;

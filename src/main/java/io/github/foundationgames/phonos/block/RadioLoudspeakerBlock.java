@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.block;
 
+import com.mojang.serialization.MapCodec;
 import io.github.foundationgames.phonos.block.entity.RadioLoudspeakerBlockEntity;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import net.minecraft.block.BlockEntityProvider;
@@ -9,19 +10,25 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class RadioLoudspeakerBlock extends AbstractLoudspeakerBlock implements BlockEntityProvider {
+    public static final MapCodec<RadioLoudspeakerBlock> CODEC = createCodec(RadioLoudspeakerBlock::new);
+
     public RadioLoudspeakerBlock(Settings settings) {
         super(settings);
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    protected MapCodec<? extends AbstractLoudspeakerBlock> getCodec() {
+        return CODEC;
+    }
+
+    @Override
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         var side = hit.getSide();
         var facing = state.get(FACING);
 
@@ -39,7 +46,7 @@ public class RadioLoudspeakerBlock extends AbstractLoudspeakerBlock implements B
             return ActionResult.SUCCESS;
         }
 
-        return super.onUse(state, world, pos, player, hand, hit);
+        return super.onUse(state, world, pos, player, hit);
     }
 
     @Nullable

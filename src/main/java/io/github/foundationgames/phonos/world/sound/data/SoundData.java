@@ -3,6 +3,8 @@ package io.github.foundationgames.phonos.world.sound.data;
 import com.mojang.serialization.Lifecycle;
 import io.github.foundationgames.phonos.Phonos;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.SimpleRegistry;
@@ -20,6 +22,8 @@ public abstract class SoundData {
     public final SoundCategory soundCategory;
     public final float volume, pitch;
 
+    public static final PacketCodec<RegistryByteBuf, SoundData> PACKET_CODEC = PacketCodec.of(SoundData::toPacket, SoundData::fromPacket);
+
     public SoundData(Type<?> type, long emitterId, SoundCategory soundCategory, float volume, float pitch) {
         this.type = type;
         this.emitterId = emitterId;
@@ -32,7 +36,7 @@ public abstract class SoundData {
         this(type, buf.readLong(), SoundCategory.values()[buf.readInt()], buf.readFloat(), buf.readFloat());
     }
 
-    public void toPacket(PacketByteBuf buf) {
+    private void toPacket(RegistryByteBuf buf) {
         buf.writeIdentifier(type.id());
         buf.writeLong(emitterId);
         buf.writeInt(soundCategory.ordinal());
@@ -44,8 +48,7 @@ public abstract class SoundData {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
-    public static @Nullable SoundData fromPacket(PacketByteBuf buf) {
+    private static @Nullable SoundData fromPacket(RegistryByteBuf buf) {
         var id = buf.readIdentifier();
         var entry = REGISTRY.get(id);
 
@@ -69,6 +72,6 @@ public abstract class SoundData {
     public record Type<S extends SoundData>(Identifier id, boolean resumable, Factory<S> constructor) {}
 
     public interface Factory<S extends SoundData> {
-        S create(Type<?> type, PacketByteBuf buf);
+        S create(Type<?> type, RegistryByteBuf buf);
     }
 }

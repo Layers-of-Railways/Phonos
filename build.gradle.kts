@@ -75,9 +75,6 @@ dependencies {
 
     if ("enable_music_disc_mods"().toBoolean()) {
         modLocalRuntime("maven.modrinth:more-music-discs:${"more_music_discs_version"()}") { isTransitive = false }
-        modLocalRuntime("maven.modrinth:spindlemark:${"spindlemark_version"()}") { isTransitive = false }
-        modLocalRuntime("com.unascribed:lib39-core:${"lib39_version"()}")
-        modLocalRuntime("com.unascribed:lib39-keygen:${"lib39_version"()}")
     }
 }
 

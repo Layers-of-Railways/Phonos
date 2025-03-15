@@ -20,6 +20,7 @@ public class CableVBOContainer {
     private List<CableConnection> cachedCons = new ArrayList<>();
 
     private CableBounds bounds = new CableBounds();
+    BufferBuilder wipBuilder = null;
 
     public void refresh(ConnectionCollection conns) {
         List<CableConnection> connections = new ArrayList<>();
@@ -47,16 +48,19 @@ public class CableVBOContainer {
                        ConnectionCollection conns, PhonosClientConfig config, World world, int overlay, float tickDelta) {
         boolean rebuild = this.buffer == null || this.rebuild;
 
+        BufferBuilder builder;
         if (rebuild) {
             // If we're re-rendering into the vertexbuffer, create a new VBO,
             // grab the tessellator and start tessellating with our vertex format
             var vbo = new VertexBuffer(VertexBuffer.Usage.STATIC);
-            BufferBuilder builder = Tessellator.getInstance().getBuffer();
-            builder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL);
+            builder = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL);
+            wipBuilder = builder;
 
             this.buffer = vbo;
 
             this.bounds.clear();
+        } else {
+            builder = null; // because Java can't infer that `builder` is initialized in the next `if (rebuild)` block
         }
 
         // Render each connection point in immediate mode, and render cables into the given vertex buffer
@@ -69,10 +73,12 @@ public class CableVBOContainer {
         if (rebuild) {
             // If we rerendered, upload the buffer to the GPU and mark ourselves as not dirty
             vbo.bind();
-            vbo.upload(Tessellator.getInstance().getBuffer().end());
+            vbo.upload(builder.end());
             VertexBuffer.unbind();
             this.rebuild = false;
         }
+
+        wipBuilder = null;
 
         if (config.cableCulling && !bounds.visible(frustum)) {
             return;

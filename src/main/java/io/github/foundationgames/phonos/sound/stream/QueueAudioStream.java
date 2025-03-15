@@ -30,7 +30,7 @@ public class QueueAudioStream implements AudioStream {
     }
 
     @Override
-    public synchronized ByteBuffer getBuffer(int size) {
+    public synchronized ByteBuffer read(int size) {
         var out = BufferUtils.createByteBuffer(size);
         var stream = this.stream.get();
 

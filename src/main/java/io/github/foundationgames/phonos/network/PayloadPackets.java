@@ -163,7 +163,7 @@ public final class PayloadPackets {
     public static void sendSoundPlay(ServerPlayerEntity player, SoundData data, SoundEmitterTree tree) {
         var buf = new PacketByteBuf(Unpooled.buffer());
         data.toPacket(buf);
-        tree.toPacket(buf);
+        SoundEmitterTree.PACKET_CODEC.encode(buf, tree);
         ServerPlayNetworking.send(player, Phonos.id("sound_play"), buf);
     }
 
@@ -175,7 +175,7 @@ public final class PayloadPackets {
 
     public static void sendSoundUpdate(ServerPlayerEntity player, SoundEmitterTree.Delta delta) {
         var buf = new PacketByteBuf(Unpooled.buffer());
-        SoundEmitterTree.Delta.toPacket(buf, delta);
+        SoundEmitterTree.Delta.PACKET_CODEC.encode(buf, delta);
         ServerPlayNetworking.send(player, Phonos.id("sound_update"), buf);
     }
 

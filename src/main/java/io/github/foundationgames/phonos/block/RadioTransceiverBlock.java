@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.block;
 
+import com.mojang.serialization.MapCodec;
 import io.github.foundationgames.phonos.block.entity.RadioTransceiverBlockEntity;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.util.PhonosUtil;
@@ -11,12 +12,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
+import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -25,6 +27,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class RadioTransceiverBlock extends RadioReceiverBlock implements BlockEntityProvider, InputBlock {
+    public static final MapCodec<RadioTransceiverBlock> CODEC = createCodec(RadioTransceiverBlock::new);
     public final BlockConnectionLayout inputLayout = new BlockConnectionLayout()
             .addPoint(-4.5, -4.5, 8, Direction.SOUTH)
             .addPoint(4.5, -4.5, 8, Direction.SOUTH);
@@ -34,14 +37,17 @@ public class RadioTransceiverBlock extends RadioReceiverBlock implements BlockEn
     }
 
     @Override
-    protected ActionResult onUseFace(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        var stack = player.getStackInHand(hand);
+    protected MapCodec<? extends RadioReceiverBlock> getCodec() {
+        return CODEC;
+    }
 
+    @Override
+    protected ItemActionResult onUseFace(BlockState state, World world, BlockPos pos, PlayerEntity player, ItemStack stack, BlockHitResult hit) {
         int inc = player.isSneaking() ? -1 : 1;
         if (world.getBlockEntity(pos) instanceof RadioTransceiverBlockEntity be) {
             int goal = be.getChannel() + inc;
 
-            if (stack.isOf(Items.NAME_TAG) && stack.hasCustomName()) {
+            if (stack.isOf(Items.NAME_TAG) && stack.contains(DataComponentTypes.CUSTOM_NAME)) {
                 String customName = stack.getName().getString();
                 if (customName.matches("\\d+")) {
                     goal = Integer.parseInt(customName);
@@ -53,7 +59,7 @@ public class RadioTransceiverBlock extends RadioReceiverBlock implements BlockEn
             be.markDirty();
         }
 
-        return ActionResult.CONSUME;
+        return ItemActionResult.CONSUME;
     }
 
     @Override

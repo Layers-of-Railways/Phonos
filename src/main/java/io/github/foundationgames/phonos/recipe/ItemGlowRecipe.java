@@ -8,20 +8,23 @@ import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
+import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
 public class ItemGlowRecipe extends SpecialCraftingRecipe {
-    public ItemGlowRecipe(Identifier id, CraftingRecipeCategory category) {
-        super(id, category);
+    public ItemGlowRecipe(CraftingRecipeCategory category) {
+        super(category);
     }
+
     @Override
-    public boolean matches(RecipeInputInventory inventory, World world) {
+    public boolean matches(CraftingRecipeInput input, World world) {
         int glowableItems = 0;
         int glowInkSacs = 0;
 
-        for (var stack : inventory.getInputStacks()) {
+        for (var stack : input.getStacks()) {
             if (stack.getItem() instanceof GlowableItem item && !item.isGlowing(stack)) {
                 glowableItems++;
             } else if (stack.isOf(Items.GLOW_INK_SAC)) {
@@ -39,8 +42,8 @@ public class ItemGlowRecipe extends SpecialCraftingRecipe {
     }
 
     @Override
-    public ItemStack craft(RecipeInputInventory inventory, DynamicRegistryManager registryManager) {
-        for (var stack : inventory.getInputStacks()) {
+    public ItemStack craft(CraftingRecipeInput input, RegistryWrapper.WrapperLookup wrapperLookup) {
+        for (var stack : input.getStacks()) {
             if (stack.getItem() instanceof GlowableItem item) {
                 var result = stack.copy();
                 item.setGlowing(result, true);

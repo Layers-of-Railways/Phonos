@@ -49,7 +49,7 @@ public class SVCMultiSoundInstance extends MultiSourceSoundInstance implements F
     @Override
     public CompletableFuture<AudioStream> getAudioStream(SoundLoader loader, Identifier id, boolean repeatInstantly) {
         MinecraftClient mc = MinecraftClient.getInstance();
-        var sound = mc.getSoundManager().get(Identifier.of("minecraft", "block.note_block.chime"))
+        var sound = mc.getSoundManager().get(Identifier.tryParse("minecraft", "block.note_block.chime"))
             .getSound(mc.player.getRandom());
         return loader.loadStreamed(sound.getLocation(), false)
             .thenApply(InfinitelyExtendingAudioStream::new);

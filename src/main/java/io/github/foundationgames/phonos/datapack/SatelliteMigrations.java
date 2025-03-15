@@ -7,7 +7,6 @@ import io.github.foundationgames.phonos.Phonos;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.minecraft.resource.JsonDataLoader;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.util.Identifier;
@@ -48,7 +47,7 @@ public class SatelliteMigrations {
                         elements.add(JsonHelper.deserialize(GSON, reader, JsonElement.class));
                     }
                 } catch (JsonParseException | IOException | IllegalArgumentException exception) {
-                    Identifier id = new Identifier(resource.getPack().getName(), "phonos/"+filePath);
+                    Identifier id = Identifier.of(resource.getPack().getId(), "phonos/"+filePath);
                     Phonos.LOG.error("Couldn't parse satellite migrations file {}", id, exception);
                 }
             }

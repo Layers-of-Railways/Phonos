@@ -22,9 +22,9 @@ public class InfinitelyExtendingAudioStream implements AudioStream {
     }
 
     @Override
-    public ByteBuffer getBuffer(int size) throws IOException {
+    public ByteBuffer read(int size) throws IOException {
         if (wrapped != null) {
-            ByteBuffer wrappedBuffer = wrapped.getBuffer(size);
+            ByteBuffer wrappedBuffer = wrapped.read(size);
             if (wrappedBuffer == null || wrappedBuffer.limit() == 0) {
                 wrapped.close();
                 wrapped = null;

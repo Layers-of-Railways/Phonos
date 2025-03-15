@@ -7,25 +7,24 @@ import io.github.foundationgames.phonos.sound.emitter.SoundEmitterStorage;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
 import io.github.foundationgames.phonos.util.UniqueId;
 import io.github.foundationgames.phonos.world.sound.data.SoundEventSoundData;
+import net.minecraft.block.jukebox.JukeboxSong;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.MusicDiscItem;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
+import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 public class PortableRecordPlayerItem extends Item implements SoundEmitterItem {
     public static final Text NO_DISC = Text.translatable("tooltip.phonos.item.no_disc").formatted(Formatting.RED);
@@ -52,18 +51,21 @@ public class PortableRecordPlayerItem extends Item implements SoundEmitterItem {
                     cursorStackReference.set(this.removeRecordAndStop(stack, player.getWorld()));
                     result = true;
                 }
-            } else if (otherStack.getItem() instanceof MusicDiscItem disc) {
-                if (!hasEmitterId(stack)) {
-                    refreshEmitterId(stack);
-                }
+            } else {
+                Optional<RegistryEntry<JukeboxSong>> optionalSong = JukeboxSong.getSongEntryFromStack(player.getRegistryManager(), otherStack);
+                if (optionalSong.isPresent()) {
+                    if (!hasEmitterId(stack)) {
+                        refreshEmitterId(stack);
+                    }
 
-                if (needsSync) {
-                    sync = stack.copy();
-                }
+                    if (needsSync) {
+                        sync = stack.copy();
+                    }
 
-                this.putRecordAndPlay(stack, disc, otherStack, player.getWorld());
-                cursorStackReference.set(ItemStack.EMPTY);
-                result = true;
+                    this.putRecordAndPlay(stack, optionalSong.get().value(), otherStack, player.getWorld());
+                    cursorStackReference.set(ItemStack.EMPTY);
+                    result = true;
+                }
             }
 
             if (sync != null) {
@@ -79,54 +81,47 @@ public class PortableRecordPlayerItem extends Item implements SoundEmitterItem {
     }
 
     public boolean hasEmitterId(ItemStack stack) {
-        return stack.hasNbt() && stack.getNbt().contains("uid");
+        return stack.contains(PhonosDataComponents.EMITTER_ID);
     }
 
     public long getEmitterId(ItemStack stack) {
-        return stack.hasNbt() ? stack.getNbt().getLong("uid") : 0;
+        return stack.getOrDefault(PhonosDataComponents.EMITTER_ID, 0L);
     }
 
     public long refreshEmitterId(ItemStack stack) {
         long id = UniqueId.random();
-        stack.getOrCreateNbt().putLong("uid", id);
+        stack.set(PhonosDataComponents.EMITTER_ID, id);
 
         return id;
     }
 
     public void removeEmitterId(ItemStack stack) {
-        if (stack.hasNbt()) {
-            stack.getNbt().remove("uid");
-        }
+        stack.remove(PhonosDataComponents.EMITTER_ID);
     }
 
     public boolean hasRecord(ItemStack stack) {
-        return stack.getSubNbt("Record") != null;
+        return !stack.getOrDefault(PhonosDataComponents.PORTABLE_RECORD_CONTENTS, ItemStack.EMPTY).isEmpty();
     }
 
-    public void putRecordAndPlay(ItemStack stack, MusicDiscItem disc, ItemStack record, World world) {
-        stack.setSubNbt("Record", record.writeNbt(new NbtCompound()));
+    private void putRecordAndPlay(ItemStack stack, JukeboxSong song, ItemStack record, World world) {
+        stack.set(PhonosDataComponents.PORTABLE_RECORD_CONTENTS, record);
         long emitterId = getEmitterId(stack);
 
         if (!world.isClient()) {
             SoundEmitterStorage.getInstance(world).addEmitter(SoundEmitter.noOp(emitterId));
             SoundStorage.getInstance(world).play(world, SoundEventSoundData.create(
-                            emitterId, Registries.SOUND_EVENT.getEntry(disc.getSound()), SoundCategory.RECORDS, 2, 1),
+                            emitterId, song.soundEvent(), SoundCategory.RECORDS, 2, 1),
                     new SoundEmitterTree(emitterId));
         }
     }
 
     public ItemStack getRecord(ItemStack stack) {
-        var nbt = stack.getSubNbt("Record");
-        if (this.hasRecord(stack)) {
-            return ItemStack.fromNbt(nbt);
-        }
-
-        return ItemStack.EMPTY;
+        return stack.getOrDefault(PhonosDataComponents.PORTABLE_RECORD_CONTENTS, ItemStack.EMPTY);
     }
 
     public ItemStack removeRecordAndStop(ItemStack stack, World world) {
-        var nbt = stack.getSubNbt("Record");
-        if (nbt != null) {
+        var record = stack.remove(PhonosDataComponents.PORTABLE_RECORD_CONTENTS);
+        if (record != null && !record.isEmpty()) {
             if (!world.isClient() && hasEmitterId(stack)) {
                 long emitterId = getEmitterId(stack);
                 SoundEmitterStorage.getInstance(world).removeEmitter(emitterId);
@@ -134,9 +129,8 @@ public class PortableRecordPlayerItem extends Item implements SoundEmitterItem {
             }
 
             removeEmitterId(stack);
-            stack.removeSubNbt("Record");
 
-            return ItemStack.fromNbt(nbt);
+            return record;
         }
 
         return ItemStack.EMPTY;
@@ -174,13 +168,14 @@ public class PortableRecordPlayerItem extends Item implements SoundEmitterItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        super.appendTooltip(stack, world, tooltip, context);
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+        super.appendTooltip(stack, context, tooltip, type);
 
         var record = this.getRecord(stack);
-        if (record.getItem() instanceof MusicDiscItem disc) {
+        var optionalSong = JukeboxSong.getSongEntryFromStack(context.getRegistryLookup(), record);
+        if (optionalSong.isPresent()) {
             tooltip.add(PLAYING);
-            tooltip.add(disc.getDescription().copy().formatted(Formatting.BLUE));
+            tooltip.add(optionalSong.get().value().description().copy().formatted(Formatting.BLUE));
             tooltip.add(TOOLTIP_HINT);
         } else {
             tooltip.add(NO_DISC);

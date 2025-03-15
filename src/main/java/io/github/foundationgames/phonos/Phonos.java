@@ -4,9 +4,11 @@ import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.datapack.SatelliteMigrations;
 import io.github.foundationgames.phonos.item.ItemGroupQueue;
+import io.github.foundationgames.phonos.item.PhonosDataComponents;
 import io.github.foundationgames.phonos.item.PhonosItems;
 import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingServerPlayerEntity;
 import io.github.foundationgames.phonos.network.PayloadPackets;
+import io.github.foundationgames.phonos.network.PhonosPackets;
 import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.recipe.ItemGlowRecipe;
@@ -76,8 +78,10 @@ public class Phonos implements ModInitializer {
 
         Registry.register(Registries.RECIPE_SERIALIZER, Phonos.id("crafting_special_itemglow"), ITEM_GLOW_RECIPE_SERIALIZER);
 
+        PhonosPackets.PACKETS.initCommon();
         PayloadPackets.initCommon();
 
+        PhonosDataComponents.init();
         PhonosBlocks.init();
         PhonosItems.init();
         PhonosTags.init();
@@ -190,6 +194,6 @@ public class Phonos implements ModInitializer {
     }
 
     public static Identifier id(String path) {
-        return new Identifier("phonos", path);
+        return Identifier.of("phonos", path);
     }
 }

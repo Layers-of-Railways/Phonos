@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.PersistentState;
@@ -13,7 +14,6 @@ import net.minecraft.world.PersistentState;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class RadarPoints extends PersistentState {
     private final Int2ObjectMap<LongSet> channelToSources = new Int2ObjectOpenHashMap<>();
@@ -58,7 +58,7 @@ public class RadarPoints extends PersistentState {
     }
 
     public static RadarPoints get(ServerWorld world) {
-        return world.getPersistentStateManager().getOrCreate(RadarPoints::readNbt, RadarPoints::new, "phonos_radar_points");
+        return world.getPersistentStateManager().getOrCreate(new Type<>(RadarPoints::new, RadarPoints::readNbt, null), "phonos_radar_points");
     }
 
     private static int[] packPosSet(LongSet posSet) {
@@ -89,7 +89,7 @@ public class RadarPoints extends PersistentState {
     }
 
     @Override
-    public NbtCompound writeNbt(NbtCompound nbt) {
+    public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         for (var entry : channelToSources.int2ObjectEntrySet()) if (!entry.getValue().isEmpty()) {
             nbt.putIntArray("ch" + entry.getIntKey(), packPosSet(entry.getValue()));
         }
@@ -103,7 +103,7 @@ public class RadarPoints extends PersistentState {
         return nbt;
     }
 
-    public static RadarPoints readNbt(NbtCompound nbt) {
+    public static RadarPoints readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         var state = new RadarPoints();
 
         for (int ch = 0; ch < RadioStorage.CHANNEL_COUNT; ch++) {
