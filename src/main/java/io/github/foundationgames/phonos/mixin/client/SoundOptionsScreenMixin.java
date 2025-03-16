@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 @Mixin(SoundOptionsScreen.class)
 public class SoundOptionsScreenMixin {
     @ModifyArg(
-            method = "init",
+            method = "addOptions",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/gui/widget/OptionListWidget;addAll([Lnet/minecraft/client/option/SimpleOption;)V",

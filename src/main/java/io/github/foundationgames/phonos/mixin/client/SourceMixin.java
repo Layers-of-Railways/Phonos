@@ -33,7 +33,7 @@ public abstract class SourceMixin implements ISkippableSource {
         phonos$ticksToSkip += ticks;
     }
 
-    @WrapOperation(method = "read", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/AudioStream;getBuffer(I)Ljava/nio/ByteBuffer;"))
+    @WrapOperation(method = "read", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/AudioStream;read(I)Ljava/nio/ByteBuffer;"))
     private ByteBuffer skipRead(AudioStream instance, int size, Operation<ByteBuffer> original) {
         if (phonos$ticksToSkip <= 0)
             return original.call(instance, size);

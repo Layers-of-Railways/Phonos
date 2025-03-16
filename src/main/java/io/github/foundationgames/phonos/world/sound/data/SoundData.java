@@ -36,7 +36,7 @@ public abstract class SoundData {
         this(type, buf.readLong(), SoundCategory.values()[buf.readInt()], buf.readFloat(), buf.readFloat());
     }
 
-    private void toPacket(RegistryByteBuf buf) {
+    public void toPacket(RegistryByteBuf buf) {
         buf.writeIdentifier(type.id());
         buf.writeLong(emitterId);
         buf.writeInt(soundCategory.ordinal());

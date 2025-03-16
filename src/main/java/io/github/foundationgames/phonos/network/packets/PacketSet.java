@@ -146,7 +146,7 @@ public class PacketSet {
 
     public void initCommon() {
         PayloadTypeRegistry.playS2C().register(s2cPacket, S2C_PACKET_CODEC);
-        PayloadTypeRegistry.playS2C().register(c2sPacket, C2S_PACKET_CODEC);
+        PayloadTypeRegistry.playC2S().register(c2sPacket, C2S_PACKET_CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(c2sPacket, (payload, context) -> {
             ServerPlayerEntity sender = context.player();

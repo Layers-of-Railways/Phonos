@@ -2,6 +2,7 @@ package io.github.foundationgames.phonos;
 
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
+import io.github.foundationgames.phonos.datapack.MusicDiscOverrides;
 import io.github.foundationgames.phonos.datapack.SatelliteMigrations;
 import io.github.foundationgames.phonos.item.ItemGroupQueue;
 import io.github.foundationgames.phonos.item.PhonosDataComponents;
@@ -13,7 +14,6 @@ import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.recipe.ItemGlowRecipe;
 import io.github.foundationgames.phonos.satellite_radio.SatelliteRadioStorage;
-import io.github.foundationgames.phonos.datapack.MusicDiscOverrides;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SecondaryEmitterHolder;
@@ -35,6 +35,7 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.block.dispenser.FallibleItemDispenserBehavior;
 import net.minecraft.item.ArmorItem;
@@ -51,6 +52,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPointer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -190,6 +192,10 @@ public class Phonos implements ModInitializer {
         RadioStorage.init();
         PhonosCommands.init();
         ServerLifecycleHooks.init();
+
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            MixinEnvironment.getCurrentEnvironment().audit();
+        }
     }
 
     public static Identifier id(String path) {
