@@ -200,6 +200,10 @@ public class ElectronicJukeboxBlockEntity extends BlockEntity implements Syncing
         }
     }
 
+    public boolean isPlaying() {
+        return playingSound != null;
+    }
+
     private static void spawnNoteParticles(WorldAccess world, BlockPos pos) {
         if (world instanceof ServerWorld serverWorld) {
             Vec3d vec3d = Vec3d.ofBottomCenter(pos).add(0.0, 1.2F, 0.0);
