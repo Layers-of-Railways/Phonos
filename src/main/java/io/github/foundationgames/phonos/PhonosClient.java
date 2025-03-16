@@ -11,7 +11,6 @@ import io.github.foundationgames.phonos.config.PhonosClientConfig;
 import io.github.foundationgames.phonos.config.widgets.PhonosOptionRegistry;
 import io.github.foundationgames.phonos.item.*;
 import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingClientPlayerEntity;
-import io.github.foundationgames.phonos.network.ClientPayloadPackets;
 import io.github.foundationgames.phonos.network.PhonosPackets;
 import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioStorage;
@@ -65,7 +64,6 @@ public class PhonosClient implements ClientModInitializer {
             Phonos.LOG.error("Error loading Phonos client config!");
 
         PhonosPackets.PACKETS.initClient();
-        ClientPayloadPackets.initClient();
         ClientSoundStorage.initClient();
         PhonosClientCommands.initClient();
 

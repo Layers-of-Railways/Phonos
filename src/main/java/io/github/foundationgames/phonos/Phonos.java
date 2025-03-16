@@ -79,7 +79,6 @@ public class Phonos implements ModInitializer {
         Registry.register(Registries.RECIPE_SERIALIZER, Phonos.id("crafting_special_itemglow"), ITEM_GLOW_RECIPE_SERIALIZER);
 
         PhonosPackets.PACKETS.initCommon();
-        PayloadPackets.initCommon();
 
         PhonosDataComponents.init();
         PhonosBlocks.init();

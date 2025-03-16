@@ -2,6 +2,7 @@ package io.github.foundationgames.phonos.util;
 
 import io.github.foundationgames.phonos.block.entity.Ticking;
 import io.github.foundationgames.phonos.item.AudioCableItem;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
@@ -14,6 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.WorldSavePath;
@@ -180,6 +182,20 @@ public enum PhonosUtil {;
     public static Path getCustomSoundFolder(MinecraftServer server) {
         return server.getSavePath(WorldSavePath.ROOT).resolve("phonos");
     }
+
+    public static final PacketCodec<PacketByteBuf, PacketByteBuf> NESTED_BUF_PACKET_CODEC = PacketCodec.ofStatic(
+        (buf, value) -> buf.writeByteArray(value.array()),
+        buf -> {
+            var value = new PacketByteBuf(Unpooled.buffer());
+            value.writeBytes(buf.readByteArray());
+            return value;
+        }
+    );
+
+    public static final PacketCodec<PacketByteBuf, ByteBuffer> BYTE_BUFFER_PACKET_CODEC = PacketCodec.ofStatic(
+        PhonosUtil::writeBufferToPacket,
+        buf -> PhonosUtil.readBufferFromPacket(buf, ByteBuffer::allocate)
+    );
 
     public static void writeBufferToPacket(PacketByteBuf packet, ByteBuffer buffer) {
         int sizeCur = packet.writerIndex();

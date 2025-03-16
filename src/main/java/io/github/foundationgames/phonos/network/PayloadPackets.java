@@ -1,261 +1,70 @@
 package io.github.foundationgames.phonos.network;
 
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
-import dev.isxander.yacl3.config.v2.api.ConfigField;
-import dev.isxander.yacl3.config.v2.api.FieldAccess;
-import io.github.foundationgames.phonos.Phonos;
-import io.github.foundationgames.phonos.block.entity.EnderMusicBoxBlockEntity;
 import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
-import io.github.foundationgames.phonos.config.serializers.NetworkConfigSerializer;
-import io.github.foundationgames.phonos.item.PortableSatelliteRadioItem;
-import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
+import io.github.foundationgames.phonos.network.packets.s2c.*;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
-import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.sound.data.SoundData;
-import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.listener.ClientCommonPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.ClickType;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
 public final class PayloadPackets {
-    public static void initCommon() {
-        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("fake_creative_slot_click"), (server, player, handler, buf, responseSender) -> {
-            var onto = buf.readItemStack();
-            var with = buf.readItemStack();
-            var click = ClickType.values()[buf.readInt()];
-
-            server.execute(() ->
-                    onto.getItem().onClicked(onto, with, null, click, player, StackReference.EMPTY));
-        });
-
-        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("request_ender_music_box_upload_session"), (server, player, handler, buf, responseSender) -> {
-            var pos = buf.readBlockPos();
-            var name = buf.readString(512);
-
-            server.execute(() -> {
-                var world = player.getWorld();
-
-                if (world.getBlockEntity(pos) instanceof EnderMusicBoxBlockEntity entity) {
-                    Long streamId;
-                    if (entity.canModifyStreams(player) && (streamId = entity.allocateStreamId(name)) != null) {
-                        ServerCustomAudio.beginUploadSession(player, streamId);
-                        sendUploadStatus(player, streamId, true);
-
-                        Phonos.LOG.info("Allowed player {} to upload audio at ender music box {}. Will be saved to <world>/phonos/{}",
-                                player, pos, Long.toHexString(streamId) + ServerCustomAudio.FILE_EXT);
-                    } else {
-                        sendUploadStatus(player, entity.emitterId(), false);
-                    }
-                }
-            });
-        });
-
-        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("delete_ender_music_box_stream"), (server, player, handler, buf, responseSender) -> {
-            var pos = buf.readBlockPos();
-            var streamId = buf.readLong();
-
-            server.execute(() -> {
-                var world = player.getWorld();
-
-                if (world.getBlockEntity(pos) instanceof EnderMusicBoxBlockEntity entity && entity.canModifyStreams(player)) {
-                    entity.deleteStream(streamId);
-                }
-            });
-        });
-
-        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("request_satellite_action"), (server, player, handler, buf, responseSender) -> {
-            var pos = buf.readBlockPos();
-            int actionId = buf.readInt();
-            String data = buf.readString(256);
-
-            server.execute(() -> {
-                var world = player.getWorld();
-
-                switch (actionId) {
-                    case SatelliteStationBlockEntity.ACTION_LAUNCH -> {
-                        if (world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity entity && entity.canLaunch(player)) {
-                            entity.performAction(SatelliteStationBlockEntity.ACTION_LAUNCH, data);
-                        }
-                    }
-
-                    case SatelliteStationBlockEntity.ACTION_CRASH -> {
-                        if (world.getBlockEntity(pos) instanceof SatelliteStationBlockEntity entity && entity.canCrash(player)) {
-                            entity.performAction(SatelliteStationBlockEntity.ACTION_CRASH, data);
-                        }
-                    }
-                }
-            });
-        });
-
-        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("audio_upload"), (server, player, handler, buf, responseSender) -> {
-            long streamId = buf.readLong();
-            int sampleRate = buf.readInt();
-            var samples = PhonosUtil.readBufferFromPacket(buf, ByteBuffer::allocate);
-
-            boolean last = buf.readBoolean();
-
-            server.execute(() -> ServerCustomAudio.receiveUpload(server, player, streamId, sampleRate, samples, last));
-        });
-
-        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("config_change"), ((server, player, handler, buf, responseSender) -> {
-            if (!PhonosServerConfig.isAuthorizedToChange(player)) {
-                Phonos.LOG.warn("Player {} tried to change config without permission", player);
-                handler.disconnect(Text.of("You are not authorized to change Phonos config"));
-                return;
-            }
-
-            ConfigClassHandler<PhonosServerConfig> config = PhonosServerConfig.getHandler(player.getServerWorld());
-
-            int idx = buf.readVarInt();
-            String name = buf.readString();
-
-            FieldAccess<?> access = config.fields()[MathHelper.clamp(idx, 0, config.fields().length-1)].access();
-
-            if (access.name().equals(name)) {
-                NetworkConfigSerializer.read(buf, access);
-                config.save();
-                return;
-            }
-
-            for (ConfigField<?> field : config.fields()) {
-                access = field.access();
-                if (access.name().equals(name)) {
-                    NetworkConfigSerializer.read(buf, access);
-                    config.save();
-                    return;
-                }
-            }
-
-            Phonos.LOG.warn("Failed to find config field with name {}", name);
-        }));
-
-        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("configure_portable_satellite_radio_channel"), (server, player, handler, buf, responseSender) -> {
-            var channel = buf.readString(256);
-            channel = SatelliteStationBlockEntity.cleanChannel(channel);
-
-            if (!SatelliteStationBlockEntity.validateChannel(channel)) {
-                Phonos.LOG.warn("Player {} tried to set invalid channel {}", player, channel);
-                return;
-            }
-
-            String finalChannel = channel;
-            server.execute(() -> {
-                ItemStack handStack = player.getMainHandStack();
-                if (handStack.getItem() instanceof PortableSatelliteRadioItem satelliteRadio) {
-                    satelliteRadio.setChannel(handStack, finalChannel);
-                }
-            });
-        });
-    }
-
     public static void sendSoundPlay(ServerPlayerEntity player, SoundData data, SoundEmitterTree tree) {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        data.toPacket(buf);
-        SoundEmitterTree.PACKET_CODEC.encode(buf, tree);
-        ServerPlayNetworking.send(player, Phonos.id("sound_play"), buf);
+        PhonosPackets.PACKETS.sendTo(player, new SoundPlayPacket(data, tree));
     }
 
     public static void sendSoundStop(ServerPlayerEntity player, long sourceId) {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        buf.writeLong(sourceId);
-        ServerPlayNetworking.send(player, Phonos.id("sound_stop"), buf);
+        PhonosPackets.PACKETS.sendTo(player, new SoundStopPacket(sourceId));
     }
 
     public static void sendSoundUpdate(ServerPlayerEntity player, SoundEmitterTree.Delta delta) {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        SoundEmitterTree.Delta.PACKET_CODEC.encode(buf, delta);
-        ServerPlayNetworking.send(player, Phonos.id("sound_update"), buf);
+        PhonosPackets.PACKETS.sendTo(player, new SoundUpdatePacket(delta));
     }
 
     public static void sendOpenSatelliteStationScreen(ServerPlayerEntity player, BlockPos pos, int screenType) {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        buf.writeBlockPos(pos);
-        buf.writeInt(screenType);
-
-        ServerPlayNetworking.send(player, Phonos.id("open_satellite_station_screen"), buf);
+        PhonosPackets.PACKETS.sendTo(player, new OpenSatelliteStationScreenPacket(pos, screenType));
     }
 
     public static void sendOpenEnderMusicBoxScreen(ServerPlayerEntity player, BlockPos pos) {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        buf.writeBlockPos(pos);
-
-        ServerPlayNetworking.send(player, Phonos.id("open_ender_music_box_screen"), buf);
+        PhonosPackets.PACKETS.sendTo(player, new OpenEnderMusicBoxScreenPacket(pos));
     }
 
     public static void sendUploadStop(ServerPlayerEntity player, long uploadId, Text message) {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        buf.writeLong(uploadId);
-        buf.writeText(message);
-
-        ServerPlayNetworking.send(player, Phonos.id("audio_upload_stop"), buf);
+        PhonosPackets.PACKETS.sendTo(player, new AudioUploadStopPacket(uploadId, message));
     }
 
     public static void sendUploadStatus(ServerPlayerEntity player, long uploadId, boolean ok) {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        buf.writeLong(uploadId);
-        buf.writeBoolean(ok);
-
-        ServerPlayNetworking.send(player, Phonos.id("audio_upload_status"), buf);
+        PhonosPackets.PACKETS.sendTo(player, new AudioUploadStatusPacket(uploadId, ok));
     }
 
     public static void sendAudioStreamData(ServerPlayerEntity player, long streamId, int sampleRate, ByteBuffer samples) {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        buf.writeLong(streamId);
-        buf.writeInt(sampleRate);
-        PhonosUtil.writeBufferToPacket(buf, samples);
-
-        ServerPlayNetworking.send(player, Phonos.id("audio_stream_data"), buf);
+        PhonosPackets.PACKETS.sendTo(player, new AudioStreamDataPacket(streamId, sampleRate, samples));
     }
 
     public static void sendAudioStreamEnd(ServerPlayerEntity player, long streamId) {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        buf.writeLong(streamId);
-
-        ServerPlayNetworking.send(player, Phonos.id("audio_stream_end"), buf);
+        PhonosPackets.PACKETS.sendTo(player, new AudioStreamEndPacket(streamId));
     }
 
-    public static Packet<ClientPlayPacketListener> pktSatelliteAction(SatelliteStationBlockEntity be, int action, String data) {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        buf.writeBlockPos(be.getPos());
-        buf.writeInt(action);
-        buf.writeString(data, 256);
-
-        return ServerPlayNetworking.createS2CPacket(Phonos.id("satellite_action"), buf);
+    public static Packet<ClientCommonPacketListener> pktSatelliteAction(SatelliteStationBlockEntity be, int action, String data) {
+        return PhonosPackets.PACKETS.tunnelPacket(new SatelliteActionPacket(be.getPos(), action, data));
     }
 
     public static void sendMicrophoneChannelOpen(ServerPlayerEntity player, UUID channelId, long streamId, UUID speakingPlayer) {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        buf.writeUuid(channelId);
-        buf.writeLong(streamId);
-        buf.writeUuid(speakingPlayer);
-
-        ServerPlayNetworking.send(player, Phonos.id("microphone_channel_open"), buf);
+        PhonosPackets.PACKETS.sendTo(player, new MicrophoneChannelOpenPacket(channelId, streamId, speakingPlayer));
     }
 
     public static void sendMicrophoneChannelClose(ServerPlayerEntity player, UUID channelId, long streamId) {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        buf.writeUuid(channelId);
-        buf.writeLong(streamId);
-
-        ServerPlayNetworking.send(player, Phonos.id("microphone_channel_close"), buf);
+        PhonosPackets.PACKETS.sendTo(player, new MicrophoneChannelClosePacket(channelId, streamId));
     }
 
     public static void sendConfig(ServerPlayerEntity player, ConfigClassHandler<PhonosServerConfig> config) {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        NetworkConfigSerializer.write(buf, config);
-
-        ServerPlayNetworking.send(player, Phonos.id("set_config"), buf);
+        PhonosPackets.PACKETS.sendTo(player, new SetConfigPacket(config));
     }
 }

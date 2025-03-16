@@ -3,6 +3,7 @@ package io.github.foundationgames.phonos.config.serializers;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.ConfigField;
 import dev.isxander.yacl3.config.v2.api.FieldAccess;
+import io.netty.buffer.Unpooled;
 import net.minecraft.network.PacketByteBuf;
 
 import java.util.Map;
@@ -44,6 +45,12 @@ public class NetworkConfigSerializer {
         codec.write.accept(buf, field.get());
     }
 
+    public static <T> PacketByteBuf write(FieldAccess<T> field) {
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        write(buf, field);
+        return buf;
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> void read(PacketByteBuf buf, FieldAccess<T> field) {
         NetCodec<T> codec = (NetCodec<T>) CODECS.get(field.typeClass());
@@ -55,6 +62,12 @@ public class NetworkConfigSerializer {
         for (ConfigField<?> field : config.fields()) {
             write(buf, field.access());
         }
+    }
+
+    public static PacketByteBuf write(ConfigClassHandler<?> config) {
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        write(buf, config);
+        return buf;
     }
 
     public static void read(PacketByteBuf buf, ConfigClassHandler<?> config) {

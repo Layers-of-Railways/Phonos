@@ -15,7 +15,9 @@ import net.minecraft.network.DisconnectionInfo;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.listener.ClientCommonPacketListener;
 import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -66,6 +68,10 @@ public class PacketSet {
 
     public void sendTo(ServerPlayerEntity player, S2CPacket packet) {
         ServerPlayNetworking.send(player, new S2CTunnel(packet));
+    }
+
+    public Packet<ClientCommonPacketListener> tunnelPacket(S2CPacket packet) {
+        return ServerPlayNetworking.createS2CPacket(new S2CTunnel(packet));
     }
 
     private final PacketCodec<RegistryByteBuf, S2CTunnel> S2C_PACKET_CODEC = PacketCodec.ofStatic(this::writeS2CTunnel, this::readS2CTunnel);
