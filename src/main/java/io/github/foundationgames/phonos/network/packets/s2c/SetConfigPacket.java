@@ -24,7 +24,7 @@ public record SetConfigPacket(PacketByteBuf serializedConfig) implements S2CPack
     @Override
     @Environment(EnvType.CLIENT)
     public void handle(MinecraftClient mc) {
-        var config = PhonosServerConfig.getHandler(mc.world);
+        var config = PhonosServerConfig.getHandler(PhonosUtil.getClientWorld());
         NetworkConfigSerializer.read(serializedConfig, config);
     }
 }

@@ -239,12 +239,8 @@ public enum PhonosUtil {;
         return defaultValue;
     }
 
-    @Environment(EnvType.CLIENT)
-    private static World $getClientWorld() {
-        return MinecraftClient.getInstance().world;
-    }
-
+    @SuppressWarnings("Convert2MethodRef")
     public static @Nullable World getClientWorld() {
-        return getIfClient(() -> PhonosUtil::$getClientWorld, null);
+        return getIfClient(() -> () -> PhonosUtilClient.$getClientWorld(), null);
     }
 }
