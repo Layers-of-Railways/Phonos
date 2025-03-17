@@ -7,7 +7,6 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.entity.JukeboxBlockEntity;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.JukeboxPlayableComponent;
 import net.minecraft.component.type.NbtComponent;
@@ -61,7 +60,7 @@ public class ElectronicJukeboxBlock extends BlockWithEntity implements BlockEnti
         var side = hit.getSide();
 
         if (side.getAxis().isVertical()) {
-            if (state.get(HAS_RECORD) && world.getBlockEntity(pos) instanceof JukeboxBlockEntity jukeboxBlockEntity) {
+            if (state.get(HAS_RECORD) && world.getBlockEntity(pos) instanceof ElectronicJukeboxBlockEntity jukeboxBlockEntity) {
                 jukeboxBlockEntity.dropRecord();
                 return ActionResult.success(world.isClient);
             } else {
@@ -74,6 +73,8 @@ public class ElectronicJukeboxBlock extends BlockWithEntity implements BlockEnti
                 if (!PhonosUtil.holdingAudioCable(player) && be.outputs.tryRemoveConnection(world, hit, !player.isCreative())) {
                     be.sync();
                     return ActionResult.SUCCESS;
+                } else {
+                    return ActionResult.PASS;
                 }
             }
 

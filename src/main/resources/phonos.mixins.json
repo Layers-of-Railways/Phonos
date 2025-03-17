@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "JukeboxSongMixin",
+    "MixinJukeboxPlayableComponent",
     "MixinPersistentStateManager",
     "ServerPlayerEntityMixin",
     "compat.LocationSoundPacketAccessor",

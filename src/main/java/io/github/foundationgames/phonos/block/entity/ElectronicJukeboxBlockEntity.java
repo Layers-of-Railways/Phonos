@@ -103,8 +103,6 @@ public class ElectronicJukeboxBlockEntity extends BlockEntity implements Syncing
 
         this.song = song;
         this.ticksSinceSongStarted = 0L;
-        this.world.updateNeighborsAlways(this.getPos(), this.getCachedState().getBlock());
-        this.world.emitGameEvent(GameEvent.JUKEBOX_PLAY, this.getPos(), GameEvent.Emitter.of(this.getCachedState()));
 
         if (!world.isClient()) {
             this.playingSound = new SoundEmitterTree(this.emitterId);
@@ -114,6 +112,9 @@ public class ElectronicJukeboxBlockEntity extends BlockEntity implements Syncing
                     this.playingSound);
             sync();
         }
+
+        this.world.updateNeighborsAlways(this.getPos(), this.getCachedState().getBlock());
+        this.world.emitGameEvent(GameEvent.JUKEBOX_PLAY, this.getPos(), GameEvent.Emitter.of(this.getCachedState()));
 
         this.markDirty();
     }
@@ -126,9 +127,6 @@ public class ElectronicJukeboxBlockEntity extends BlockEntity implements Syncing
             ticksSinceSongStarted = 0L;
         }
 
-        this.world.emitGameEvent(GameEvent.JUKEBOX_STOP_PLAY, this.getPos(), GameEvent.Emitter.of(this.getCachedState()));
-        this.world.updateNeighborsAlways(this.getPos(), this.getCachedState().getBlock());
-
         if (!world.isClient()) {
             this.playingSound = null;
 
@@ -136,6 +134,9 @@ public class ElectronicJukeboxBlockEntity extends BlockEntity implements Syncing
             playingSoundId++;
             sync();
         }
+
+        this.world.emitGameEvent(GameEvent.JUKEBOX_STOP_PLAY, this.getPos(), GameEvent.Emitter.of(this.getCachedState()));
+        this.world.updateNeighborsAlways(this.getPos(), this.getCachedState().getBlock());
 
         this.markDirty();
     }

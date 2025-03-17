@@ -96,15 +96,15 @@ public class PhonosClient implements ClientModInitializer {
 
         ColorProviderRegistry.BLOCK.register((state, world, pos, tintIndex) ->
                 world != null && pos != null && state != null ?
-                        PhonosUtil.getColorFromNote(state.get(Properties.NOTE)) : 0xFFFFFF,
+                        PhonosUtil.getColorFromNote(state.get(Properties.NOTE)) : 0xFFFFFFFF,
                 PhonosBlocks.ELECTRONIC_NOTE_BLOCK);
 
         ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
             if (tintIndex == 0 && stack.getItem() instanceof AudioCableItem aud && aud.color != null) {
-                return aud.color.getEntityColor();
+                return ColorHelper.Argb.fullAlpha(aud.color.getEntityColor());
             }
 
-            return 0xFFFFFF;
+            return 0xFFFFFFFF;
         }, PhonosItems.ALL_AUDIO_CABLES);
 
         ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
@@ -117,7 +117,7 @@ public class PhonosClient implements ClientModInitializer {
                 return ColorHelper.Argb.fullAlpha(item.isGlowing(stack) ? PhonosUtil.brighten(0x4F2E20, 0.2f) : 0x4F2E20);
             }
 
-            return 0xFFFFFF;
+            return 0xFFFFFFFF;
         }, PhonosItems.HEADSET);
 
         ModelPredicateProviderRegistry.register(Phonos.id("glowing"), (stack, world, entity, seed) -> {
@@ -211,9 +211,9 @@ public class PhonosClient implements ClientModInitializer {
         ms.push();
 
         ms.translate(0, 0, -90.0f);
-        context.drawTexture(Identifier.ofVanilla("textures/gui/widgets.png"), x-3, y-4, 24, 22, 29, 24);
+        context.drawGuiTexture(Identifier.ofVanilla("hud/hotbar_offhand_left"), x-3, y-4, 29, 24);
         context.setShaderColor(0.2f, 0.8f, 1.0f, 1.0f);
-        context.drawTexture(Identifier.ofVanilla("textures/gui/widgets.png"), x-4, y-4, 0, 22, 24, 24);
+        context.drawGuiTexture(Identifier.ofVanilla("hud/hotbar_selection"), x-4, y-4, 24, 23);
         context.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         ms.pop();

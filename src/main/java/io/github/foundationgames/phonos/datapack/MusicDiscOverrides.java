@@ -43,6 +43,14 @@ public class MusicDiscOverrides {
             SECOND_LENGTHS.clear();
             prepared.forEach((id, json) -> {
                 JsonObject obj = json.getAsJsonObject();
+                if (!obj.has("length_seconds")) {
+                    if (obj.has("length")) {
+                        Phonos.LOG.warn("Music disc override for {} has 'length' field, which is deprecated. Use 'length_seconds' instead. This entry will be skipped.", id);
+                    } else {
+                        Phonos.LOG.warn("Music disc override for {} has no 'length_seconds' field. This entry will be skipped.", id);
+                    }
+                    return;
+                }
                 float length = obj.get("length_seconds").getAsFloat();
                 Identifier songId = Identifier.tryParse(id.getPath().replaceFirst("/", ":"));
                 SECOND_LENGTHS.put(songId, length);
