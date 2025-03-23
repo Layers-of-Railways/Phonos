@@ -19,7 +19,8 @@ public interface CablePlugPoint {
                 .add(originPose.rotation()
                         .transform(PhonosUtil.vec3to4(plugPose.pos(), new Vector4f()))
                 )
-                .add(plugPose.rotation()
+                .add(originPose.rotation()
+                        .mul(plugPose.rotation())
                         .transform(new Vector4f(0, 0, (float) -extend, 1))
                 );
 
