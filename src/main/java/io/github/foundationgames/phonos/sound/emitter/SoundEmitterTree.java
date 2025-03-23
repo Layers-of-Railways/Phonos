@@ -17,6 +17,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -290,7 +291,7 @@ public class SoundEmitterTree {
         }
     }
 
-    public void forEachSource(World world, Consumer<SoundSource> action) {
+    public void forEachSource(@NotNull World world, Consumer<SoundSource> action) {
         var emitters = SoundEmitterStorage.getInstance(world);
 
         LongSet deduplication = new LongOpenHashSet();
