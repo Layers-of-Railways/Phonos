@@ -122,6 +122,9 @@ public class SatelliteReceiverBlockEntity extends AbstractConnectionHubBlockEnti
 
     @Override
     public boolean forwards() {
+        if (world != null && SatelliteStationBlockEntity.validateChannel(getChannel())) {
+            SatelliteRadioStorage.getInstance(world).keepAlive(getChannel());
+        }
         return true;
     }
 
