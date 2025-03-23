@@ -3,6 +3,7 @@ package io.github.foundationgames.phonos.item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.world.World;
 
 public interface SoundEmitterItem {
 

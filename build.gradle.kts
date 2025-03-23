@@ -113,6 +113,13 @@ tasks.named<Jar>("sourcesJar") {
 
 loom {
     accessWidenerPath = file("src/main/resources/phonos.accesswidener")
+
+    runs.configureEach {
+        vmArg("-XX:+AllowEnhancedClassRedefinition")
+        vmArg("-XX:+IgnoreUnrecognizedVMOptions")
+        vmArg("-Dmixin.debug.export=true")
+        vmArg("-Dfabric-tag-conventions-v2.missingTagTranslationWarning=VERBOSE")
+    }
 }
 
 

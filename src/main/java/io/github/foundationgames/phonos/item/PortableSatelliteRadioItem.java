@@ -1,11 +1,14 @@
 package io.github.foundationgames.phonos.item;
 
+import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity;
 import io.github.foundationgames.phonos.client.screen.ConfigurePortableSatelliteRadioScreen;
+import io.github.foundationgames.phonos.satellite_radio.SatelliteRadioStorage;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.util.UniqueId;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -63,5 +66,13 @@ public class PortableSatelliteRadioItem extends Item implements SoundEmitterItem
     @Override
     public long getParentEmitter(ItemStack stack) {
         return UniqueId.ofSatelliteChannel(getChannel(stack));
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        String channel = getChannel(stack);
+        if (world != null && SatelliteStationBlockEntity.validateChannel(channel)) {
+            SatelliteRadioStorage.getInstance(world).keepAlive(channel);
+        }
     }
 }
