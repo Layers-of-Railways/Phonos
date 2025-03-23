@@ -72,6 +72,12 @@ public class MultiSourceSoundInstance extends AbstractSoundInstance implements T
         var mc = MinecraftClient.getInstance();
         var camPos = mc.gameRenderer.getCamera().getPos();
 
+        // Music Moods keeps playing in-game music in the main menu, but since this sound is very explicitly from in-world blocks, it should stop
+        if (mc.world == null) {
+            setDone();
+            return;
+        }
+
         boolean ncTemp = false;
         if (mc.player != null) {
             var headset = mc.player.getEquippedStack(EquipmentSlot.HEAD);
