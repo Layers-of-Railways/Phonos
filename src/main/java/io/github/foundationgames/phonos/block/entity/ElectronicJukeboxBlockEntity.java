@@ -256,11 +256,10 @@ public class ElectronicJukeboxBlockEntity extends BlockEntity implements Syncing
         }
 
         if (nbt.contains("ticks_since_song_started", NbtElement.LONG_TYPE)) {
+            this.ticksSinceSongStarted = nbt.getLong("ticks_since_song_started");
             JukeboxSong.getSongEntryFromStack(registryLookup, this.recordStack).ifPresent(song -> {
-                long ticksSinceSongStarted = nbt.getLong("ticks_since_song_started");
                 if (!song.value().shouldStopPlaying(ticksSinceSongStarted)) {
                     this.song = song;
-                    this.ticksSinceSongStarted = ticksSinceSongStarted;
                 }
             });
         }

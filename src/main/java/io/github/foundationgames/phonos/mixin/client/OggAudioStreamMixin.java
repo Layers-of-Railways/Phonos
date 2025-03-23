@@ -46,7 +46,7 @@ public abstract class OggAudioStreamMixin implements ISeekableAudioStream {
     @SuppressWarnings("resource")
     public void phonos$seekForwardFromHere(float seconds) throws IOException {
         // TODO do this properly with jorbis
-        phonos$remainingSamplesToSkip += (int) (seconds * getFormat().getSampleRate() * getFormat().getFrameSize());
+        phonos$remainingSamplesToSkip += (int) (seconds * getFormat().getSampleRate());
         /*if (this.pointer == 0L) {
             return;
         }
