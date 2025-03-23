@@ -78,6 +78,7 @@ public class BlockEntityOutputs implements ConnectionCollection {
         world.spawnEntity(item);
     }
 
+    @Override
     public int getOutputCount() {
         int count = 0;
         for (var conn : connections) {

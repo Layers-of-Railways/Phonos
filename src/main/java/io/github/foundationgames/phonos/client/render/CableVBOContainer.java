@@ -5,11 +5,13 @@ import io.github.foundationgames.phonos.client.model.BasicModel;
 import io.github.foundationgames.phonos.config.PhonosClientConfig;
 import io.github.foundationgames.phonos.world.sound.CableConnection;
 import io.github.foundationgames.phonos.world.sound.ConnectionCollection;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +48,8 @@ public class CableVBOContainer {
 
     public void render(MatrixStack matrices, VertexConsumer immediate, RenderLayer layer, BasicModel cableEndModel, Frustum frustum,
                        ConnectionCollection conns, PhonosClientConfig config, World world, int overlay, float tickDelta) {
+        if (conns.getOutputCount() == 0) return;
+
         boolean rebuild = this.buffer == null || this.rebuild;
 
         BufferBuilder builder;
@@ -93,8 +97,15 @@ public class CableVBOContainer {
         RenderSystem.setShaderFogEnd(9999999);
 
         matrices.push();
+
+        var cameraPos = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
+        matrices.translate(cameraPos.x, cameraPos.y, cameraPos.z);
+        matrices.multiplyPositionMatrix(RenderSystem.getModelViewMatrix());
+        matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+
         // Render the buffer, which contains all the cables connected to this
         vbo.bind();
+
         vbo.draw(matrices.peek().getPositionMatrix(), RenderSystem.getProjectionMatrix(), GameRenderer.getRenderTypeEntitySolidProgram());
         VertexBuffer.unbind();
 
