@@ -1,9 +1,18 @@
 package io.github.foundationgames.phonos.mixin.client;
 
+import com.jcraft.jogg.Packet;
+import com.jcraft.jogg.Page;
+import com.jcraft.jogg.StreamState;
+import com.jcraft.jogg.SyncState;
+import com.jcraft.jorbis.Block;
+import com.jcraft.jorbis.DspState;
+import com.jcraft.jorbis.Info;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.github.foundationgames.phonos.mixin_interfaces.ISeekableAudioStream;
 import io.github.foundationgames.phonos.util.CleanableBufferedInputStream;
+import io.github.foundationgames.phonos.util.NewOggSeeker;
+import io.github.foundationgames.phonos.util.OggSeeker;
 import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import net.minecraft.client.sound.OggAudioStream;
 import org.spongepowered.asm.mixin.*;
@@ -15,17 +24,19 @@ import java.io.InputStream;
 
 @Mixin(OggAudioStream.class)
 public abstract class OggAudioStreamMixin implements ISeekableAudioStream {
-    /*@Shadow private long pointer;
-    @Shadow @Final private AudioFormat format;
-    @Shadow private ByteBuffer buffer;*/
     @Shadow @Final @Mutable // must make mutable for init-replacement
     private InputStream inputStream;
 
-/*    @Shadow protected abstract boolean readHeader() throws IOException;
-
-    @Shadow protected abstract void increaseBufferSize();*/
-
     @Shadow public abstract AudioFormat getFormat();
+
+    @Shadow @Final private AudioFormat format;
+    @Shadow @Final private Info info;
+    @Shadow @Final private SyncState syncState;
+    @Shadow @Final private Page page;
+    @Shadow @Final private StreamState streamState;
+    @Shadow @Final private Packet packet;
+    @Shadow @Final private DspState dspState;
+    @Shadow @Final private Block block;
 
     @Unique
     private int phonos$remainingSamplesToSkip = 0;
@@ -43,28 +54,11 @@ public abstract class OggAudioStreamMixin implements ISeekableAudioStream {
 
     @Override
     @Unique
-    @SuppressWarnings("resource")
     public void phonos$seekForwardFromHere(float seconds) throws IOException {
-        // TODO do this properly with jorbis
-        phonos$remainingSamplesToSkip += (int) (seconds * getFormat().getSampleRate());
-        /*if (this.pointer == 0L) {
-            return;
-        }
-
         final CleanableBufferedInputStream is = phonos$is();
+        is.mark(Integer.MAX_VALUE);
 
-        int historySize = this.buffer.limit() - this.buffer.position();
-
-        if (historySize > 0) {
-            byte[] history = new byte[historySize];
-            this.buffer.get(history);
-
-            is.addHistoryResetAndMark(history, Integer.MAX_VALUE);
-        } else {
-            is.mark(Integer.MAX_VALUE);
-        }
-
-        phonos$remainingSamplesToSkip += new OggSeeker(this.pointer, this.format, is, () -> this.buffer, this::readHeader, this::increaseBufferSize).seek(seconds);*/
+        phonos$remainingSamplesToSkip += new NewOggSeeker(this.format, is, this.info, this.syncState, this.page, this.streamState, this.packet, this.dspState, this.block).seek(seconds);
     }
 
     @WrapOperation(
@@ -121,23 +115,4 @@ public abstract class OggAudioStreamMixin implements ISeekableAudioStream {
             original.call(source, channels, startIndexes, samplesToWrite, output);
         }
     }
-
-    /*@Inject(method = "readChannels(Ljava/nio/FloatBuffer;Lnet/minecraft/client/sound/OggAudioStream$ChannelList;)V", at = @At("HEAD"))
-    private void doSkip(FloatBuffer buf, @Coerce Object channelList, CallbackInfo ci) {
-        if (phonos$remainingSamplesToSkip > 0) {
-            int skip = Math.min(phonos$remainingSamplesToSkip, buf.remaining());
-            buf.position(buf.position() + skip);
-            phonos$remainingSamplesToSkip -= skip;
-        }
-    }
-
-    @Inject(method = "readChannels(Ljava/nio/FloatBuffer;Ljava/nio/FloatBuffer;Lnet/minecraft/client/sound/OggAudioStream$ChannelList;)V", at = @At("HEAD"))
-    private void doSkip(FloatBuffer buf, FloatBuffer buf2, @Coerce Object channelList, CallbackInfo ci) {
-        if (phonos$remainingSamplesToSkip > 0) {
-            int skip = Math.min(phonos$remainingSamplesToSkip, Math.min(buf.remaining(), buf2.remaining()));
-            buf.position(buf.position() + skip);
-            buf2.position(buf2.position() + skip);
-            phonos$remainingSamplesToSkip -= skip;
-        }
-    }*/
 }

@@ -28,6 +28,7 @@
     "client.SoundSystemAccessor",
     "client.SoundSystemMixin",
     "client.SourceMixin",
+    "client.SyncStateMixin",
     "client.WorldRendererAccess",
     "client.YACLScreenMixin",
     "client.YACLScreenMixin$CategoryTabMixin",
