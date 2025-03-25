@@ -18,7 +18,7 @@ import java.io.EOFException;
 import java.io.IOException;
 
 @ApiStatus.Internal
-public class NewOggSeeker {
+public class OggSeeker {
     private static final int BUFSIZE = 8192;
 
     private final AudioFormat format;
@@ -38,7 +38,7 @@ public class NewOggSeeker {
     private final DspState dspState;
     private final Block block;
 
-    public NewOggSeeker(AudioFormat format, CleanableBufferedInputStream inputStream, Info info, SyncState syncState, Page page, StreamState streamState, Packet packet, DspState dspState, Block block) {
+    public OggSeeker(AudioFormat format, CleanableBufferedInputStream inputStream, Info info, SyncState syncState, Page page, StreamState streamState, Packet packet, DspState dspState, Block block) {
         this.format = format;
         this.inputStream = inputStream;
         this.info = info;

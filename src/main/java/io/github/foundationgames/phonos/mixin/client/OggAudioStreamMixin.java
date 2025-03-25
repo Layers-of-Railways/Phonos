@@ -11,7 +11,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.github.foundationgames.phonos.mixin_interfaces.ISeekableAudioStream;
 import io.github.foundationgames.phonos.util.CleanableBufferedInputStream;
-import io.github.foundationgames.phonos.util.NewOggSeeker;
 import io.github.foundationgames.phonos.util.OggSeeker;
 import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import net.minecraft.client.sound.OggAudioStream;
@@ -58,7 +57,7 @@ public abstract class OggAudioStreamMixin implements ISeekableAudioStream {
         final CleanableBufferedInputStream is = phonos$is();
         is.mark(Integer.MAX_VALUE);
 
-        phonos$remainingSamplesToSkip += new NewOggSeeker(this.format, is, this.info, this.syncState, this.page, this.streamState, this.packet, this.dspState, this.block).seek(seconds);
+        phonos$remainingSamplesToSkip += new OggSeeker(this.format, is, this.info, this.syncState, this.page, this.streamState, this.packet, this.dspState, this.block).seek(seconds);
     }
 
     @WrapOperation(
