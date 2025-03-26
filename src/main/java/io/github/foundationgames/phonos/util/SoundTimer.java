@@ -6,7 +6,6 @@ import io.github.foundationgames.phonos.mixin.client.SoundSystemAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
 import org.lwjgl.stb.STBVorbis;
@@ -77,7 +76,7 @@ public class SoundTimer {
                 IntBuffer error = memoryStack.mallocInt(1);
                 long ptr = STBVorbis.stb_vorbis_open_memory(buffer, error, null);
                 if (ptr == MemoryUtil.NULL) {
-                    throw new IOException("Failed to open Ogg Vorbis stream: " + OggSeeker.explain(error.get(0)));
+                    throw new IOException("Failed to open Ogg Vorbis stream: "/* + OggSeeker.explain(error.get(0))*/);
                 }
 
                 float length = STBVorbis.stb_vorbis_stream_length_in_seconds(ptr);
