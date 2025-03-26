@@ -57,7 +57,6 @@ public class ElectronicJukeboxBlockEntity extends BlockEntity implements Syncing
 
     public final BlockEntityOutputs outputs;
 
-    private final BlockEntityType<?> type;
     private @Nullable NbtCompound pendingNbt = null;
     private final long emitterId;
     private @Nullable SoundEmitterTree playingSound = null;
@@ -72,7 +71,6 @@ public class ElectronicJukeboxBlockEntity extends BlockEntity implements Syncing
 
     public ElectronicJukeboxBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        this.type = type;
         this.emitterId = UniqueId.ofBlock(pos);
 
         this.outputs = new BlockEntityOutputs(OUTPUT_LAYOUT, this);
@@ -81,11 +79,6 @@ public class ElectronicJukeboxBlockEntity extends BlockEntity implements Syncing
 
     public ElectronicJukeboxBlockEntity(BlockPos pos, BlockState state) {
         this(PhonosBlocks.ELECTRONIC_JUKEBOX_ENTITY, pos, state);
-    }
-
-    @Override
-    public BlockEntityType<?> getType() {
-        return this.type;
     }
 
     @Override
