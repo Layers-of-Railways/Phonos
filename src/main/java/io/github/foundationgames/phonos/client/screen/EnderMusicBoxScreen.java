@@ -1,10 +1,16 @@
 package io.github.foundationgames.phonos.client.screen;
 
+import cz.koca2000.nbs4j.NBSVersion;
+import cz.koca2000.nbs4j.Song;
+import cz.koca2000.nbs4j.SongCorruptedException;
 import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.entity.EnderMusicBoxBlockEntity;
 import io.github.foundationgames.phonos.client.screen.widgets.EnderMusicBoxStreamList;
 import io.github.foundationgames.phonos.network.ClientPayloadPackets;
 import io.github.foundationgames.phonos.sound.custom.ClientCustomAudioUploader;
+import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecord;
+import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecordUploader;
+import io.github.foundationgames.phonos.sound.nbs.NBSUploader;
 import io.github.foundationgames.phonos.sound.stream.AudioDataQueue;
 import io.github.foundationgames.phonos.sound.stream.AudioFileUtil;
 import net.minecraft.client.gui.DrawContext;
@@ -12,7 +18,9 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -31,7 +39,7 @@ public class EnderMusicBoxScreen extends Screen {
     private Text fileName = DRAG_PROMPT;
     private Text status = Text.empty();
     private int statusExpiration = 0;
-    private AudioDataQueue toUpload;
+    private PhonosAudioRecordUploader toUpload;
 
     public EnderMusicBoxScreen(EnderMusicBoxBlockEntity be) {
         super(TITLE);
@@ -127,24 +135,47 @@ public class EnderMusicBoxScreen extends Screen {
         if (!paths.isEmpty()) {
             var path = paths.get(0);
 
-            try (var in = Files.newInputStream(path)) {
-                var aud = AudioFileUtil.dataOfVorbis(in);
-                if (aud != null) {
-                    this.toUpload = aud;
+            if (path.getFileName().toString().endsWith(".nbs")) {
+                try (var in = Files.newInputStream(path)) {
+                    var song = Song.fromStream(in);
+
+                    try (var out = Files.newOutputStream(new File("/tmp/test.nbs").toPath())) {
+                        song.save(NBSVersion.LATEST, out);
+                    } catch (IOException e) {
+                        Phonos.LOG.error("Error writing nbs file {}", path, e);
+                    }
+
+                    this.toUpload = new NBSUploader(song);
                     this.fileName = Text.literal(path.getFileName().toString());
                     this.status = Text.translatable("status.phonos.ender_music_box.ready_upload").formatted(Formatting.GREEN);
 
-                    ClientPayloadPackets.sendRequestEnderMusicBoxUploadSession(be, path.getFileName().toString());
-                } else {
-                    this.status = Text.translatable("status.phonos.ender_music_box.mono_only").formatted(Formatting.GOLD);
+                    ClientPayloadPackets.sendRequestEnderMusicBoxUploadSession(be, path.getFileName().toString(), PhonosAudioRecord.FileType.NBS);
+                } catch (IOException | SongCorruptedException ex) {
+                    Phonos.LOG.error("Error reading nbs file {}", path, ex);
+                    this.status = Text.translatable("status.phonos.ender_music_box.invalid_format.nbs").formatted(Formatting.RED);
                     this.fileName = getDragPrompt();
                     this.toUpload = null;
                 }
-            } catch (IOException ex) {
-                Phonos.LOG.error("Error reading ogg file " + path, ex);
-                this.status = Text.translatable("status.phonos.ender_music_box.invalid_format").formatted(Formatting.RED);
-                this.fileName = getDragPrompt();
-                this.toUpload = null;
+            } else {
+                try (var in = Files.newInputStream(path)) {
+                    var aud = AudioFileUtil.dataOfVorbis(in);
+                    if (aud != null) {
+                        this.toUpload = aud;
+                        this.fileName = Text.literal(path.getFileName().toString());
+                        this.status = Text.translatable("status.phonos.ender_music_box.ready_upload").formatted(Formatting.GREEN);
+
+                        ClientPayloadPackets.sendRequestEnderMusicBoxUploadSession(be, path.getFileName().toString(), PhonosAudioRecord.FileType.ADQ);
+                    } else {
+                        this.status = Text.translatable("status.phonos.ender_music_box.mono_only").formatted(Formatting.GOLD);
+                        this.fileName = getDragPrompt();
+                        this.toUpload = null;
+                    }
+                } catch (IOException | IllegalStateException ex) {
+                    Phonos.LOG.error("Error reading ogg file {}", path, ex);
+                    this.status = Text.translatable("status.phonos.ender_music_box.invalid_format").formatted(Formatting.RED);
+                    this.fileName = getDragPrompt();
+                    this.toUpload = null;
+                }
             }
         }
     }

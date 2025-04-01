@@ -4,11 +4,12 @@
     "container.phonos.satellite_station": "Satellite Broadcast Station",
 
     "container.phonos.ender_music_box": "Ender Music Box",
-    "hint.phonos.ender_music_box.drag": "+ Drag and drop .ogg file to upload",
+    "hint.phonos.ender_music_box.drag": "+ Drag and drop .ogg or .nbs file to upload",
     "hint.phonos.ender_music_box.drag.full": "Ender Music Box is full",
     "status.phonos.ender_music_box.ready_upload": "Waiting for server...",
     "status.phonos.ender_music_box.mono_only": "Audio file must be mono only",
     "status.phonos.ender_music_box.invalid_format": "Invalid .ogg file! (Check log for details)",
+    "status.phonos.ender_music_box.invalid_format.nbs": "Invalid .nbs file! (Check log for details)",
     "status.phonos.ender_music_box.uploading": "Uploading...",
     "status.phonos.ender_music_box.upload_denied": "Upload denied by server!",
     "status.phonos.ender_music_box.uploaded": "Upload complete! Power the Ender Music Box to play.",

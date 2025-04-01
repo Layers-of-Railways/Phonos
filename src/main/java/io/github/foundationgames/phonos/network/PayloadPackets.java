@@ -12,6 +12,8 @@ import io.github.foundationgames.phonos.item.PortableSatelliteRadioItem;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
 import io.github.foundationgames.phonos.util.PhonosUtil;
+import io.github.foundationgames.phonos.sound.nbs.stream.NBSChunk;
+import io.github.foundationgames.phonos.sound.nbs.stream.NBSInitData;
 import io.github.foundationgames.phonos.world.sound.data.SoundData;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -257,5 +259,18 @@ public final class PayloadPackets {
         NetworkConfigSerializer.write(buf, config);
 
         ServerPlayNetworking.send(player, Phonos.id("set_config"), buf);
+    }
+
+    // fixme cherry
+    public static void sendNBSStreamStart(ServerPlayerEntity player, long streamId, NBSInitData initData) {
+        PhonosPackets.PACKETS.sendTo(player, new NBSStreamStartPacket(streamId, initData));
+    }
+
+    public static void sendNBSStreamData(ServerPlayerEntity player, long streamId, NBSChunk chunk) {
+        PhonosPackets.PACKETS.sendTo(player, new NBSStreamDataPacket(streamId, chunk));
+    }
+
+    public static void sendNBSStreamEnd(ServerPlayerEntity player, long streamId) {
+        PhonosPackets.PACKETS.sendTo(player, new NBSStreamEndPacket(streamId));
     }
 }

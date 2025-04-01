@@ -7,6 +7,7 @@ public final class SoundDataTypes {
     public static final SoundData.Type<NoteBlockSoundData> NOTE_BLOCK = SoundData.register(Phonos.id("note_block"), NoteBlockSoundData::new);
     public static final SoundData.Type<StreamSoundData> STREAM = SoundData.register(Phonos.id("stream"), true, StreamSoundData::new);
     public static final SoundData.Type<StreamSoundData> SVC_MICROPHONE = SoundData.register(Phonos.id("svc_microphone"), true , StreamSoundData::new);
+    public static final SoundData.Type<StreamSoundData> NBS_STREAM = SoundData.register(Phonos.id("nbs_stream"), true, StreamSoundData::new);
 
     public static void init() {
     }

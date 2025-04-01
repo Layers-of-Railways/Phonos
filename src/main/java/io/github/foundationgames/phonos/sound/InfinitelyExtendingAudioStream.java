@@ -1,6 +1,7 @@
 package io.github.foundationgames.phonos.sound;
 
 import net.minecraft.client.sound.AudioStream;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 
 import javax.sound.sampled.AudioFormat;
@@ -8,12 +9,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class InfinitelyExtendingAudioStream implements AudioStream {
-    private AudioFormat format = new AudioFormat(20_000, 8, 1, true, false);
+    private AudioFormat format = new AudioFormat(20_000, 16, 1, true, false);
     private AudioStream wrapped;
 
-    public InfinitelyExtendingAudioStream(AudioStream wrapped) {
+    public InfinitelyExtendingAudioStream(@Nullable AudioStream wrapped) {
         this.wrapped = wrapped;
-        this.format = wrapped.getFormat();
+        if (wrapped != null)
+            this.format = wrapped.getFormat();
     }
 
     @Override

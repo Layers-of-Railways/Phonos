@@ -21,6 +21,7 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecord;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
@@ -162,10 +163,11 @@ public final class ClientPayloadPackets {
         ClientPlayNetworking.send(Phonos.id("fake_creative_slot_click"), buf);
     }
 
-    public static void sendRequestEnderMusicBoxUploadSession(EnderMusicBoxBlockEntity entity, String name) {
+    public static void sendRequestEnderMusicBoxUploadSession(EnderMusicBoxBlockEntity entity, String name, PhonosAudioRecord.FileType fileType) {
         var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeBlockPos(entity.getPos());
         buf.writeString(name, 512);
+        buf.writeFileType(fileType); // fixme cherry
 
         ClientPlayNetworking.send(Phonos.id("request_ender_music_box_upload_session"), buf);
     }
@@ -187,10 +189,10 @@ public final class ClientPayloadPackets {
         ClientPlayNetworking.send(Phonos.id("request_satellite_action"), buf);
     }
 
-    public static void sendAudioUploadPacket(long streamId, int sampleRate, ByteBuffer samples, boolean last) {
+    public static void sendAudioUploadPacket(long streamId, int initData, ByteBuffer samples, boolean last) {
         var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeLong(streamId);
-        buf.writeInt(sampleRate);
+        buf.writeInt(initData);
         PhonosUtil.writeBufferToPacket(buf, samples);
         buf.writeBoolean(last);
 

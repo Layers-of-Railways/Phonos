@@ -17,6 +17,7 @@ import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SecondaryEmitterHolder;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitter;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterStorage;
+import io.github.foundationgames.phonos.sound.nbs.stream.ServerOutgoingNBSStreamHandler;
 import io.github.foundationgames.phonos.sound.stream.ServerOutgoingStreamHandler;
 import io.github.foundationgames.phonos.util.PhonosTags;
 import io.github.foundationgames.phonos.util.PhonosUtil;
@@ -91,6 +92,7 @@ public class Phonos implements ModInitializer {
             SoundStorage.serverReset();
             SoundEmitterStorage.serverReset();
             ServerOutgoingStreamHandler.reset();
+            ServerOutgoingNBSStreamHandler.reset();
         });
 
         ServerLifecycleEvents.SERVER_STARTED.register(e -> {
@@ -131,7 +133,10 @@ public class Phonos implements ModInitializer {
                 SatelliteRadioStorage.getInstance(world).gc();
             }
         });
-        ServerTickEvents.START_SERVER_TICK.register(ServerOutgoingStreamHandler::tick);
+        ServerTickEvents.START_SERVER_TICK.register(server -> {
+            ServerOutgoingStreamHandler.tick(server);
+            ServerOutgoingNBSStreamHandler.tick(server);
+        });
 
         ServerBlockEntityEvents.BLOCK_ENTITY_LOAD.register((be, world) -> {
             if (be instanceof SoundEmitter p) {

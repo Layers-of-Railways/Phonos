@@ -21,6 +21,8 @@ import io.github.foundationgames.phonos.sound.custom.ClientCustomAudioUploader;
 import io.github.foundationgames.phonos.sound.emitter.SecondaryEmitterHolder;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitter;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterStorage;
+import io.github.foundationgames.phonos.sound.nbs.NoteHelper;
+import io.github.foundationgames.phonos.sound.nbs.stream.ClientIncomingNBSStreamHandler;
 import io.github.foundationgames.phonos.sound.stream.ClientIncomingStreamHandler;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.command.PhonosClientCommands;
@@ -147,7 +149,12 @@ public class PhonosClient implements ClientModInitializer {
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             ClientIncomingStreamHandler.reset();
+            ClientIncomingNBSStreamHandler.reset();
             ClientCustomAudioUploader.reset();
+            NoteHelper.setRegistryManager(handler.getRegistryManager());
+        });
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            NoteHelper.setRegistryManager(null);
         });
 
         ClientTickEvents.END_WORLD_TICK.register(world -> {

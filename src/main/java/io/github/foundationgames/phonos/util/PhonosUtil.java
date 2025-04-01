@@ -186,29 +186,20 @@ public enum PhonosUtil {;
     }
 
     public static void writeBufferToPacket(PacketByteBuf packet, ByteBuffer buffer) {
-        int sizeCur = packet.writerIndex();
-        int size = 0;
-        packet.writeInt(0);
         int bufferCur = buffer.position();
-        while (buffer.hasRemaining()) {
-            packet.writeByte(buffer.get());
-            size++;
-        }
+        int size = buffer.remaining();
+        byte[] bytes = new byte[size];
+        buffer.get(bytes);
         buffer.position(bufferCur);
-        int afterSizeCur = packet.writerIndex();
 
-        packet.writerIndex(sizeCur);
-        packet.writeInt(size);
-        packet.writerIndex(afterSizeCur);
+        packet.writeByteArray(bytes);
     }
 
     public static ByteBuffer readBufferFromPacket(PacketByteBuf packet, IntFunction<ByteBuffer> create) {
-        int size = packet.readInt();
-        var buffer = create.apply(size);
-        for (int i = 0; i < size; i++) {
-            buffer.put(packet.readByte());
-        }
-        buffer.rewind();
+        byte[] bytes = packet.readByteArray();
+        var buffer = create.apply(bytes.length);
+        buffer.put(bytes);
+        buffer.flip();
 
         return buffer;
     }
