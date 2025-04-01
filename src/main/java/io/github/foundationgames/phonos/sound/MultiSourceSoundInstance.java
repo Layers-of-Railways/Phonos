@@ -7,7 +7,6 @@ import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
 import io.github.foundationgames.phonos.world.sound.entity.HeadsetSoundSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.AbstractSoundInstance;
-import net.minecraft.client.sound.TickableSoundInstance;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -19,7 +18,7 @@ import org.joml.Vector3d;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class MultiSourceSoundInstance extends AbstractSoundInstance implements TickableSoundInstance, SkippableSoundInstance {
+public class MultiSourceSoundInstance extends AbstractSoundInstance implements RemoveNotifiedTickableSoundInstance, SkippableSoundInstance {
     public final AtomicReference<SoundEmitterTree> emitters;
     private double camX, camZ;
     private double x, y, z;
@@ -72,7 +71,7 @@ public class MultiSourceSoundInstance extends AbstractSoundInstance implements T
         var mc = MinecraftClient.getInstance();
         var camPos = mc.gameRenderer.getCamera().getPos();
 
-        // Music Moods keeps playing in-game music in the main menu, but since this sound is very explicity from in-world blocks, it should stop
+        // Music Moods keeps playing in-game music in the main menu, but since this sound is very explicitly from in-world blocks, it should stop
         if (mc.world == null) {
             setDone();
             return;
@@ -167,9 +166,16 @@ public class MultiSourceSoundInstance extends AbstractSoundInstance implements T
         return done;
     }
 
-    protected final void setDone() {
-        this.done = true;
+    protected void onDone() {}
+
+    @Override
+    public final void setDone() {
         this.repeat = false;
+        if (this.done) {
+            return;
+        }
+        this.done = true;
+        this.onDone();
     }
 
     @Override

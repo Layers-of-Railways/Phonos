@@ -152,8 +152,8 @@ public class PhonosCommands {
                 if (aud == null)
                     return;
 
-                double sizeKB = (double)(aud.originalSize / 100) / 10D;
-                int duration = (int) Math.ceil((double) aud.originalSize / aud.sampleRate);
+                double sizeKB = (double)(aud.getDataSize() / 100) / 10D;
+                int duration = aud.getPlayTicks() / 20;
                 source.sendMessage(Text.translatable("command.phonos.ender_music_box.entry.named",
                     name,
                     Long.toHexString(id),
@@ -191,13 +191,13 @@ public class PhonosCommands {
         double totalSizeKB = 0;
 
         for (var entry : set) {
-            double sizeKB = (double)(entry.getValue().originalSize / 100) / 10D;
-            int duration = (int) Math.ceil((double) entry.getValue().originalSize / entry.getValue().sampleRate);
+            double sizeKB = (double)(entry.getValue().getDataSize() / 100) / 10D;
+            int duration = entry.getValue().getPlayTicks() / 20;
             source.sendMessage(Text.translatable("command.phonos.ender_music_box.entry",
                     Long.toHexString(entry.getLongKey()),
                     PhonosUtil.duration(duration),
                     sizeKB));
-            totalSizeKB += entry.getValue().originalSize;
+            totalSizeKB += entry.getValue().getDataSize();
         }
 
         totalSizeKB = (double)((int)totalSizeKB / 100) / 10D;

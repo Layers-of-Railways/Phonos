@@ -1,6 +1,14 @@
 package io.github.foundationgames.phonos.sound.stream;
 
+import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecord;
+import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecordBuilder;
+import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecordUploader;
 import io.github.foundationgames.phonos.util.PhonosUtil;
+import io.github.foundationgames.phonos.world.sound.data.SoundData;
+import io.github.foundationgames.phonos.world.sound.data.StreamSoundData;
+import net.minecraft.client.render.model.json.JsonUnbakedModel;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.sound.SoundCategory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +18,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.function.IntFunction;
 
-public class AudioDataQueue {
+public class AudioDataQueue implements PhonosAudioRecord<AudioDataQueue>, PhonosAudioRecordBuilder<AudioDataQueue>, PhonosAudioRecordUploader {
     public static final int SAMPLE_SECTION = 7000;
 
     public final int sampleRate;
@@ -39,7 +47,25 @@ public class AudioDataQueue {
         return copy;
     }
 
+    @Override
+    public int getPlayTicks() {
+        return (int) ((this.originalSize * 20f) / this.sampleRate);
+    }
+
+    @Override
+    public SoundData startPlaying(long emitterId, long streamId, SoundCategory category, float volume, float pitch, MinecraftServer server) {
+        ServerOutgoingStreamHandler.startStream(streamId, this, server);
+        return StreamSoundData.create(emitterId, streamId, category, volume, pitch);
+    }
+
+    @Override
+    public void stopPlaying(long streamId, MinecraftServer server) {
+        ServerOutgoingStreamHandler.endStream(streamId, server);
+    }
+
+    @Override
     public void write(OutputStream stream) throws IOException {
+        PhonosAudioRecord.writeHeader(stream, FileType.ADQ);
         PhonosUtil.writeInt(stream, sampleRate);
         PhonosUtil.writeInt(stream, this.data.size());
 
@@ -71,5 +97,34 @@ public class AudioDataQueue {
         }
 
         return aud;
+    }
+
+    @Override
+    public AudioDataQueue copy() {
+        return copy(ByteBuffer::allocate);
+    }
+
+    @Override
+    public void pushUploadBytes(ByteBuffer buffer) {
+        push(buffer);
+    }
+
+    @Override
+    public int getDataSize() {
+        return originalSize;
+    }
+
+    @Override
+    public AudioDataQueue build() {
+        return this;
+    }
+
+    @Override
+    public UploadFragment getNextFragment() {
+        return new UploadFragment(
+            sampleRate,
+            data.removeFirst().rewind(),
+            data.isEmpty()
+        );
     }
 }

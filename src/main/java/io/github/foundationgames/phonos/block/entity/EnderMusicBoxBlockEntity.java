@@ -5,6 +5,7 @@ import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.sound.SoundStorage;
+import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecord;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
 import io.github.foundationgames.phonos.sound.stream.ServerOutgoingStreamHandler;
@@ -50,6 +51,7 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
     private final long s2cStreamId;
 
     private @Nullable SoundEmitterTree playingSound = null;
+    private @Nullable PhonosAudioRecord<?> playingRecord = null;
     private int playDuration = 0;
     private int playingTimer = 0;
     private int playingIndex = 0;
@@ -79,14 +81,13 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
             }
 
             var aud = Objects.requireNonNull(ServerCustomAudio.loadSaved(streamId));
-            ServerOutgoingStreamHandler.startStream(this.s2cStreamId, aud, sWorld.getServer());
+            var soundData = aud.startPlaying(this.emitterId(), this.s2cStreamId, SoundCategory.MASTER, 2, 1, sWorld.getServer());
 
             this.playingSound = new SoundEmitterTree(this.emitterId);
-            SoundStorage.getInstance(this.world).play(this.world,
-                StreamSoundData.create(this.emitterId(), this.s2cStreamId, SoundCategory.MASTER, 2, 1),
-                this.playingSound);
+            SoundStorage.getInstance(this.world).play(this.world, soundData, this.playingSound);
 
-            this.playingTimer = this.playDuration = (int) ((aud.originalSize * 20f) / aud.sampleRate);
+            this.playingTimer = this.playDuration = aud.getPlayTicks();
+            this.playingRecord = aud;
 
             world.updateComparators(pos, getCachedState().getBlock());
             sync();
@@ -94,10 +95,11 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
     }
 
     public void stop() {
-        if (world instanceof ServerWorld sWorld && playingSound != null) {
-            ServerOutgoingStreamHandler.endStream(this.s2cStreamId, sWorld.getServer());
+        if (world instanceof ServerWorld sWorld && playingSound != null && playingRecord != null) {
+            this.playingRecord.stopPlaying(this.s2cStreamId, sWorld.getServer());
             SoundStorage.getInstance(this.world).stop(this.world, this.emitterId());
             this.playingSound = null;
+            this.playingRecord = null;
 
             world.updateComparators(pos, getCachedState().getBlock());
             sync();

@@ -5,6 +5,8 @@ import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.network.packets.s2c.*;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
+import io.github.foundationgames.phonos.sound.nbs.stream.NBSChunk;
+import io.github.foundationgames.phonos.sound.nbs.stream.NBSInitData;
 import io.github.foundationgames.phonos.world.sound.data.SoundData;
 import net.minecraft.network.listener.ClientCommonPacketListener;
 import net.minecraft.network.packet.Packet;
@@ -66,5 +68,17 @@ public final class PayloadPackets {
 
     public static void sendConfig(ServerPlayerEntity player, ConfigClassHandler<PhonosServerConfig> config) {
         PhonosPackets.PACKETS.sendTo(player, new SetConfigPacket(config));
+    }
+
+    public static void sendNBSStreamStart(ServerPlayerEntity player, long streamId, NBSInitData initData) {
+        PhonosPackets.PACKETS.sendTo(player, new NBSStreamStartPacket(streamId, initData));
+    }
+
+    public static void sendNBSStreamData(ServerPlayerEntity player, long streamId, NBSChunk chunk) {
+        PhonosPackets.PACKETS.sendTo(player, new NBSStreamDataPacket(streamId, chunk));
+    }
+
+    public static void sendNBSStreamEnd(ServerPlayerEntity player, long streamId) {
+        PhonosPackets.PACKETS.sendTo(player, new NBSStreamEndPacket(streamId));
     }
 }

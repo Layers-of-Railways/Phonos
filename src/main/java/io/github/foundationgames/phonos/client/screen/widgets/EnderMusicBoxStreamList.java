@@ -18,6 +18,11 @@ public class EnderMusicBoxStreamList extends AlwaysSelectedEntryListWidget<Ender
     @Override
     protected void drawSelectionHighlight(DrawContext context, int y, int entryWidth, int entryHeight, int borderColor, int fillColor) {}
 
+    @Override
+    public int getRowWidth() {
+        return 320;
+    }
+
     public static class Entry extends AlwaysSelectedEntryListWidget.Entry<io.github.foundationgames.phonos.client.screen.widgets.EnderMusicBoxStreamList.Entry> {
         private final EnderMusicBoxBlockEntity entity;
         public final long id;
@@ -66,7 +71,7 @@ public class EnderMusicBoxStreamList extends AlwaysSelectedEntryListWidget<Ender
                 int brightness = (int) (progress * 255);
                 int color = brightness << 16;
 
-                context.drawTextWithShadow(textRenderer, "-".repeat(37), x, y + 5, color);
+                context.drawTextWithShadow(textRenderer, "-".repeat(53), x + 1, y + 5, color);
             } else {
                 hoverStartTick = -1;
             }

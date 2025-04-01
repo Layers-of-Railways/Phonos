@@ -8,7 +8,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.SoundInstance;
-import net.minecraft.client.sound.SoundManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
@@ -105,5 +104,7 @@ public class ClientSoundStorage extends SoundStorage {
             registerProvider(SoundDataTypes.SVC_MICROPHONE, (data, list, random) ->
                 new SVCMultiSoundInstance(list, data.streamId, data.soundCategory, random, data.volume, data.pitch));
         });
+        registerProvider(SoundDataTypes.NBS_STREAM, (data, list, random) ->
+            new NBSStreamMultiSoundInstance(list, data.streamId, data.soundCategory, random, data.volume, data.pitch));
     }
 }

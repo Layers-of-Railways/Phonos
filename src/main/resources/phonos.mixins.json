@@ -9,7 +9,11 @@
     "MixinPersistentStateManager",
     "ServerPlayerEntityMixin",
     "compat.LocationSoundPacketAccessor",
-    "compat.SoundPacketAccessor"
+    "compat.SoundPacketAccessor",
+    "nbs.NBSWriterMixin",
+    "nbs.NBSReaderMixin",
+    "nbs.SongAccessor",
+    "nbs.SongMixin"
   ],
   "client": [
     "client.AbstractClientPlayerEntityMixin",

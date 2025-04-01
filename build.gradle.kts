@@ -45,6 +45,7 @@ repositories {
     )
     maven("https://maven.isxander.dev/releases") // YACL
     exclusiveMaven("https://repo.sleeping.town", "com.unascribed")
+    exclusiveMaven("https://jitpack.io", "com.github.koca2000")
 }
 
 dependencies {
@@ -56,6 +57,9 @@ dependencies {
 
     modImplementation("maven.modrinth:jsonem:${"jsonem_version"()}")
     include("maven.modrinth:jsonem:${"jsonem_version"()}")
+
+    implementation("com.github.koca2000:NBS4j:1.0")
+    include("com.github.koca2000:NBS4j:1.0")
 
     modApi("com.terraformersmc:modmenu:${"modmenu_version"()}") { isTransitive = false }
 

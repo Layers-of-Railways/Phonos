@@ -19,6 +19,9 @@ public class PhonosPackets {
         .s2c(MicrophoneChannelOpenPacket.class, MicrophoneChannelOpenPacket.PACKET_CODEC)
         .s2c(MicrophoneChannelClosePacket.class, MicrophoneChannelClosePacket.PACKET_CODEC)
         .s2c(SetConfigPacket.class, SetConfigPacket.PACKET_CODEC)
+        .s2c(NBSStreamStartPacket.class, NBSStreamStartPacket.PACKET_CODEC)
+        .s2c(NBSStreamDataPacket.class, NBSStreamDataPacket.PACKET_CODEC)
+        .s2c(NBSStreamEndPacket.class, NBSStreamEndPacket.PACKET_CODEC)
 
         .c2s(FakeCreativeSlotClickPacket.class, FakeCreativeSlotClickPacket.PACKET_CODEC)
         .c2s(RequestEnderMusicBoxUploadSessionPacket.class, RequestEnderMusicBoxUploadSessionPacket.PACKET_CODEC)

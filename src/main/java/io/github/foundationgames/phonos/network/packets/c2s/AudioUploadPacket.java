@@ -10,12 +10,12 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.nio.ByteBuffer;
 
-public record AudioUploadPacket(long streamId, int sampleRate, ByteBuffer samples, boolean last) implements C2SPacket {
+public record AudioUploadPacket(long streamId, int initData, ByteBuffer samples, boolean last) implements C2SPacket {
     public static final PacketCodec<PacketByteBuf, AudioUploadPacket> PACKET_CODEC = PacketCodec.tuple(
         PacketCodecs.VAR_LONG,
         AudioUploadPacket::streamId,
         PacketCodecs.INTEGER,
-        AudioUploadPacket::sampleRate,
+        AudioUploadPacket::initData,
         PhonosUtil.BYTE_BUFFER_PACKET_CODEC,
         AudioUploadPacket::samples,
         PacketCodecs.BOOL,
@@ -25,6 +25,6 @@ public record AudioUploadPacket(long streamId, int sampleRate, ByteBuffer sample
 
     @Override
     public void handle(ServerPlayerEntity sender) {
-        ServerCustomAudio.receiveUpload(sender.server, sender, streamId, sampleRate, samples, last);
+        ServerCustomAudio.receiveUpload(sender.server, sender, streamId, initData, samples, last);
     }
 }

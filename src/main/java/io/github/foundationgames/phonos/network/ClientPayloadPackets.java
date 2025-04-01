@@ -4,6 +4,7 @@ import dev.isxander.yacl3.config.v2.api.FieldAccess;
 import io.github.foundationgames.phonos.block.entity.EnderMusicBoxBlockEntity;
 import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity;
 import io.github.foundationgames.phonos.network.packets.c2s.*;
+import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecord;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ClickType;
 
@@ -14,8 +15,8 @@ public final class ClientPayloadPackets {
         PhonosPackets.PACKETS.send(new FakeCreativeSlotClickPacket(onto, with, click));
     }
 
-    public static void sendRequestEnderMusicBoxUploadSession(EnderMusicBoxBlockEntity entity, String name) {
-        PhonosPackets.PACKETS.send(new RequestEnderMusicBoxUploadSessionPacket(entity.getPos(), name));
+    public static void sendRequestEnderMusicBoxUploadSession(EnderMusicBoxBlockEntity entity, String name, PhonosAudioRecord.FileType fileType) {
+        PhonosPackets.PACKETS.send(new RequestEnderMusicBoxUploadSessionPacket(entity.getPos(), name, fileType));
     }
 
     public static void sendDeleteEnderMusicBoxStream(EnderMusicBoxBlockEntity entity, long streamId) {
@@ -26,8 +27,8 @@ public final class ClientPayloadPackets {
         PhonosPackets.PACKETS.send(new RequestSatelliteActionPacket(entity.getPos(), actionId, data));
     }
 
-    public static void sendAudioUploadPacket(long streamId, int sampleRate, ByteBuffer samples, boolean last) {
-        PhonosPackets.PACKETS.send(new AudioUploadPacket(streamId, sampleRate, samples, last));
+    public static void sendAudioUploadPacket(long streamId, int initData, ByteBuffer samples, boolean last) {
+        PhonosPackets.PACKETS.send(new AudioUploadPacket(streamId, initData, samples, last));
     }
 
     public static void sendConfigChange(int i, FieldAccess<?> access) {

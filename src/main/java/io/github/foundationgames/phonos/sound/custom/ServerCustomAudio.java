@@ -3,12 +3,10 @@ package io.github.foundationgames.phonos.sound.custom;
 import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.network.PayloadPackets;
-import io.github.foundationgames.phonos.sound.stream.AudioDataQueue;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import it.unimi.dsi.fastutil.longs.*;
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
-import it.unimi.dsi.fastutil.objects.Object2LongMaps;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -20,9 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,14 +29,14 @@ public class ServerCustomAudio {
     public static final ExecutorService UPLOAD_POOL = Executors.newFixedThreadPool(1);
     public static final ExecutorService FILESYS_POOL = Executors.newFixedThreadPool(4);
 
-    public static final Long2ObjectMap<AudioDataQueue> UPLOADING = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
-    public static final Long2ObjectMap<AudioDataQueue> SAVED = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
+    public static final Long2ObjectMap<PhonosAudioRecordBuilder<?>> UPLOADING = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
+    public static final Long2ObjectMap<PhonosAudioRecord<?>> SAVED = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
 
     private static int TOTAL_SAVED_SIZE = 0;
 
     public static final LongSet SUCCESSES = new LongOpenHashSet();
 
-    private static final Object2LongMap<UUID> UPLOAD_SESSIONS = Object2LongMaps.synchronize(new Object2LongOpenHashMap<>());
+    private static final Map<UUID, UploadSession> UPLOAD_SESSIONS = Collections.synchronizedMap(new HashMap<>());
 
     private static volatile boolean LOADED = false;
 
@@ -48,9 +44,9 @@ public class ServerCustomAudio {
         return SAVED.containsKey(id);
     }
 
-    public static @Nullable AudioDataQueue loadSaved(long id) {
+    public static @Nullable PhonosAudioRecord<?> loadSaved(long id) {
         if (hasSaved(id)) {
-            return SAVED.get(id).copy(ByteBuffer::allocate);
+            return SAVED.get(id).copy();
         }
 
         return null;
@@ -60,40 +56,48 @@ public class ServerCustomAudio {
         endUploadSession(player.getUuid());
     }
 
-    public static void beginUploadSession(ServerPlayerEntity player, long streamId) {
-        UPLOAD_SESSIONS.put(player.getUuid(), streamId);
+    public static void beginUploadSession(ServerPlayerEntity player, long streamId, PhonosAudioRecord.FileType fileType) {
+        UPLOAD_SESSIONS.put(player.getUuid(), new UploadSession(streamId, fileType));
     }
 
     public static void endUploadSession(UUID player) {
-        long id = UPLOAD_SESSIONS.removeLong(player);
+        long id = UPLOAD_SESSIONS.remove(player).streamId;
         UPLOADING.remove(id);
     }
 
-    public static void receiveUpload(MinecraftServer srv, ServerPlayerEntity player, long id, int sampleRate, ByteBuffer samples, boolean last) {
-        UPLOAD_POOL.submit(() -> handleUpload(srv, player, id, sampleRate, samples, last));
+    public static void receiveUpload(MinecraftServer srv, ServerPlayerEntity player, long id, int initData, ByteBuffer samples, boolean last) {
+        UPLOAD_POOL.submit(() -> handleUpload(srv, player, id, initData, samples, last));
     }
 
-    private static void handleUpload(MinecraftServer srv, ServerPlayerEntity player, long id, int sampleRate, ByteBuffer samples, boolean last) {
-        if (UPLOAD_SESSIONS.containsKey(player.getUuid()) && UPLOAD_SESSIONS.getLong(player.getUuid()) == id) {
-            var aud = UPLOADING.computeIfAbsent(id, k -> new AudioDataQueue(sampleRate));
-            aud.push(samples);
+    private static void handleUpload(MinecraftServer srv, ServerPlayerEntity player, long id, int initData, ByteBuffer samples, boolean last) {
+        if (UPLOAD_SESSIONS.containsKey(player.getUuid())) {
+            var session = UPLOAD_SESSIONS.get(player.getUuid());
+            if (session.streamId != id) return;
+            var aud = UPLOADING.computeIfAbsent(id, k -> session.fileType.createBuilder(initData));
+            aud.pushUploadBytes(samples);
 
             int maxAud = PhonosServerConfig.get(srv.getOverworld()).uploadLimitKB * 1000;
-            if (maxAud > 0 && TOTAL_SAVED_SIZE + aud.originalSize > maxAud) {
+            if (maxAud > 0 && TOTAL_SAVED_SIZE + aud.getDataSize() > maxAud) {
                 endUploadSession(player.getUuid());
                 PayloadPackets.sendUploadStop(player, id, Text.translatable("error.phonos.ender_music_box.upload_limit"));
                 return;
             }
 
             if (last) {
-                SAVED.put(id, aud);
-                SUCCESSES.add(id);
+                try {
+                    SAVED.put(id, aud.build());
+                    SUCCESSES.add(id);
+                } catch (Exception ex) {
+                    Phonos.LOG.error("Error building uploaded sound", ex);
+                }
                 endUploadSession(player.getUuid());
 
-                try {
-                    saveOnly(id, PhonosUtil.getCustomSoundFolder(srv));
-                } catch (IOException ex) {
-                    Phonos.LOG.error("Error saving uploaded sound", ex);
+                if (SUCCESSES.contains(id)) {
+                    try {
+                        saveOnly(id, PhonosUtil.getCustomSoundFolder(srv));
+                    } catch (IOException ex) {
+                        Phonos.LOG.error("Error saving uploaded sound", ex);
+                    }
                 }
             }
         }
@@ -110,8 +114,8 @@ public class ServerCustomAudio {
             deleteOnly(id, PhonosUtil.getCustomSoundFolder(srv));
 
             if (aud != null) {
-                Phonos.LOG.info("Saved audio with ID {} ({} bytes) was deleted.", Long.toHexString(id), aud.originalSize);
-                TOTAL_SAVED_SIZE -= aud.originalSize;
+                Phonos.LOG.info("Saved audio with ID {} ({} bytes) was deleted.", Long.toHexString(id), aud.getDataSize());
+                TOTAL_SAVED_SIZE -= aud.getDataSize();
             }
         } catch (IOException ex) {
             Phonos.LOG.error("Error deleting saved sound", ex);
@@ -130,7 +134,7 @@ public class ServerCustomAudio {
         var filename = Long.toHexString(id) + FILE_EXT;
         var path = folder.resolve(filename);
 
-        TOTAL_SAVED_SIZE += aud.originalSize;
+        TOTAL_SAVED_SIZE += aud.getDataSize();
 
         try (var out = Files.newOutputStream(path)) {
             aud.write(out);
@@ -217,12 +221,12 @@ public class ServerCustomAudio {
                 long id = Long.parseUnsignedLong(hexStr, 16);
 
                 try (var in = Files.newInputStream(path)) {
-                    var aud = AudioDataQueue.read(in, ByteBuffer::allocate);
+                    var aud = PhonosAudioRecord.read(in);
 
                     SAVED.put(id, aud);
-                    TOTAL_SAVED_SIZE += aud.originalSize;
+                    TOTAL_SAVED_SIZE += aud.getDataSize();
                 } catch (IOException ex) {
-                    Phonos.LOG.error("Error loading custom audio file {}", path.getFileName());
+                    Phonos.LOG.error("Error loading custom audio file {}: {}", path.getFileName(), ex);
                 }
 
                 if (loadedDataCount.incrementAndGet() >= foundDataCount) {
@@ -234,4 +238,6 @@ public class ServerCustomAudio {
             });
         }
     }
+
+    private record UploadSession(long streamId, PhonosAudioRecord.FileType fileType) {}
 }

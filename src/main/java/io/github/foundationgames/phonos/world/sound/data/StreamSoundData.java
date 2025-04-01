@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.world.sound.data;
 
+import io.github.foundationgames.phonos.sound.nbs.stream.ServerOutgoingNBSStreamHandler;
 import io.github.foundationgames.phonos.sound.stream.ServerOutgoingStreamHandler;
 import io.github.foundationgames.phonos.util.compat.PhonosVoicechatProxy;
 import net.minecraft.network.PacketByteBuf;
@@ -30,6 +31,10 @@ public class StreamSoundData extends SoundData {
         return new StreamSoundData(SoundDataTypes.SVC_MICROPHONE, id, streamId, category, 1.0f, 1.0f);
     }
 
+    public static StreamSoundData createNBS(long id, long streamId, SoundCategory category, float volume, float pitch) {
+        return new StreamSoundData(SoundDataTypes.NBS_STREAM, id, streamId, category, volume, pitch);
+    }
+
     @Override
     public boolean updateSkippedTicksAndCheckResumable() {
         if (!this.type.resumable())
@@ -39,6 +44,8 @@ public class StreamSoundData extends SoundData {
             return PhonosVoicechatProxy.isStreaming(this.streamId);
         } else if (this.type == SoundDataTypes.STREAM) {
             return ServerOutgoingStreamHandler.STREAMS.containsKey(this.streamId);
+        } else if (this.type == SoundDataTypes.NBS_STREAM) {
+            return ServerOutgoingNBSStreamHandler.STREAMS.containsKey(this.streamId);
         } else {
             return false;
         }
@@ -50,6 +57,8 @@ public class StreamSoundData extends SoundData {
             PhonosVoicechatProxy.resumeStream(player, this.streamId);
         } else if (this.type == SoundDataTypes.STREAM) {
             ServerOutgoingStreamHandler.resumeStream(player, this.streamId);
+        } else if (this.type == SoundDataTypes.NBS_STREAM) {
+            ServerOutgoingNBSStreamHandler.resumeStream(player, this.streamId);
         }
     }
 
