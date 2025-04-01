@@ -26,7 +26,6 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -102,8 +101,12 @@ public enum PhonosUtil {;
         float r = Math.max(0.0F, MathHelper.sin((d + 0.0F) * 6.2831855F) * 0.65F + 0.35F);
         float g = Math.max(0.0F, MathHelper.sin((d + 0.33333334F) * 6.2831855F) * 0.65F + 0.35F);
         float b = Math.max(0.0F, MathHelper.sin((d + 0.6666667F) * 6.2831855F) * 0.65F + 0.35F);
-        Color c = new Color(r, g, b);
-        return ColorHelper.Argb.fullAlpha(c.getRGB());
+
+        int ri = Math.round(r * 255f);
+        int gi = Math.round(g * 255f);
+        int bi = Math.round(b * 255f);
+        int c = (ri & 255) << 16 | (gi & 255) << 8 | (bi & 255);
+        return ColorHelper.Argb.fullAlpha(c);
     }
 
     public static double maxSquaredConnectionDistance(World world) {
