@@ -32,6 +32,9 @@ public class ClientIncomingNBSStreamHandler {
         if (STREAMS.containsKey(id)) {
             var song = STREAMS.get(id);
             song.run(chunk::apply);
+            if (chunk.isLast()) {
+                song.markComplete();
+            }
         }
     }
 

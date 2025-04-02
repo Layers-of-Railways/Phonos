@@ -159,7 +159,10 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
                     int nextNonEmptyTick = this.song.apply(s -> s.getNextNonEmptyTick(this.tick));
                     long sleepTicks;
                     if (nextNonEmptyTick == -1) {
-                        if (loopForever || remainingLoops-- > 0) {
+                        if (!song.isComplete()) {
+                            sleepTicks = 1;
+                            this.tick++;
+                        } else if (loopForever || remainingLoops-- > 0) {
                             sleepTicks = songEndTick - this.tick;
                             this.tick = loopStartTick;
                             var loopDesc = loopForever ? "∞" : String.valueOf(remainingLoops);
@@ -213,6 +216,8 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
     }
 
     private class ChildSound extends AbstractSoundInstance implements TickableSoundInstance, UnlimitedPitchSoundInstance {
+        private int doneTicks = 0;
+
         protected ChildSound(Identifier soundId) {
             super(soundId, NBSStreamMultiSoundInstance.this.category, NBSStreamMultiSoundInstance.this.random);
         }
@@ -249,10 +254,14 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
         public boolean isDone() {
             // the sound engine will automatically cull this sound if its source stops (even if we return false here),
             // so this is safe
-            return NBSStreamMultiSoundInstance.this.isDone();
+            return doneTicks >= 20; // give a bit of time for the sound to finish, if at the end of a song
         }
 
         @Override
-        public void tick() {}
+        public void tick() {
+            if (doneTicks > 0 || NBSStreamMultiSoundInstance.this.isDone()) {
+                doneTicks++;
+            }
+        }
     }
 }

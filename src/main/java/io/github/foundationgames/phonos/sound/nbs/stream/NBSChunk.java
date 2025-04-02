@@ -7,7 +7,7 @@ import net.minecraft.network.PacketByteBuf;
 
 import java.util.HashMap;
 
-public record NBSChunk(HashMap<Integer, Note>[] layerUpdates) {
+public record NBSChunk(HashMap<Integer, Note>[] layerUpdates, boolean isLast) {
     private static Note newNote(int instrument, boolean isCustomInstrument, int key, int pitch, int panning, byte volume) {
         var note = new Note();
         note.setInstrument(instrument, isCustomInstrument);
@@ -61,6 +61,7 @@ public record NBSChunk(HashMap<Integer, Note>[] layerUpdates) {
         for (var map : layerUpdates) {
             writeNoteMap(buf, map);
         }
+        buf.writeBoolean(isLast);
     }
 
     @SuppressWarnings("unchecked")
@@ -70,15 +71,20 @@ public record NBSChunk(HashMap<Integer, Note>[] layerUpdates) {
         for (int i = 0; i < layerCount; i++) {
             layerUpdates[i] = readNoteMap(buf);
         }
-        return new NBSChunk(layerUpdates);
+        boolean isLast = buf.readBoolean();
+        return new NBSChunk(layerUpdates, isLast);
     }
 
     @SuppressWarnings("unchecked")
     public NBSChunk(int layerCount) {
-        this(new HashMap[layerCount]);
+        this(new HashMap[layerCount], false);
         for (int i = 0; i < layerCount; i++) {
             layerUpdates[i] = new HashMap<>();
         }
+    }
+
+    public NBSChunk setLast() {
+        return new NBSChunk(layerUpdates, true);
     }
 
     public void apply(Song song) {
