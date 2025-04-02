@@ -10,7 +10,7 @@ import net.minecraft.network.codec.PacketCodecs;
 
 import java.util.HashMap;
 
-public record NBSChunk(HashMap<Integer, Note>[] layerUpdates) {
+public record NBSChunk(HashMap<Integer, Note>[] layerUpdates, boolean isLast) {
     private static Note newNote(int instrument, boolean isCustomInstrument, int key, int pitch, int panning, byte volume) {
         var note = new Note();
         note.setInstrument(instrument, isCustomInstrument);
@@ -37,21 +37,30 @@ public record NBSChunk(HashMap<Integer, Note>[] layerUpdates) {
         NOTE_PACKET_CODEC
     );
 
-    public static final PacketCodec<PacketByteBuf, NBSChunk> PACKET_CODEC = PhonosPacketCodecs.array(
+    private static final PacketCodec<PacketByteBuf, HashMap<Integer, Note>[]> LAYER_UPDATES_PACKET_CODEC = PhonosPacketCodecs.array(
         HashMap.class,
         NOTE_MAP_PACKET_CODEC,
         255
-    ).xmap(
-        NBSChunk::new,
-        NBSChunk::layerUpdates
+    );
+
+    public static final PacketCodec<PacketByteBuf, NBSChunk> PACKET_CODEC = PacketCodec.tuple(
+        LAYER_UPDATES_PACKET_CODEC,
+        NBSChunk::layerUpdates,
+        PacketCodecs.BOOL,
+        NBSChunk::isLast,
+        NBSChunk::new
     );
 
     @SuppressWarnings("unchecked")
     public NBSChunk(int layerCount) {
-        this(new HashMap[layerCount]);
+        this(new HashMap[layerCount], false);
         for (int i = 0; i < layerCount; i++) {
             layerUpdates[i] = new HashMap<>();
         }
+    }
+
+    public NBSChunk setLast() {
+        return new NBSChunk(layerUpdates, true);
     }
 
     public void apply(Song song) {

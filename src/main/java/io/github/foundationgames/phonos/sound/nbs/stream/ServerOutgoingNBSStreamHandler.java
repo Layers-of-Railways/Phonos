@@ -89,6 +89,8 @@ public class ServerOutgoingNBSStreamHandler {
                     }
                 }
             }
+
+            chunks.addLast(chunks.removeLast().setLast());
         }
 
         void tick(MinecraftServer server) {

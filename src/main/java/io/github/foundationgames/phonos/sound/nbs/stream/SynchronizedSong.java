@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 public class SynchronizedSong {
     private final Song song;
+    private boolean isComplete = false;
 
     public SynchronizedSong(Song song) {
         this.song = song;
@@ -19,5 +20,13 @@ public class SynchronizedSong {
 
     public synchronized <T> T apply(Function<Song, T> function) {
         return function.apply(song);
+    }
+
+    public synchronized void markComplete() {
+        this.isComplete = true;
+    }
+
+    public synchronized boolean isComplete() {
+        return this.isComplete;
     }
 }
