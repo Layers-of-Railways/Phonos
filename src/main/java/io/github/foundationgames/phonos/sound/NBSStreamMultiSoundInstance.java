@@ -5,24 +5,21 @@ import cz.koca2000.nbs4j.Layer;
 import cz.koca2000.nbs4j.Note;
 import cz.koca2000.nbs4j.Song;
 import io.github.foundationgames.phonos.Phonos;
+import io.github.foundationgames.phonos.mixin_interfaces.IMonoForceableAudioStream;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
 import io.github.foundationgames.phonos.sound.nbs.NoteHelper;
 import io.github.foundationgames.phonos.sound.nbs.stream.ClientIncomingNBSStreamHandler;
 import io.github.foundationgames.phonos.sound.nbs.stream.SynchronizedSong;
 import net.fabricmc.fabric.api.client.sound.v1.FabricSoundInstance;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.sound.AbstractSoundInstance;
-import net.minecraft.client.sound.AudioStream;
-import net.minecraft.client.sound.SoundLoader;
-import net.minecraft.client.sound.TickableSoundInstance;
+import net.minecraft.client.sound.*;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implements FabricSoundInstance {
@@ -147,8 +144,11 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
                     });
 
                     mc.executeSync(() -> {
+                        SoundManager soundManager = mc.getSoundManager();
+
                         for (ChildSound sound : toPlay) {
-                            mc.getSoundManager().play(sound);
+                            sound.initActualSound(soundManager);
+                            soundManager.play(sound);
                         }
 
                         if (mc.world == null) {
@@ -215,11 +215,45 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
         }
     }
 
-    private class ChildSound extends AbstractSoundInstance implements TickableSoundInstance, UnlimitedPitchSoundInstance {
+    private class ChildSound extends AbstractSoundInstance implements TickableSoundInstance, UnlimitedPitchSoundInstance, FabricSoundInstance {
         private int doneTicks = 0;
+        private final Identifier actualSoundId;
+        private @Nullable Sound actualSound;
+
+        private static final Set<Identifier> monoCache = Collections.synchronizedSet(new HashSet<>());
+
+        // only do streaming if the sound is custom, because it is slower
+        private static Identifier maybeMakeStreamed(Identifier soundId) {
+            if (monoCache.contains(soundId)) {
+                return soundId;
+            }
+
+            if (soundId.getNamespace().equals("minecraft") && soundId.getPath().startsWith("block.note_block.")) {
+                return soundId;
+            } else {
+                return Phonos.STREAMED_SOUND;
+            }
+        }
 
         protected ChildSound(Identifier soundId) {
-            super(soundId, NBSStreamMultiSoundInstance.this.category, NBSStreamMultiSoundInstance.this.random);
+            super(maybeMakeStreamed(soundId), NBSStreamMultiSoundInstance.this.category, NBSStreamMultiSoundInstance.this.random);
+            this.actualSoundId = soundId;
+        }
+
+        protected void initActualSound(SoundManager soundManager) {
+            if (this.actualSound != null) return;
+            if (id != Phonos.STREAMED_SOUND) return;
+
+            if (this.actualSoundId.equals(SoundManager.INTENTIONALLY_EMPTY_ID)) {
+                this.actualSound = SoundManager.INTENTIONALLY_EMPTY_SOUND;
+            } else {
+                WeightedSoundSet weightedSoundSet = soundManager.get(this.actualSoundId);
+                if (weightedSoundSet == null) {
+                    this.actualSound = SoundManager.MISSING_SOUND;
+                } else {
+                    this.actualSound = weightedSoundSet.getSound(this.random);
+                }
+            }
         }
 
         public void setPitch(float pitch) {
@@ -262,6 +296,28 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
             if (doneTicks > 0 || NBSStreamMultiSoundInstance.this.isDone()) {
                 doneTicks++;
             }
+        }
+
+        @Override
+        public boolean shouldAlwaysPlay() {
+            return true;
+        }
+
+        @Override
+        public CompletableFuture<AudioStream> getAudioStream(SoundLoader loader, Identifier id, boolean repeatInstantly) {
+            if (actualSound == null) {
+                initActualSound(MinecraftClient.getInstance().getSoundManager());
+            }
+
+            return loader.loadStreamed(actualSound.getLocation(), repeatInstantly).thenApply(stream -> {
+                if (stream.getFormat().getChannels() == 1) {
+                    monoCache.add(actualSoundId);
+                }
+                if (stream instanceof IMonoForceableAudioStream monoStream) {
+                    monoStream.phonos$forceMono();
+                }
+                return stream;
+            });
         }
     }
 }

@@ -8,8 +8,8 @@
     "ServerPlayerEntityMixin",
     "compat.LocationSoundPacketAccessor",
     "compat.SoundPacketAccessor",
-    "nbs.NBSWriterMixin",
     "nbs.NBSReaderMixin",
+    "nbs.NBSWriterMixin",
     "nbs.SongAccessor",
     "nbs.SongMixin"
   ],
