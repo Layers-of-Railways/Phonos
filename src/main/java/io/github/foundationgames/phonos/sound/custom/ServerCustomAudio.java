@@ -61,7 +61,9 @@ public class ServerCustomAudio {
     }
 
     public static void endUploadSession(UUID player) {
-        long id = UPLOAD_SESSIONS.remove(player).streamId;
+        UploadSession session = UPLOAD_SESSIONS.remove(player);
+        if (session == null) return;
+        long id = session.streamId;
         UPLOADING.remove(id);
     }
 
