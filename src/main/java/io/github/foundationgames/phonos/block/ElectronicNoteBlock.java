@@ -22,6 +22,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -91,7 +92,10 @@ public class ElectronicNoteBlock extends NoteBlock implements BlockEntityProvide
             var sound = instrument.getSound();
 
             if (instrument.hasCustomSound() && world.getBlockEntity(pos.up()) instanceof SkullBlockEntity skull) {
-                sound = RegistryEntry.of(SoundEvent.of(skull.getNoteBlockSound()));
+                Identifier noteBlockSound = skull.getNoteBlockSound();
+                if (noteBlockSound != null) {
+                    sound = RegistryEntry.of(SoundEvent.of(noteBlockSound));
+                }
             }
 
             if (instrument.isNotBaseBlock() || world.getBlockState(pos.up()).isAir()) {
