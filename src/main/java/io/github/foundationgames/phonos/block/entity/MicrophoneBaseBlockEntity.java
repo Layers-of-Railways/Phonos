@@ -46,6 +46,8 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
     private @Nullable WeakReference<ServerPlayerEntity> serverPlayer = null;
     private @Nullable UUID clientPlayer = null;
 
+    protected boolean adventurePlayersCanSpeak = false;
+
     public MicrophoneBaseBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state, OUTPUT_LAYOUT);
 
@@ -199,6 +201,15 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
                 nbt.putUuid("Player", player.getUuid());
             }
         }
+
+        nbt.putBoolean("AdventurePlayersCanSpeak", this.adventurePlayersCanSpeak);
+    }
+
+    @Override
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.writeNbt(nbt, registryLookup);
+
+        nbt.putBoolean("AdventurePlayersCanSpeak", this.adventurePlayersCanSpeak);
     }
 
     @Override
@@ -209,6 +220,12 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
         } else {
             this.clientPlayer = null;
         }
+
+        this.adventurePlayersCanSpeak = nbt.getBoolean("AdventurePlayersCanSpeak");
+    }
+
+    public boolean adventurePlayersCanSpeak() {
+        return this.adventurePlayersCanSpeak;
     }
 
     public @Nullable UUID getClientPlayer() {

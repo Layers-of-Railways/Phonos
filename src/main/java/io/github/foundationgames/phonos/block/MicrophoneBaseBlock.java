@@ -140,35 +140,39 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
             if (world.isClient()) {
                 return ActionResult.SUCCESS;
             }
+        }
 
-            if (world.getBlockEntity(pos) instanceof MicrophoneBaseBlockEntity be) {
-                if (hit.getSide() != Direction.UP) {
-                    var relHitPos = hit.getPos().subtract(pos.toCenterPos());
-                    if (relHitPos.getY() < -2/16. && !be.isSpeakingPlayer(player)) {
-                        if (be.outputs.tryRemoveConnection(world, hit, !player.isCreative())) {
-                            be.sync();
-                            return ActionResult.SUCCESS;
-                        }
-                    }
-                }
+        if (world.getBlockEntity(pos) instanceof MicrophoneBaseBlockEntity be && (player.canModifyBlocks() || be.adventurePlayersCanSpeak())) {
+            if (world.isClient()) {
+                return ActionResult.SUCCESS;
+            }
 
-                if (player instanceof ServerPlayerEntity serverPlayer) {
-                    if (be.isPlaying()) {
-                        if (be.isSpeakingPlayer(serverPlayer)) {
-                            be.stop();
-                            updatePower(world, pos);
-                            return ActionResult.SUCCESS;
-                        } else {
-                            serverPlayer.sendMessageToClient(Text.translatable("block.phonos.microphone_base.already_playing")
-                                .setStyle(Style.EMPTY.withColor(Formatting.RED)), true);
-                            return ActionResult.FAIL;
-                        }
-                    } else {
-                        if (be.canStart(serverPlayer))
-                            be.start(serverPlayer);
-                        updatePower(world, pos);
+            if (hit.getSide() != Direction.UP) {
+                var relHitPos = hit.getPos().subtract(pos.toCenterPos());
+                if (relHitPos.getY() < -2/16. && !be.isSpeakingPlayer(player)) {
+                    if (be.outputs.tryRemoveConnection(world, hit, !player.isCreative())) {
+                        be.sync();
                         return ActionResult.SUCCESS;
                     }
+                }
+            }
+
+            if (player instanceof ServerPlayerEntity serverPlayer) {
+                if (be.isPlaying()) {
+                    if (be.isSpeakingPlayer(serverPlayer)) {
+                        be.stop();
+                        updatePower(world, pos);
+                        return ActionResult.SUCCESS;
+                    } else {
+                        serverPlayer.sendMessageToClient(Text.translatable("block.phonos.microphone_base.already_playing")
+                            .setStyle(Style.EMPTY.withColor(Formatting.RED)), true);
+                        return ActionResult.FAIL;
+                    }
+                } else {
+                    if (be.canStart(serverPlayer))
+                        be.start(serverPlayer);
+                    updatePower(world, pos);
+                    return ActionResult.SUCCESS;
                 }
             }
         }
