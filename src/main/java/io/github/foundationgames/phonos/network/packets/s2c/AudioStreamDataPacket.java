@@ -12,13 +12,13 @@ import net.minecraft.network.codec.PacketCodecs;
 
 import java.nio.ByteBuffer;
 
-public record AudioStreamDataPacket(long streamId, int sampleRate, ByteBuffer samples) implements S2CPacket {
+public record AudioStreamDataPacket(long streamId, int sampleRate, byte[] samples) implements S2CPacket {
     public static final PacketCodec<PacketByteBuf, AudioStreamDataPacket> PACKET_CODEC = PacketCodec.tuple(
         PacketCodecs.VAR_LONG,
         AudioStreamDataPacket::streamId,
         PacketCodecs.INTEGER,
         AudioStreamDataPacket::sampleRate,
-        PhonosUtil.BYTE_BUFFER_PACKET_CODEC,
+        PhonosUtil.BYTE_ARRAY_PACKET_CODEC,
         AudioStreamDataPacket::samples,
         AudioStreamDataPacket::new
     );
@@ -26,6 +26,7 @@ public record AudioStreamDataPacket(long streamId, int sampleRate, ByteBuffer sa
     @Override
     @Environment(EnvType.CLIENT)
     public void handle(MinecraftClient mc) {
-        ClientIncomingStreamHandler.receiveStream(streamId, sampleRate, samples);
+        var buffer = PhonosUtil.byteArrayToByteBuffer(samples, ByteBuffer::allocate);
+        ClientIncomingStreamHandler.receiveStream(streamId, sampleRate, buffer);
     }
 }

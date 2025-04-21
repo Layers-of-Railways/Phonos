@@ -1,6 +1,7 @@
 package io.github.foundationgames.phonos.sound.stream;
 
 import io.github.foundationgames.phonos.network.PayloadPackets;
+import io.github.foundationgames.phonos.util.PhonosUtil;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.entity.Entity;
@@ -62,10 +63,11 @@ public class ServerOutgoingStreamHandler {
 
                 for (int i = 0; i < 1 - tickDelay && !queue.data.isEmpty(); i++) {
                     var samples = queue.data.removeFirst();
+                    samples.rewind();
+                    byte[] sampleArray = PhonosUtil.byteBufferToByteArray(samples);
 
                     for (var id : listeners) {
-                        samples.rewind();
-                        PayloadPackets.sendAudioStreamData(server.getPlayerManager().getPlayer(id), streamId, sampleRate, samples);
+                        PayloadPackets.sendAudioStreamData(server.getPlayerManager().getPlayer(id), streamId, sampleRate, sampleArray);
                     }
                 }
 

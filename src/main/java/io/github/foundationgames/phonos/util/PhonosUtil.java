@@ -4,12 +4,10 @@ import io.github.foundationgames.phonos.block.entity.Ticking;
 import io.github.foundationgames.phonos.item.AudioCableItem;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
@@ -197,23 +195,39 @@ public enum PhonosUtil {;
         buf -> PhonosUtil.readBufferFromPacket(buf, ByteBuffer::allocate)
     );
 
-    public static void writeBufferToPacket(PacketByteBuf packet, ByteBuffer buffer) {
+    public static final PacketCodec<PacketByteBuf, byte[]> BYTE_ARRAY_PACKET_CODEC = PacketCodec.ofStatic(
+        (buf, bytes) -> buf.writeByteArray(bytes),
+        (buf) -> buf.readByteArray()
+    );
+
+    public static byte[] byteBufferToByteArray(ByteBuffer buffer) {
         int bufferCur = buffer.position();
         int size = buffer.remaining();
         byte[] bytes = new byte[size];
         buffer.get(bytes);
         buffer.position(bufferCur);
 
-        packet.writeByteArray(bytes);
+        return bytes;
     }
 
-    public static ByteBuffer readBufferFromPacket(PacketByteBuf packet, IntFunction<ByteBuffer> create) {
-        byte[] bytes = packet.readByteArray();
+    public static ByteBuffer byteArrayToByteBuffer(byte[] bytes, IntFunction<ByteBuffer> create) {
         var buffer = create.apply(bytes.length);
         buffer.put(bytes);
         buffer.flip();
 
         return buffer;
+    }
+
+    public static void writeBufferToPacket(PacketByteBuf packet, ByteBuffer buffer) {
+        byte[] bytes = byteBufferToByteArray(buffer);
+
+        packet.writeByteArray(bytes);
+    }
+
+    public static ByteBuffer readBufferFromPacket(PacketByteBuf packet, IntFunction<ByteBuffer> create) {
+        byte[] bytes = packet.readByteArray();
+
+        return byteArrayToByteBuffer(bytes, create);
     }
 
     public static void runIfClient(Supplier<Runnable> runnable) {

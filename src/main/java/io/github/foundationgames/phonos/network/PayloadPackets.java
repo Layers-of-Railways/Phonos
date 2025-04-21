@@ -14,7 +14,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
-import java.nio.ByteBuffer;
 import java.util.UUID;
 
 public final class PayloadPackets {
@@ -46,7 +45,7 @@ public final class PayloadPackets {
         PhonosPackets.PACKETS.sendTo(player, new AudioUploadStatusPacket(uploadId, ok));
     }
 
-    public static void sendAudioStreamData(ServerPlayerEntity player, long streamId, int sampleRate, ByteBuffer samples) {
+    public static void sendAudioStreamData(ServerPlayerEntity player, long streamId, int sampleRate, byte[] samples) {
         PhonosPackets.PACKETS.sendTo(player, new AudioStreamDataPacket(streamId, sampleRate, samples));
     }
 
