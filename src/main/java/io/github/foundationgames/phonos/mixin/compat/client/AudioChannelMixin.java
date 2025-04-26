@@ -2,7 +2,9 @@ package io.github.foundationgames.phonos.mixin.compat.client;
 
 import de.maxhenkel.voicechat.voice.client.AudioChannel;
 import de.maxhenkel.voicechat.voice.common.LocationSoundPacket;
+import de.maxhenkel.voicechat.voice.common.PlayerSoundPacket;
 import de.maxhenkel.voicechat.voice.common.SoundPacket;
+import io.github.foundationgames.phonos.config.PhonosClientConfig;
 import io.github.foundationgames.phonos.util.compat.PhonosVoicechatPlugin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,6 +17,13 @@ public class AudioChannelMixin {
     private void fixLocation(SoundPacket<?> packet, short[] monoData, CallbackInfo ci) {
         if (packet instanceof LocationSoundPacket locationSoundPacket) {
             PhonosVoicechatPlugin.onLocationalSoundPacket(locationSoundPacket, monoData);
+        }
+    }
+
+    @Inject(method = "writeToSpeaker", at = @At("HEAD"), remap = false, cancellable = true)
+    private void muteForStreamers(SoundPacket<?> packet, short[] monoData, CallbackInfo ci) {
+        if (packet instanceof PlayerSoundPacket && PhonosClientConfig.get().muteNonPhonosSVC) {
+            ci.cancel();
         }
     }
 }

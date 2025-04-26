@@ -38,6 +38,11 @@ public class PhonosClientConfig {
     @DoublePercentSlider(min = 0, max = 1, step = 0.01f)
     public double ownVoiceVolume = 1;
 
+    @SerialEntry(comment = "Mute Non-Phonos Simple Voice Chat Audio")
+    @AutoGen(category = "audio")
+    @TickBox
+    public boolean muteNonPhonosSVC = false;
+
 
     @SerialEntry(comment = "Cull Audio Cables not on-screen")
     @AutoGen(category = "rendering")
