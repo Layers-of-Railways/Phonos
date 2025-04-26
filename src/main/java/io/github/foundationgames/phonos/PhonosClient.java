@@ -3,6 +3,7 @@ package io.github.foundationgames.phonos;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.foundationgames.jsonem.JsonEM;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
+import io.github.foundationgames.phonos.client.PhonosKeybinds;
 import io.github.foundationgames.phonos.client.model.PartialModel;
 import io.github.foundationgames.phonos.client.model.PhonosPartialModels;
 import io.github.foundationgames.phonos.client.render.RadioDebugRenderer;
@@ -68,6 +69,7 @@ public class PhonosClient implements ClientModInitializer {
         PhonosPackets.PACKETS.initClient();
         ClientSoundStorage.initClient();
         PhonosClientCommands.initClient();
+        PhonosKeybinds.initClient();
 
         JsonEM.registerModelLayer(AUDIO_CABLE_END_LAYER);
         JsonEM.registerModelLayer(SATELLITE_LAYER);

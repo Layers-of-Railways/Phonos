@@ -115,6 +115,7 @@
     "yacl3.config.phonos:client_config.phonosMasterVolume": "Loudspeaker Master Volume",
     "yacl3.config.phonos:client_config.streamVolume": "Satellite Audio Volume",
     "yacl3.config.phonos:client_config.ownVoiceVolume": "Microphone Volume (Own Voice)",
+    "yacl3.config.phonos:client_config.muteNonPhonosSVC": "Mute Non-Phonos Simple Voice Chat Audio",
     "yacl3.config.phonos:client_config.cableCulling": "Cull Audio Cables not on-screen",
     "yacl3.config.phonos:client_config.cableVBOs": "Render Audio Cables with VBOs",
     "yacl3.config.phonos:client_config.cableLODs": "Render Audio Cables with Detail Levels",
@@ -138,5 +139,10 @@
     "yacl3.config.phonos:server_config.restrictEnderMusicBoxUploads": "Restrict Uploads to OPs",
     "yacl3.config.phonos:server_config.uploadLimitKB": "Upload Limit",
     "yacl3.config.phonos:server_config.uploadLimitKB.fmt": "%s KB",
-    "yacl3.config.phonos:server_config.uploadLimitKB.fmt.0": "Unlimited"
+    "yacl3.config.phonos:server_config.uploadLimitKB.fmt.0": "Unlimited",
+
+    "category.phonos.keybinds": "Phonos Keybinds",
+    "key.phonos.toggle_streamer_mode": "Toggle Streamer Mode",
+    "key.phonos.toggle_streamer_mode.on": "Phonos Streamer Mode: ON",
+    "key.phonos.toggle_streamer_mode.off": "Phonos Streamer Mode: OFF"
 }
