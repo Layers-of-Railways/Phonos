@@ -206,8 +206,8 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
+    protected void writeNbt(NbtCompound nbt) {
+        super.writeNbt(nbt);
 
         nbt.putBoolean("AdventurePlayersCanSpeak", this.adventurePlayersCanSpeak);
     }
