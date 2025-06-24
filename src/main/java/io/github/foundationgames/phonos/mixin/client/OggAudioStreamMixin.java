@@ -8,6 +8,7 @@ import io.github.foundationgames.phonos.util.CleanableBufferedInputStream;
 import io.github.foundationgames.phonos.util.OggSeeker;
 import net.minecraft.client.sound.OggAudioStream;
 import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -31,11 +32,6 @@ public abstract class OggAudioStreamMixin implements ISeekableAudioStream, IMono
     @Shadow protected abstract boolean readHeader() throws IOException;
 
     @Shadow protected abstract void increaseBufferSize();
-
-    @Shadow
-    private static void method_59760(float[] fs, int i, long l, FloatConsumer floatConsumer) {
-        throw new AssertionError("Mixin did not apply");
-    }
 
     @Unique
     private int phonos$remainingSamplesToSkip = 0;
@@ -82,24 +78,31 @@ public abstract class OggAudioStreamMixin implements ISeekableAudioStream, IMono
 
     @Inject(method = "readChannels(Ljava/nio/FloatBuffer;Lnet/minecraft/client/sound/OggAudioStream$ChannelList;)V", at = @At("HEAD"))
     private void doSkip(FloatBuffer buf, @Coerce Object channelList, CallbackInfo ci) {
-        int skip;
         if (phonos$remainingSamplesToSkip > 0) {
-            skip = Math.min(phonos$remainingSamplesToSkip, buf.remaining());
+            int skip = Math.min(phonos$remainingSamplesToSkip, buf.remaining());
             buf.position(buf.position() + skip);
             phonos$remainingSamplesToSkip -= skip;
-        } // fixme cherry
+        }
     }
 
-    @Inject(method = "readChannels(Ljava/nio/FloatBuffer;Ljava/nio/FloatBuffer;Lnet/minecraft/client/sound/OggAudioStream$ChannelList;)V", at = @At("HEAD"))
+    @Inject(method = "readChannels(Ljava/nio/FloatBuffer;Ljava/nio/FloatBuffer;Lnet/minecraft/client/sound/OggAudioStream$ChannelList;)V", at = @At("HEAD"), cancellable = true)
     private void doSkip(FloatBuffer buf, FloatBuffer buf2, @Coerce Object channelList, CallbackInfo ci) {
-        int skip;
-        int[] newIndexes;
         if (phonos$remainingSamplesToSkip > 0) {
-            skip = Math.min(phonos$remainingSamplesToSkip, Math.min(buf.remaining(), buf2.remaining()));
+            int skip = Math.min(phonos$remainingSamplesToSkip, Math.min(buf.remaining(), buf2.remaining()));
             buf.position(buf.position() + skip);
             buf2.position(buf2.position() + skip);
             phonos$remainingSamplesToSkip -= skip;
-        } // fixme cherry
+        }
+
+        if (phonos$forceMono) {
+            while (buf.hasRemaining() && buf2.hasRemaining()) {
+                float f1 = buf.get();
+                float f2 = buf2.get();
+
+                ((ChannelListAccessor) channelList).callAddChannel((f1 + f2) / 2f);
+            }
+            ci.cancel();
+        }
     }
 
     @Inject(method = "getFormat", at = @At("HEAD"), cancellable = true)
@@ -125,5 +128,11 @@ public abstract class OggAudioStreamMixin implements ISeekableAudioStream, IMono
             format.getFrameRate(),
             format.isBigEndian()
         );
+    }
+
+    @Mixin(targets = "net.minecraft.client.sound.OggAudioStream$ChannelList")
+    private interface ChannelListAccessor {
+        @Invoker
+        void callAddChannel(float data);
     }
 }
