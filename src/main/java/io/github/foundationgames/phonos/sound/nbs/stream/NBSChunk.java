@@ -3,10 +3,7 @@ package io.github.foundationgames.phonos.sound.nbs.stream;
 import cz.koca2000.nbs4j.Note;
 import cz.koca2000.nbs4j.Song;
 import io.github.foundationgames.phonos.Phonos;
-import io.github.foundationgames.phonos.util.PhonosPacketCodecs;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
 
 import java.util.HashMap;
 
@@ -21,30 +18,60 @@ public record NBSChunk(HashMap<Integer, Note>[] layerUpdates) {
         return note;
     }
 
-    private static final PacketCodec<PacketByteBuf, Note> NOTE_PACKET_CODEC = PacketCodec.tuple(
-        PacketCodecs.VAR_INT, Note::getInstrument,
-        PacketCodecs.BOOL,    Note::isCustomInstrument,
-        PacketCodecs.VAR_INT, Note::getKey,
-        PacketCodecs.VAR_INT, Note::getPitch,
-        PacketCodecs.VAR_INT, Note::getPanning,
-        PacketCodecs.BYTE, Note::getVolume,
-        NBSChunk::newNote
-    );
+    private static void writeNote(PacketByteBuf buf, Note note) {
+        buf.writeVarInt(note.getInstrument());
+        buf.writeBoolean(note.isCustomInstrument());
+        buf.writeVarInt(note.getKey());
+        buf.writeVarInt(note.getPitch());
+        buf.writeVarInt(note.getPanning());
+        buf.writeByte(note.getVolume());
+    }
 
-    private static final PacketCodec<PacketByteBuf, HashMap<Integer, Note>> NOTE_MAP_PACKET_CODEC = PacketCodecs.map(
-        HashMap::new,
-        PacketCodecs.VAR_INT,
-        NOTE_PACKET_CODEC
-    );
+    private static Note readNote(PacketByteBuf buf) {
+        int instrument = buf.readVarInt();
+        boolean isCustomInstrument = buf.readBoolean();
+        int key = buf.readVarInt();
+        int pitch = buf.readVarInt();
+        int panning = buf.readVarInt();
+        byte volume = buf.readByte();
+        return newNote(instrument, isCustomInstrument, key, pitch, panning, volume);
+    }
 
-    public static final PacketCodec<PacketByteBuf, NBSChunk> PACKET_CODEC = PhonosPacketCodecs.array(
-        HashMap.class,
-        NOTE_MAP_PACKET_CODEC,
-        255
-    ).xmap(
-        NBSChunk::new,
-        NBSChunk::layerUpdates
-    );
+    private static void writeNoteMap(PacketByteBuf buf, HashMap<Integer, Note> map) {
+        buf.writeVarInt(map.size());
+        for (var entry : map.entrySet()) {
+            buf.writeVarInt(entry.getKey());
+            writeNote(buf, entry.getValue());
+        }
+    }
+
+    private static HashMap<Integer, Note> readNoteMap(PacketByteBuf buf) {
+        int size = buf.readVarInt();
+        var map = new HashMap<Integer, Note>(size);
+        for (int i = 0; i < size; i++) {
+            int tick = buf.readVarInt();
+            Note note = readNote(buf);
+            map.put(tick, note);
+        }
+        return map;
+    }
+
+    public void toPacket(PacketByteBuf buf) {
+        buf.writeVarInt(layerUpdates.length);
+        for (var map : layerUpdates) {
+            writeNoteMap(buf, map);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static NBSChunk fromPacket(PacketByteBuf buf) {
+        int layerCount = buf.readVarInt();
+        var layerUpdates = new HashMap[layerCount];
+        for (int i = 0; i < layerCount; i++) {
+            layerUpdates[i] = readNoteMap(buf);
+        }
+        return new NBSChunk(layerUpdates);
+    }
 
     @SuppressWarnings("unchecked")
     public NBSChunk(int layerCount) {

@@ -13,6 +13,9 @@ import io.github.foundationgames.phonos.config.serializers.NetworkConfigSerializ
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.custom.ClientCustomAudioUploader;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
+import io.github.foundationgames.phonos.sound.nbs.stream.ClientIncomingNBSStreamHandler;
+import io.github.foundationgames.phonos.sound.nbs.stream.NBSChunk;
+import io.github.foundationgames.phonos.sound.nbs.stream.NBSInitData;
 import io.github.foundationgames.phonos.sound.stream.ClientIncomingStreamHandler;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.util.compat.PhonosVoicechatProxy;
@@ -152,6 +155,26 @@ public final class ClientPayloadPackets {
             ConfigClassHandler<PhonosServerConfig> config = PhonosServerConfig.getHandler(client.world);
             NetworkConfigSerializer.read(buf, config);
         });
+
+        ClientPlayNetworking.registerGlobalReceiver(Phonos.id("nbs_stream_start"), (client, handler, buf, responseSender) -> {
+            long streamId = buf.readVarLong();
+            var initData = NBSInitData.fromPacket(buf);
+
+            client.execute(() -> ClientIncomingNBSStreamHandler.initStream(streamId, initData));
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(Phonos.id("nbs_stream_data"), (client, handler, buf, responseSender) -> {
+            long streamId = buf.readVarLong();
+            var chunk = NBSChunk.fromPacket(buf);
+
+            client.execute(() -> ClientIncomingNBSStreamHandler.receiveChunk(streamId, chunk));
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(Phonos.id("nbs_stream_end"), (client, handler, buf, responseSender) -> {
+            long streamId = buf.readVarLong();
+
+            client.execute(() -> ClientIncomingNBSStreamHandler.endStream(streamId));
+        });
     }
 
     public static void sendFakeCreativeSlotClick(ItemStack onto, ItemStack with, ClickType click) {
@@ -167,7 +190,7 @@ public final class ClientPayloadPackets {
         var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeBlockPos(entity.getPos());
         buf.writeString(name, 512);
-        buf.writeFileType(fileType); // fixme cherry
+        fileType.writeBuf(buf);
 
         ClientPlayNetworking.send(Phonos.id("request_ender_music_box_upload_session"), buf);
     }

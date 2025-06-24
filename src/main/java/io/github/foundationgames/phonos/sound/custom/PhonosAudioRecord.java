@@ -5,10 +5,7 @@ import io.github.foundationgames.phonos.sound.nbs.NBSRecord;
 import io.github.foundationgames.phonos.sound.stream.AudioDataQueue;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.sound.data.SoundData;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sound.SoundCategory;
 import org.jetbrains.annotations.ApiStatus;
@@ -72,10 +69,13 @@ public interface PhonosAudioRecord<T extends PhonosAudioRecord<T>> {
         ADQ(0, PhonosAudioRecordBuilder.Factory.cast(AudioDataQueue::new)),
         NBS(1, PhonosAudioRecordBuilder.Factory.cast(NBSBuilder::new));
 
-        public static final PacketCodec<ByteBuf, FileType> PACKET_CODEC = PacketCodecs.VAR_INT.xmap(
-            FileType::fromId,
-            f -> f.id
-        );
+        public void writeBuf(PacketByteBuf buf) {
+            buf.writeVarInt(id);
+        }
+
+        public static FileType readBuf(PacketByteBuf buf) {
+            return fromId(buf.readVarInt());
+        }
 
         public final int id;
         private final PhonosAudioRecordBuilder.Factory<?> factory;

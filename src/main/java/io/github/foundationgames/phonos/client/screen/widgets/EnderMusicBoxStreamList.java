@@ -15,12 +15,17 @@ public class EnderMusicBoxStreamList extends AlwaysSelectedEntryListWidget<Ender
         super(client, width, height, top, bottom, itemHeight);
     }
 
-    @Override // fixme cherry
+    @Override
     protected void drawSelectionHighlight(DrawContext context, int y, int entryWidth, int entryHeight, int borderColor, int fillColor) {}
 
     @Override
     public int getRowWidth() {
         return 320;
+    }
+
+    @Override
+    protected int getScrollbarPositionX() {
+        return super.getScrollbarPositionX() + (getRowWidth() - super.getRowWidth())/2;
     }
 
     public static class Entry extends AlwaysSelectedEntryListWidget.Entry<Entry> {

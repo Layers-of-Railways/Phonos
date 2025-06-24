@@ -5,8 +5,6 @@ import cz.koca2000.nbs4j.Layer;
 import cz.koca2000.nbs4j.Song;
 import io.github.foundationgames.phonos.mixin.nbs.SongAccessor;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,11 +12,13 @@ import java.util.List;
 public record NBSInitData(int length, List<LayerInit> layers, float tempo, int nonCustomInstrumentsCount, List<CustomInstrument> customInstruments, Metadata metadata) {
 
     private record LayerInit(int volume) {
-        private static final PacketCodec<PacketByteBuf, LayerInit> PACKET_CODEC = PacketCodec.tuple(
-            PacketCodecs.VAR_INT,
-            LayerInit::volume,
-            LayerInit::new
-        );
+        private void writeBuf(PacketByteBuf buf) {
+            buf.writeVarInt(volume);
+        }
+
+        private static LayerInit readBuf(PacketByteBuf buf) {
+            return new LayerInit(buf.readVarInt());
+        }
 
         private LayerInit(Layer layer) {
             this(layer.getVolume());
@@ -32,15 +32,15 @@ public record NBSInitData(int length, List<LayerInit> layers, float tempo, int n
     }
 
     private record Metadata(boolean doLoop, byte loopCount, byte timeSignature) {
-        private static final PacketCodec<PacketByteBuf, Metadata> PACKET_CODEC = PacketCodec.tuple(
-            PacketCodecs.BOOL,
-            Metadata::doLoop,
-            PacketCodecs.BYTE,
-            Metadata::loopCount,
-            PacketCodecs.BYTE,
-            Metadata::timeSignature,
-            Metadata::new
-        );
+        private void writeBuf(PacketByteBuf buf) {
+            buf.writeBoolean(doLoop);
+            buf.writeByte(loopCount);
+            buf.writeByte(timeSignature);
+        }
+
+        private static Metadata readBuf(PacketByteBuf buf) {
+            return new Metadata(buf.readBoolean(), buf.readByte(), buf.readByte());
+        }
 
         private Metadata(Song song) {
             this(song.getMetadata().isLoop(), song.getMetadata().getLoopMaxCount(), song.getMetadata().getTimeSignature());
@@ -60,31 +60,49 @@ public record NBSInitData(int length, List<LayerInit> layers, float tempo, int n
         ci.setKey(key);
         return ci;
     }
-    private static final PacketCodec<PacketByteBuf, CustomInstrument> CUSTOM_INSTRUMENT_PACKET_CODEC = PacketCodec.tuple(
-        PacketCodecs.STRING,
-        CustomInstrument::getName,
-        PacketCodecs.STRING,
-        CustomInstrument::getFileName,
-        PacketCodecs.VAR_INT,
-        CustomInstrument::getKey,
-        NBSInitData::makeCustomInstrument
-    );
 
-    public static final PacketCodec<PacketByteBuf, NBSInitData> PACKET_CODEC = PacketCodec.tuple(
-        PacketCodecs.VAR_INT,
-        NBSInitData::length,
-        PacketCodecs.collection(ArrayList::new, LayerInit.PACKET_CODEC),
-        NBSInitData::layers,
-        PacketCodecs.FLOAT,
-        NBSInitData::tempo,
-        PacketCodecs.VAR_INT,
-        NBSInitData::nonCustomInstrumentsCount,
-        PacketCodecs.collection(ArrayList::new, CUSTOM_INSTRUMENT_PACKET_CODEC),
-        NBSInitData::customInstruments,
-        Metadata.PACKET_CODEC,
-        NBSInitData::metadata,
-        NBSInitData::new
-    );
+    private static void writeCustomInstrument(PacketByteBuf buf, CustomInstrument ci) {
+        buf.writeString(ci.getName());
+        buf.writeString(ci.getFileName());
+        buf.writeVarInt(ci.getKey());
+    }
+
+    private static CustomInstrument readCustomInstrument(PacketByteBuf buf) {
+        return makeCustomInstrument(buf.readString(32767), buf.readString(32767), buf.readVarInt());
+    }
+
+    public void toPacket(PacketByteBuf buf) {
+        buf.writeVarInt(length);
+        buf.writeVarInt(layers.size());
+        for (var layer : layers) {
+            layer.writeBuf(buf);
+        }
+        buf.writeFloat(tempo);
+        buf.writeVarInt(nonCustomInstrumentsCount);
+        buf.writeVarInt(customInstruments.size());
+        for (var ci : customInstruments) {
+            writeCustomInstrument(buf, ci);
+        }
+        metadata.writeBuf(buf);
+    }
+
+    public static NBSInitData fromPacket(PacketByteBuf buf) {
+        int length = buf.readVarInt();
+        int layersCount = buf.readVarInt();
+        List<LayerInit> layers = new ArrayList<>(layersCount);
+        for (int i = 0; i < layersCount; i++) {
+            layers.add(LayerInit.readBuf(buf));
+        }
+        float tempo = buf.readFloat();
+        int nonCustomInstrumentsCount = buf.readVarInt();
+        int customInstrumentsCount = buf.readVarInt();
+        List<CustomInstrument> customInstruments = new ArrayList<>(customInstrumentsCount);
+        for (int i = 0; i < customInstrumentsCount; i++) {
+            customInstruments.add(readCustomInstrument(buf));
+        }
+        Metadata metadata = Metadata.readBuf(buf);
+        return new NBSInitData(length, layers, tempo, nonCustomInstrumentsCount, customInstruments, metadata);
+    }
 
     private static List<LayerInit> getLayerInits(Song song) {
         List<LayerInit> layerInits = new ArrayList<>();

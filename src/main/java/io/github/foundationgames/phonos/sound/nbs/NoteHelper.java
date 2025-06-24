@@ -2,9 +2,7 @@ package io.github.foundationgames.phonos.sound.nbs;
 
 import cz.koca2000.nbs4j.CustomInstrument;
 import io.github.foundationgames.phonos.Phonos;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.sound.SoundEvent;
@@ -147,7 +145,7 @@ public class NoteHelper {
             }
 
             for (String p : prefixes) {
-                Identifier prefixedId = Identifier.tryParse(idFromFile.getNamespace(), p + "." + idFromFile.getPath());
+                Identifier prefixedId = Identifier.of(idFromFile.getNamespace(), p + "." + idFromFile.getPath());
 
                 SoundEvent prefixedSound = soundRegistry.get(prefixedId);
                 if (prefixedSound != null) {
@@ -168,7 +166,7 @@ public class NoteHelper {
             }
 
             for (String p : prefixes) {
-                Identifier prefixedId = Identifier.tryParse(idFromName.getNamespace(), p + "." + idFromName.getPath());
+                Identifier prefixedId = Identifier.of(idFromName.getNamespace(), p + "." + idFromName.getPath());
 
                 SoundEvent prefixedSound = soundRegistry.get(prefixedId);
                 if (prefixedSound != null) {

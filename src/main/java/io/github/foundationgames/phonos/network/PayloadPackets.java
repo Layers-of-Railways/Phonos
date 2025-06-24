@@ -9,11 +9,12 @@ import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.config.serializers.NetworkConfigSerializer;
 import io.github.foundationgames.phonos.item.PortableSatelliteRadioItem;
+import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecord;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
-import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.sound.nbs.stream.NBSChunk;
 import io.github.foundationgames.phonos.sound.nbs.stream.NBSInitData;
+import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.sound.data.SoundData;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -45,6 +46,7 @@ public final class PayloadPackets {
         ServerPlayNetworking.registerGlobalReceiver(Phonos.id("request_ender_music_box_upload_session"), (server, player, handler, buf, responseSender) -> {
             var pos = buf.readBlockPos();
             var name = buf.readString(512);
+            var fileType = PhonosAudioRecord.FileType.readBuf(buf);
 
             server.execute(() -> {
                 var world = player.getWorld();
@@ -52,7 +54,7 @@ public final class PayloadPackets {
                 if (world.getBlockEntity(pos) instanceof EnderMusicBoxBlockEntity entity) {
                     Long streamId;
                     if (entity.canModifyStreams(player) && (streamId = entity.allocateStreamId(name)) != null) {
-                        ServerCustomAudio.beginUploadSession(player, streamId);
+                        ServerCustomAudio.beginUploadSession(player, streamId, fileType);
                         sendUploadStatus(player, streamId, true);
 
                         Phonos.LOG.info("Allowed player {} to upload audio at ender music box {}. Will be saved to <world>/phonos/{}",
@@ -103,12 +105,12 @@ public final class PayloadPackets {
 
         ServerPlayNetworking.registerGlobalReceiver(Phonos.id("audio_upload"), (server, player, handler, buf, responseSender) -> {
             long streamId = buf.readLong();
-            int sampleRate = buf.readInt();
+            int initData = buf.readInt();
             var samples = PhonosUtil.readBufferFromPacket(buf, ByteBuffer::allocate);
 
             boolean last = buf.readBoolean();
 
-            server.execute(() -> ServerCustomAudio.receiveUpload(server, player, streamId, sampleRate, samples, last));
+            server.execute(() -> ServerCustomAudio.receiveUpload(server, player, streamId, initData, samples, last));
         });
 
         ServerPlayNetworking.registerGlobalReceiver(Phonos.id("config_change"), ((server, player, handler, buf, responseSender) -> {
@@ -261,16 +263,26 @@ public final class PayloadPackets {
         ServerPlayNetworking.send(player, Phonos.id("set_config"), buf);
     }
 
-    // fixme cherry
     public static void sendNBSStreamStart(ServerPlayerEntity player, long streamId, NBSInitData initData) {
-        PhonosPackets.PACKETS.sendTo(player, new NBSStreamStartPacket(streamId, initData));
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeVarLong(streamId);
+        initData.toPacket(buf);
+
+        ServerPlayNetworking.send(player, Phonos.id("nbs_stream_start"), buf);
     }
 
     public static void sendNBSStreamData(ServerPlayerEntity player, long streamId, NBSChunk chunk) {
-        PhonosPackets.PACKETS.sendTo(player, new NBSStreamDataPacket(streamId, chunk));
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeVarLong(streamId);
+        chunk.toPacket(buf);
+
+        ServerPlayNetworking.send(player, Phonos.id("nbs_stream_data"), buf);
     }
 
     public static void sendNBSStreamEnd(ServerPlayerEntity player, long streamId) {
-        PhonosPackets.PACKETS.sendTo(player, new NBSStreamEndPacket(streamId));
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeVarLong(streamId);
+
+        ServerPlayNetworking.send(player, Phonos.id("nbs_stream_end"), buf);
     }
 }
