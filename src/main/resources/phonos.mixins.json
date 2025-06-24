@@ -22,7 +22,6 @@
     "client.ControllerWidgetMixin",
     "client.HeldItemRendererMixin",
     "client.OggAudioStreamMixin",
-    "client.OggAudioStreamMixin$ChannelListAccessor",
     "client.OptionListMixin",
     "client.OptionListMixin$ListGroupSeparatorEntryMixin",
     "client.OptionListMixin$OptionEntryMixin",

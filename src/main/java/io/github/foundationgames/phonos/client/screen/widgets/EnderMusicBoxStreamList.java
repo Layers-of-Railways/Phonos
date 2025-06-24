@@ -23,12 +23,7 @@ public class EnderMusicBoxStreamList extends AlwaysSelectedEntryListWidget<Ender
         return 320;
     }
 
-    @Override
-    protected int getScrollbarPositionX() { // fixme merge
-        return super.getScrollbarPositionX() + (getRowWidth() - super.getRowWidth())/2;
-    }
-
-    public static class Entry extends AlwaysSelectedEntryListWidget.Entry<io.github.foundationgames.phonos.client.screen.widgets.EnderMusicBoxStreamList.Entry> {
+    public static class Entry extends AlwaysSelectedEntryListWidget.Entry<Entry> {
         private final EnderMusicBoxBlockEntity entity;
         public final long id;
         private final String name;
