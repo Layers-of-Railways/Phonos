@@ -29,6 +29,7 @@ import net.minecraft.util.ClickType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
 public final class PayloadPackets {
@@ -217,7 +218,7 @@ public final class PayloadPackets {
         var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeLong(streamId);
         buf.writeInt(sampleRate);
-        PhonosUtil.writeBufferToPacket(buf, samples); // fixme cherry
+        buf.writeByteArray(samples);
 
         ServerPlayNetworking.send(player, Phonos.id("audio_stream_data"), buf);
     }
