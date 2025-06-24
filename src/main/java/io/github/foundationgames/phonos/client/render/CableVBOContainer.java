@@ -5,6 +5,7 @@ import io.github.foundationgames.phonos.client.model.BasicModel;
 import io.github.foundationgames.phonos.config.PhonosClientConfig;
 import io.github.foundationgames.phonos.world.sound.CableConnection;
 import io.github.foundationgames.phonos.world.sound.ConnectionCollection;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
@@ -74,7 +75,7 @@ public class CableVBOContainer {
             this.rebuild = false;
         }
 
-        if (config.cableCulling && !bounds.visible(frustum)) {
+        if (config.cableCulling && !bounds.visible(frustum) && world == MinecraftClient.getInstance().world) {
             return;
         }
 
