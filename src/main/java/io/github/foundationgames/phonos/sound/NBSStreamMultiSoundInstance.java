@@ -27,6 +27,7 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
     private final Object mutex = new Object();
     @Nullable
     private PlayerThread playerThread;
+    private boolean audible = true;
 
     protected NBSStreamMultiSoundInstance(SoundEmitterTree tree, long streamId, SoundCategory category, Random random, float volume, float pitch) {
         super(tree, Phonos.STREAMED_SOUND, category, random, volume, pitch);
@@ -44,6 +45,16 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
 
             return new InfinitelyExtendingAudioStream(null);
         });
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        var mc = MinecraftClient.getInstance();
+        var camPos = mc.gameRenderer.getCamera().getPos();
+
+        audible = camPos.squaredDistanceTo(getX(), getY(), getZ()) <= 34 * 34;
     }
 
     // Waiting logic is from Notica by LCLPYT and is licensed under the MIT license
@@ -144,11 +155,13 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
                     });
 
                     mc.executeSync(() -> {
-                        SoundManager soundManager = mc.getSoundManager();
+                        if (audible) {
+                            SoundManager soundManager = mc.getSoundManager();
 
-                        for (ChildSound sound : toPlay) {
-                            sound.initActualSound(soundManager);
-                            soundManager.play(sound);
+                            for (ChildSound sound : toPlay) {
+                                sound.initActualSound(soundManager);
+                                soundManager.play(sound);
+                            }
                         }
 
                         if (mc.world == null) {
@@ -215,7 +228,7 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
         }
     }
 
-    private class ChildSound extends AbstractSoundInstance implements TickableSoundInstance, UnlimitedPitchSoundInstance, FabricSoundInstance {
+    private class ChildSound extends AbstractSoundInstance implements RemoveNotifiedTickableSoundInstance, UnlimitedPitchSoundInstance, FabricSoundInstance {
         private int doneTicks = 0;
         private final Identifier actualSoundId;
         private @Nullable Sound actualSound;
@@ -309,6 +322,11 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
                 initActualSound(MinecraftClient.getInstance().getSoundManager());
             }
 
+            if (actualSound == SoundManager.MISSING_SOUND) {
+                //Phonos.LOG.warn("Missing sound for note: {}", actualSoundId);
+                return CompletableFuture.completedFuture(new InstantaneousAudioStream());
+            }
+
             return loader.loadStreamed(actualSound.getLocation(), repeatInstantly).thenApply(stream -> {
                 if (stream.getFormat().getChannels() == 1) {
                     monoCache.add(actualSoundId);
@@ -318,6 +336,11 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
                 }
                 return stream;
             });
+        }
+
+        @Override
+        public void setDone() {
+            this.doneTicks = 20;
         }
     }
 }
