@@ -21,7 +21,7 @@ public class InstantaneousAudioStream implements AudioStream {
     }
 
     @Override
-    public ByteBuffer getBuffer(int size) throws IOException {
+    public ByteBuffer read(int size) throws IOException {
         buffer.flip();
         return buffer;
     }
