@@ -2,6 +2,7 @@ package io.github.foundationgames.phonos;
 
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
+import io.github.foundationgames.phonos.datapack.MusicDiscOverrides;
 import io.github.foundationgames.phonos.datapack.SatelliteMigrations;
 import io.github.foundationgames.phonos.item.ItemGroupQueue;
 import io.github.foundationgames.phonos.item.PhonosItems;
@@ -11,7 +12,6 @@ import io.github.foundationgames.phonos.radio.RadioDevice;
 import io.github.foundationgames.phonos.radio.RadioStorage;
 import io.github.foundationgames.phonos.recipe.ItemGlowRecipe;
 import io.github.foundationgames.phonos.satellite_radio.SatelliteRadioStorage;
-import io.github.foundationgames.phonos.datapack.MusicDiscOverrides;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SecondaryEmitterHolder;
@@ -51,7 +51,6 @@ import net.minecraft.util.math.BlockPointer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.nio.file.Files;
 
 public class Phonos implements ModInitializer {
@@ -105,7 +104,7 @@ public class Phonos implements ModInitializer {
                 if (!Files.exists(path)) Files.createDirectory(path);
 
                 ServerCustomAudio.load(path);
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 Phonos.LOG.error("Error loading custom audio files", ex);
             }
         });

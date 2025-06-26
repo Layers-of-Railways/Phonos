@@ -225,15 +225,22 @@ public class ServerCustomAudio {
         for (final var hexStr : files) {
             final var path = folder.resolve(hexStr + FILE_EXT);
             FILESYS_POOL.submit(() -> {
-                long id = Long.parseUnsignedLong(hexStr, 16);
+                try {
+                    Phonos.LOG.info("Starting to load custom audio file {}...", hexStr + FILE_EXT);
+                    long id = Long.parseUnsignedLong(hexStr, 16);
 
-                try (var in = Files.newInputStream(path)) {
-                    var aud = PhonosAudioRecord.read(in);
+                    try (var in = Files.newInputStream(path)) {
+                        var aud = PhonosAudioRecord.read(in);
 
-                    SAVED.put(id, aud);
-                    TOTAL_SAVED_SIZE += aud.getDataSize();
-                } catch (IOException ex) {
-                    Phonos.LOG.error("Error loading custom audio file {}: {}", path.getFileName(), ex);
+                        SAVED.put(id, aud);
+                        TOTAL_SAVED_SIZE += aud.getDataSize();
+                    } catch (IOException ex) {
+                        Phonos.LOG.error("Error loading custom audio file {}: {}", path.getFileName(), ex);
+                    }
+
+                    Phonos.LOG.info("Loaded custom audio file {}", hexStr + FILE_EXT);
+                } catch (Exception ex) {
+                    Phonos.LOG.error("Error parsing custom audio file {}", hexStr + FILE_EXT, ex);
                 }
 
                 if (loadedDataCount.incrementAndGet() >= foundDataCount) {
