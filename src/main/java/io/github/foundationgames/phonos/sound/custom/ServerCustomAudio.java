@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServerCustomAudio {
@@ -190,7 +191,7 @@ public class ServerCustomAudio {
         }
     }
 
-    public static void load(Path folder) throws IOException {
+    public static void load(Path folder, MinecraftServer server) throws IOException {
         TOTAL_SAVED_SIZE = 0;
         final var startTime = Instant.now();
 
@@ -215,6 +216,7 @@ public class ServerCustomAudio {
 
         final int foundDataCount = files.size();
         var loadedDataCount = new AtomicInteger(0);
+        var anyFailed = new AtomicBoolean();
 
         if (foundDataCount == 0) {
             LOADED = true;
@@ -234,13 +236,20 @@ public class ServerCustomAudio {
 
                         SAVED.put(id, aud);
                         TOTAL_SAVED_SIZE += aud.getDataSize();
+
+                        Phonos.LOG.info("Loaded custom audio file {}", hexStr + FILE_EXT);
                     } catch (IOException ex) {
                         Phonos.LOG.error("Error loading custom audio file {}: {}", path.getFileName(), ex);
+                        anyFailed.set(true);
                     }
-
-                    Phonos.LOG.info("Loaded custom audio file {}", hexStr + FILE_EXT);
                 } catch (Exception ex) {
-                    Phonos.LOG.error("Error parsing custom audio file {}", hexStr + FILE_EXT, ex);
+                    Phonos.LOG.error("Error parsing custom audio file {}, saving a backup for debugging", hexStr + FILE_EXT, ex);
+
+                    try {
+                        Files.copy(path, path.resolveSibling(hexStr + FILE_EXT + ".bak"));
+                    } catch (IOException e) {
+                        Phonos.LOG.error("Error saving backup for custom audio file {}", hexStr + FILE_EXT, e);
+                    }
                 }
 
                 if (loadedDataCount.incrementAndGet() >= foundDataCount) {
@@ -248,6 +257,11 @@ public class ServerCustomAudio {
 
                     var dur = Duration.between(startTime, Instant.now());
                     Phonos.LOG.info("Loaded {} bytes of saved audio from <world>/phonos/ in {} ms", TOTAL_SAVED_SIZE, dur.toMillis());
+
+                    if (anyFailed.get() && PhonosServerConfig.get(server.getOverworld()).shutdownOnAudioLoadError) {
+                        Phonos.LOG.error("Stopping server due to errors while loading custom audio files.");
+                        server.shutdown();
+                    }
                 }
             });
         }

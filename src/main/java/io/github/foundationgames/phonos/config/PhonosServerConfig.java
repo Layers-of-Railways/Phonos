@@ -56,6 +56,11 @@ public class PhonosServerConfig {
     @IntSlider(min = 0, max = 100*1000, step = 100) // max 100MB
     public int uploadLimitKB = 0;
 
+    @SerialEntry(comment = "Shutdown server if Ender Music Box data loading fails")
+    @AutoGen(category = "general", group = "ender_music_box")
+    @TickBox
+    public boolean shutdownOnAudioLoadError = true;
+
     @SerialEntry(comment = "Base Radio Range [16, 4096]")
     @AutoGen(category = "radio")
     @IntField(min = 16, max = 4096)

@@ -103,7 +103,7 @@ public class Phonos implements ModInitializer {
                 var path = PhonosUtil.getCustomSoundFolder(e);
                 if (!Files.exists(path)) Files.createDirectory(path);
 
-                ServerCustomAudio.load(path);
+                ServerCustomAudio.load(path, e);
             } catch (Exception ex) {
                 Phonos.LOG.error("Error loading custom audio files", ex);
             }
