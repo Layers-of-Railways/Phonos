@@ -244,6 +244,7 @@ public class ServerCustomAudio {
                     }
                 } catch (Exception ex) {
                     Phonos.LOG.error("Error parsing custom audio file {}, saving a backup for debugging", hexStr + FILE_EXT, ex);
+                    anyFailed.set(true);
 
                     try {
                         Files.copy(path, path.resolveSibling(hexStr + FILE_EXT + ".bak"));
@@ -260,7 +261,7 @@ public class ServerCustomAudio {
 
                     if (anyFailed.get() && PhonosServerConfig.get(server.getOverworld()).shutdownOnAudioLoadError) {
                         Phonos.LOG.error("Stopping server due to errors while loading custom audio files.");
-                        server.shutdown();
+                        server.execute(server::shutdown);
                     }
                 }
             });
