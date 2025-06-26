@@ -92,7 +92,7 @@ public final class ClientPayloadPackets {
                 if (ok) {
                     ClientCustomAudioUploader.sendUploadPackets(id);
                 } else {
-                    Phonos.LOG.warn("Denied upload for sound " + Long.toHexString(id));
+                    Phonos.LOG.warn("Denied upload for sound {}", Long.toHexString(id));
                 }
             });
         });
@@ -107,6 +107,7 @@ public final class ClientPayloadPackets {
                 }
 
                 ClientCustomAudioUploader.cancelUpload(id);
+                Phonos.LOG.warn("Upload canceled by server for sound {}: {}", Long.toHexString(id), message.getString());
             });
         });
 

@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.block.entity;
 
+import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.EnderMusicBoxBlock;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
@@ -8,11 +9,9 @@ import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecord;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
-import io.github.foundationgames.phonos.sound.stream.ServerOutgoingStreamHandler;
 import io.github.foundationgames.phonos.util.UniqueId;
 import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
-import io.github.foundationgames.phonos.world.sound.data.StreamSoundData;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.block.BlockState;
@@ -174,27 +173,30 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
 
         if (deleteCooldown > 0) {
             deleteCooldown--;
-        } else {
+        } else if (ServerCustomAudio.loaded()) {
             for (int i = 0; i < this.streamIds.size(); i++) {
                 long streamId = this.streamIds.getLong(i);
 
-                if (ServerCustomAudio.loaded() && !ServerCustomAudio.hasSaved(streamId) && !ServerCustomAudio.UPLOADING.containsKey(streamId)) {
-                    this.streamIds.removeLong(i);
-                    this.streamNames.remove(i);
+                if (ServerCustomAudio.hasSaved(streamId)) continue;
+                if (ServerCustomAudio.UPLOADING.containsKey(streamId)) continue;
+                if (ServerCustomAudio.UNINITIALIZED_SESSIONS.contains(streamId)) continue;
 
-                    if (playingIndex == i) {
-                        this.stop();
-                        if (powered)
-                            this.play(playingIndex);
-                    } else if (playingIndex > i) {
-                        playingIndex--;
-                    }
+                Phonos.LOG.warn("Removing stream id {} from Ender Music Box at ({}), because it is neither saved nor being uploaded", streamId, this.getPos().toShortString());
+                this.streamIds.removeLong(i);
+                this.streamNames.remove(i);
 
-                    i--;
-
-                    sync();
-                    markDirty();
+                if (playingIndex == i) {
+                    this.stop();
+                    if (powered)
+                        this.play(playingIndex);
+                } else if (playingIndex > i) {
+                    playingIndex--;
                 }
+
+                i--;
+
+                sync();
+                markDirty();
             }
         }
     }

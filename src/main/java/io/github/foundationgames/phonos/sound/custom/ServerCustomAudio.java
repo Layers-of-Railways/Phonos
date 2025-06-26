@@ -5,8 +5,6 @@ import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import it.unimi.dsi.fastutil.longs.*;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -38,6 +36,9 @@ public class ServerCustomAudio {
 
     private static final Map<UUID, UploadSession> UPLOAD_SESSIONS = Collections.synchronizedMap(new HashMap<>());
 
+    // this exists so that Ender Music Boxes don't delete streams that have a session but haven't sent any data yet
+    public static final LongSet UNINITIALIZED_SESSIONS = LongSets.synchronize(new LongOpenHashSet());
+
     private static volatile boolean LOADED = false;
 
     public static boolean hasSaved(long id) {
@@ -58,6 +59,7 @@ public class ServerCustomAudio {
 
     public static void beginUploadSession(ServerPlayerEntity player, long streamId, PhonosAudioRecord.FileType fileType) {
         UPLOAD_SESSIONS.put(player.getUuid(), new UploadSession(streamId, fileType));
+        UNINITIALIZED_SESSIONS.add(streamId);
     }
 
     public static void endUploadSession(UUID player) {
@@ -65,6 +67,7 @@ public class ServerCustomAudio {
         if (session == null) return;
         long id = session.streamId;
         UPLOADING.remove(id);
+        UNINITIALIZED_SESSIONS.remove(id); // paranoia
     }
 
     public static void receiveUpload(MinecraftServer srv, ServerPlayerEntity player, long id, int initData, ByteBuffer samples, boolean last) {
@@ -76,6 +79,7 @@ public class ServerCustomAudio {
             var session = UPLOAD_SESSIONS.get(player.getUuid());
             if (session.streamId != id) return;
             var aud = UPLOADING.computeIfAbsent(id, k -> session.fileType.createBuilder(initData));
+            UNINITIALIZED_SESSIONS.remove(id);
             aud.pushUploadBytes(samples);
 
             int maxAud = PhonosServerConfig.get(srv.getOverworld()).uploadLimitKB * 1000;
@@ -128,6 +132,7 @@ public class ServerCustomAudio {
         UPLOADING.clear();
         SAVED.clear();
         UPLOAD_SESSIONS.clear();
+        UNINITIALIZED_SESSIONS.clear();
         LOADED = false;
     }
 
