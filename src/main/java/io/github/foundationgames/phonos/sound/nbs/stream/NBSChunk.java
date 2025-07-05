@@ -39,8 +39,7 @@ public record NBSChunk(HashMap<Integer, Note>[] layerUpdates, boolean isLast) {
 
     private static final PacketCodec<PacketByteBuf, HashMap<Integer, Note>[]> LAYER_UPDATES_PACKET_CODEC = PhonosPacketCodecs.array(
         HashMap.class,
-        NOTE_MAP_PACKET_CODEC,
-        255
+        NOTE_MAP_PACKET_CODEC
     );
 
     public static final PacketCodec<PacketByteBuf, NBSChunk> PACKET_CODEC = PacketCodec.tuple(
