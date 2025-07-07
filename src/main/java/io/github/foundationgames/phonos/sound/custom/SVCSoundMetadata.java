@@ -52,4 +52,15 @@ public class SVCSoundMetadata {
     public @NotNull UUID getPlayerId() {
         return playerId;
     }
+
+    @Override
+    public String toString() {
+        return "SVCSoundMetadata{" +
+            "position=" + position +
+            ", distance=" + distance +
+            ", category='" + category + '\'' +
+            ", volume=" + volume +
+            ", playerId=" + playerId +
+            '}';
+    }
 }

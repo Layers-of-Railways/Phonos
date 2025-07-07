@@ -25,6 +25,7 @@ import io.github.foundationgames.phonos.sound.nbs.NoteHelper;
 import io.github.foundationgames.phonos.sound.nbs.stream.ClientIncomingNBSStreamHandler;
 import io.github.foundationgames.phonos.sound.stream.ClientIncomingStreamHandler;
 import io.github.foundationgames.phonos.util.PhonosUtil;
+import io.github.foundationgames.phonos.util.compat.PhonosVoicechatProxy;
 import io.github.foundationgames.phonos.world.command.PhonosClientCommands;
 import io.github.foundationgames.phonos.world.sound.entity.HeadsetSoundSource;
 import net.fabricmc.api.ClientModInitializer;
@@ -155,6 +156,7 @@ public class PhonosClient implements ClientModInitializer {
         });
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             NoteHelper.setRegistryManager(null);
+            PhonosVoicechatProxy.cleanupOnDisconnect();
         });
 
         ClientTickEvents.END_WORLD_TICK.register(world -> {

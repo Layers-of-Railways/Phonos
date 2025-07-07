@@ -8,6 +8,7 @@ import io.github.foundationgames.phonos.mixin_interfaces.IMicrophoneHoldingServe
 import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
+import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.util.UniqueId;
 import io.github.foundationgames.phonos.util.compat.PhonosVoicechatProxy;
 import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
@@ -106,7 +107,7 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
             this.playingSound = null;
 
             PhonosVoicechatProxy.stopStreaming(this.streamId);
-            Phonos.LOG.info("Stopped microphone stream for player {} with stream ID {}", this.serverPlayer, this.streamId);
+            Phonos.LOG.info("Stopped microphone stream for player {} with stream ID {}", PhonosUtil.weakRefToString(this.serverPlayer), this.streamId);
 
             if (this.serverPlayer != null) {
                 ServerPlayerEntity player = this.serverPlayer.get();
@@ -149,6 +150,9 @@ public class MicrophoneBaseBlockEntity extends AbstractOutputBlockEntity impleme
                 player == null || player.isRemoved() ||
                     !canContinue(player)
             ) {
+                Phonos.LOG.info("Stopping microphone stream for player {} with stream ID {} because they no longer exist or are too far away",
+                    PhonosUtil.weakRefToString(this.serverPlayer), this.streamId);
+
                 this.stop();
                 ((MicrophoneBaseBlock) state.getBlock()).updatePower(world, pos);
             }
