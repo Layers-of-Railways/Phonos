@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.sound.custom;
 
+import io.github.foundationgames.phonos.block.entity.EnderMusicBoxBlockEntity;
 import io.github.foundationgames.phonos.sound.nbs.NBSBuilder;
 import io.github.foundationgames.phonos.sound.nbs.NBSRecord;
 import io.github.foundationgames.phonos.sound.stream.AudioDataQueue;
@@ -19,7 +20,7 @@ import java.nio.ByteBuffer;
 
 public interface PhonosAudioRecord<T extends PhonosAudioRecord<T>> {
     int getPlayTicks();
-    SoundData startPlaying(long emitterId, long streamId, SoundCategory category, float volume, float pitch, MinecraftServer server);
+    SoundData startPlaying(long emitterId, long streamId, SoundCategory category, float volume, float pitch, MinecraftServer server, EnderMusicBoxBlockEntity holder);
     void stopPlaying(long streamId, MinecraftServer server);
 
     T copy();

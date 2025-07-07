@@ -105,6 +105,7 @@ public class ClientSoundStorage extends SoundStorage {
                 new SVCMultiSoundInstance(list, data.streamId, data.soundCategory, random, data.volume, data.pitch));
         });
         registerProvider(SoundDataTypes.NBS_STREAM, (data, list, random) ->
-            new NBSStreamMultiSoundInstance(list, data.streamId, data.soundCategory, random, data.volume, data.pitch));
+            new NBSStreamMultiSoundInstance(list, data.streamId, data.soundCategory, random, data.volume, data.pitch)
+                .withSkippedTicks(data.getSkippedTicks()));
     }
 }

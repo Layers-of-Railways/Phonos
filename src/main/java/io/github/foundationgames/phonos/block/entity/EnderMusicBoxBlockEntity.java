@@ -12,6 +12,7 @@ import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
 import io.github.foundationgames.phonos.util.UniqueId;
 import io.github.foundationgames.phonos.world.sound.InputPlugPoint;
 import io.github.foundationgames.phonos.world.sound.block.BlockConnectionLayout;
+import io.github.foundationgames.phonos.world.sound.block.ResumableSoundHolder;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.block.BlockState;
@@ -37,7 +38,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
-public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
+public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity implements ResumableSoundHolder {
     public static final BlockConnectionLayout OUTPUT_LAYOUT = new BlockConnectionLayout()
         .addPoint(-8, -4, 0, Direction.WEST)
         .addPoint(8, -4, 0, Direction.EAST)
@@ -54,6 +55,8 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
     private int playingTimer = 0;
     private int playingIndex = 0;
 
+    private int playingSoundId = 1;
+
     private int deleteCooldown = 0;
 
     private Boolean lastPowered = null;
@@ -69,6 +72,16 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
         this.s2cStreamId = UniqueId.obf(this.emitterId());
     }
 
+    @Override
+    public int getPlayingSoundId() {
+        return playingSoundId;
+    }
+
+    @Override
+    public long getSkippedTicks() {
+        return playDuration - playingTimer;
+    }
+
     public void play(int index) {
         if (index < 0 || index >= this.streamIds.size()) return;
         long streamId = this.streamIds.getLong(index);
@@ -79,7 +92,7 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
             }
 
             var aud = Objects.requireNonNull(ServerCustomAudio.loadSaved(streamId));
-            var soundData = aud.startPlaying(this.emitterId(), this.s2cStreamId, SoundCategory.MASTER, 2, 1, sWorld.getServer());
+            var soundData = aud.startPlaying(this.emitterId(), this.s2cStreamId, SoundCategory.MASTER, 2, 1, sWorld.getServer(), this);
 
             this.playingSound = new SoundEmitterTree(this.emitterId);
             SoundStorage.getInstance(this.world).play(this.world, soundData, this.playingSound);
@@ -104,6 +117,7 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity {
         }
 
         this.playDuration = this.playingTimer = 0;
+        this.playingSoundId++;
     }
 
     public void requestPlay(int power) {

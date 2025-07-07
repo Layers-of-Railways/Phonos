@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.sound.stream;
 
+import io.github.foundationgames.phonos.block.entity.EnderMusicBoxBlockEntity;
 import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecord;
 import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecordBuilder;
 import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecordUploader;
@@ -52,7 +53,7 @@ public class AudioDataQueue implements PhonosAudioRecord<AudioDataQueue>, Phonos
     }
 
     @Override
-    public SoundData startPlaying(long emitterId, long streamId, SoundCategory category, float volume, float pitch, MinecraftServer server) {
+    public SoundData startPlaying(long emitterId, long streamId, SoundCategory category, float volume, float pitch, MinecraftServer server, EnderMusicBoxBlockEntity holder) {
         ServerOutgoingStreamHandler.startStream(streamId, this, server);
         return StreamSoundData.create(emitterId, streamId, category, volume, pitch);
     }

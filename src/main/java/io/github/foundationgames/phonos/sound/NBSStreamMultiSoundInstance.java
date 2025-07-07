@@ -74,9 +74,11 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
             this.setName("Phonos NBS Player Thread " + NBSStreamMultiSoundInstance.this.streamId);
             this.setDaemon(true);
 
-            this.tick = (int) NBSStreamMultiSoundInstance.this.getSkippedTicks();
+            float notesPerSecond = song.apply(s -> s.getTempo(0));
 
-            double exactTempo = 1000. / song.apply(s -> s.getTempo(0));
+            this.tick = (int) (notesPerSecond / 20. * NBSStreamMultiSoundInstance.this.getSkippedTicks());
+
+            double exactTempo = 1000. / notesPerSecond;
             this.period = (int) Math.ceil(exactTempo);
             this.remainder = Math.max(0, period - exactTempo);
         }
