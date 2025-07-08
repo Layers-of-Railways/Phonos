@@ -46,6 +46,9 @@
     "command.phonos.ender_music_box.list.info": "Found %s songs, total size %s KB",
     "command.phonos.ender_music_box.list.none": "No songs.",
 
+    "command.phonos.resync.success": "Resyncing Phonos audio to self.",
+    "command.phonos.resync.success.plural": "Resyncing Phonos audio to %s players.",
+
     "argument.phonos.idList.invalid": "Invalid ID!",
 
     "block.phonos.loudspeaker": "Loudspeaker",

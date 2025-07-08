@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ClientSoundStorage extends SoundStorage {
+public class ClientSoundStorage extends SoundStorage implements SoundStorage.AllStoppable {
     private static final Map<SoundData.Type<?>, SoundInstanceFactory<SoundData>> CLIENT_SOUND_PROVIDERS = new HashMap<>();
     private final Long2ObjectMap<SoundInstance> playingSounds = new Long2ObjectOpenHashMap<>();
     private final Set<SoundEmitterTree> activeEmitterTrees = new HashSet<>();
@@ -63,6 +63,18 @@ public class ClientSoundStorage extends SoundStorage {
         }
 
         activeEmitterTrees.removeIf(tree -> tree.rootId == soundUniqueId);
+    }
+
+    @Override
+    public void stopAll() {
+        var soundMgr = MinecraftClient.getInstance().getSoundManager();
+        for (var sound : playingSounds.values()) {
+            if (soundMgr.isPlaying(sound)) {
+                soundMgr.stop(sound);
+            }
+        }
+        playingSounds.clear();
+        activeEmitterTrees.clear();
     }
 
     @Override

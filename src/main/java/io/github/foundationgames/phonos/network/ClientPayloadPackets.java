@@ -10,6 +10,7 @@ import io.github.foundationgames.phonos.client.screen.EnderMusicBoxScreen;
 import io.github.foundationgames.phonos.client.screen.LaunchSatelliteStationScreen;
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.config.serializers.NetworkConfigSerializer;
+import io.github.foundationgames.phonos.sound.ResyncManager;
 import io.github.foundationgames.phonos.sound.SoundStorage;
 import io.github.foundationgames.phonos.sound.custom.ClientCustomAudioUploader;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
@@ -176,6 +177,13 @@ public final class ClientPayloadPackets {
 
             client.execute(() -> ClientIncomingNBSStreamHandler.endStream(streamId));
         });
+
+        ClientPlayNetworking.registerGlobalReceiver(Phonos.id("prepare_for_resync"), (client, handler, buf, responseSender) -> {
+            client.execute(() -> {
+                ResyncManager.prepareClient();
+                sendReadyForResync();
+            });
+        });
     }
 
     public static void sendFakeCreativeSlotClick(ItemStack onto, ItemStack with, ClickType click) {
@@ -237,5 +245,10 @@ public final class ClientPayloadPackets {
         buf.writeString(channel);
 
         ClientPlayNetworking.send(Phonos.id("configure_portable_satellite_radio_channel"), buf);
+    }
+
+    public static void sendReadyForResync() {
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        ClientPlayNetworking.send(Phonos.id("ready_for_resync"), buf);
     }
 }

@@ -9,6 +9,7 @@ import io.github.foundationgames.phonos.block.entity.SatelliteStationBlockEntity
 import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.config.serializers.NetworkConfigSerializer;
 import io.github.foundationgames.phonos.item.PortableSatelliteRadioItem;
+import io.github.foundationgames.phonos.sound.ResyncManager;
 import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecord;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.sound.emitter.SoundEmitterTree;
@@ -170,6 +171,10 @@ public final class PayloadPackets {
                 }
             });
         });
+
+        ServerPlayNetworking.registerGlobalReceiver(Phonos.id("ready_for_resync"), (server, player, handler, buf, responseSender) -> {
+            server.execute(() -> ResyncManager.resyncServer(player));
+        });
     }
 
     public static void sendSoundPlay(ServerPlayerEntity player, SoundData data, SoundEmitterTree tree) {
@@ -292,5 +297,10 @@ public final class PayloadPackets {
         buf.writeVarLong(streamId);
 
         ServerPlayNetworking.send(player, Phonos.id("nbs_stream_end"), buf);
+    }
+
+    public static void sendPrepareForResync(ServerPlayerEntity player) {
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        ServerPlayNetworking.send(player, Phonos.id("prepare_for_resync"), buf);
     }
 }
