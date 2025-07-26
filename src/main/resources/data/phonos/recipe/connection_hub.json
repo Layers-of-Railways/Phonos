@@ -1,0 +1,18 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"ingredients": [
+		{
+			"tag": "server:audio_cables"
+		},
+		{
+			"tag": "server:audio_cables"
+		},
+		{
+			"tag": "minecraft:wooden_slabs"
+		}
+	],
+	"result": {
+		"id": "phonos:connection_hub",
+		"count": 1
+	}
+}

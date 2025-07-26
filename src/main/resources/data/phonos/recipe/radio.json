@@ -1,0 +1,23 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"m",
+		"i",
+		"c"
+	],
+	"key": {
+		"m": {
+			"item": "chipped:woven_iron_bars"
+		},
+		"i": {
+			"item": "chipped:iron_bars_top"
+		},
+		"c": {
+			"item": "phonos:connection_hub"
+		}
+	},
+	"result": {
+		"id": "phonos:radio_transceiver",
+		"count": 1
+	}
+}
