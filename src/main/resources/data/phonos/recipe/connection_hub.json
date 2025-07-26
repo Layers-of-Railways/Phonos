@@ -2,10 +2,10 @@
 	"type": "minecraft:crafting_shapeless",
 	"ingredients": [
 		{
-			"tag": "server:audio_cables"
+			"tag": "phonos:audio_cables"
 		},
 		{
-			"tag": "server:audio_cables"
+			"tag": "phonos:audio_cables"
 		},
 		{
 			"tag": "minecraft:wooden_slabs"
