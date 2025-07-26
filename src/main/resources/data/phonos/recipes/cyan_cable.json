@@ -1,0 +1,15 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"ingredients": [
+		{
+			"item": "minecraft:cyan_dye"
+		},
+		{
+			"item": "phonos:audio_cable"
+		}
+	],
+	"result": {
+		"id": "phonos:cyan_audio_cable",
+		"count": 1
+	}
+}

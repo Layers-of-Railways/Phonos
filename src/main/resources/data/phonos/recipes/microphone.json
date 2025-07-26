@@ -1,0 +1,23 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"i",
+		"g",
+		"c"
+	],
+	"key": {
+		"i": {
+			"item": "minecraft:iron_ingot"
+		},
+		"g": {
+			"item": "minecraft:gold_ingot"
+		},
+		"c": {
+			"item": "phonos:connection_hub"
+		}
+	},
+	"result": {
+		"id": "phonos:microphone_base",
+		"count": 1
+	}
+}
