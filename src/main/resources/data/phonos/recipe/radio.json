@@ -7,10 +7,10 @@
 	],
 	"key": {
 		"m": {
-			"item": "chipped:woven_iron_bars"
+			"item": "minecraft:iron_bars"
 		},
 		"i": {
-			"item": "chipped:iron_bars_top"
+			"item": "minecraft:iron_bars"
 		},
 		"c": {
 			"item": "phonos:connection_hub"
