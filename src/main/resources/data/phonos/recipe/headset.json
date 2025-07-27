@@ -9,7 +9,7 @@
 			"item": "phonos:loudspeaker"
 		},
 		"-": {
-			"item": "chipped:iron_bars_top"
+			"item": "minecraft:iron_bars"
 		}
 	},
 	"result": {
