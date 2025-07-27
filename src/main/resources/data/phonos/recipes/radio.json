@@ -2,15 +2,12 @@
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
 		"m",
-		"i",
+		"m",
 		"c"
 	],
 	"key": {
 		"m": {
-			"item": "chipped:woven_iron_bars"
-		},
-		"i": {
-			"item": "chipped:iron_bars_top"
+			"item": "minecraft:iron_bars"
 		},
 		"c": {
 			"item": "phonos:connection_hub"
