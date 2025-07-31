@@ -106,7 +106,7 @@ public class CableRenderer {
                 buildCableGeometry(conn, matrices, buffer, segments, length, detail, startLight, endLight, overlay);
             }
         } else { // Connection must be rendered immediate
-            if (bounds != null && config.cableCulling) {
+            if (bounds != null && config.cableCulling && world == MinecraftClient.getInstance().world) {
                 bounds.fitTwo(cableStPt.x, cableStPt.y, cableStPt.z, cableEnPt.x, cableEnPt.y, cableEnPt.z);
 
                 if (!bounds.visible(frustum)) {

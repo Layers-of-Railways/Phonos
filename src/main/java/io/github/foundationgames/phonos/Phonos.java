@@ -55,7 +55,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
-import java.io.IOException;
 import java.nio.file.Files;
 
 public class Phonos implements ModInitializer {
@@ -109,8 +108,8 @@ public class Phonos implements ModInitializer {
                 var path = PhonosUtil.getCustomSoundFolder(e);
                 if (!Files.exists(path)) Files.createDirectory(path);
 
-                ServerCustomAudio.load(path);
-            } catch (IOException ex) {
+                ServerCustomAudio.load(path, e);
+            } catch (Exception ex) {
                 Phonos.LOG.error("Error loading custom audio files", ex);
             }
         });

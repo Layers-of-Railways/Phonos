@@ -29,7 +29,7 @@ public record AudioUploadStatusPacket(long uploadId, boolean ok) implements S2CP
         if (ok) {
             ClientCustomAudioUploader.sendUploadPackets(uploadId);
         } else {
-            Phonos.LOG.warn("Denied upload for sound " + Long.toHexString(uploadId));
+            Phonos.LOG.warn("Denied upload for sound {}", Long.toHexString(uploadId));
         }
     }
 }

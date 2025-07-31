@@ -22,6 +22,7 @@ public class PhonosPackets {
         .s2c(NBSStreamStartPacket.class, NBSStreamStartPacket.PACKET_CODEC)
         .s2c(NBSStreamDataPacket.class, NBSStreamDataPacket.PACKET_CODEC)
         .s2c(NBSStreamEndPacket.class, NBSStreamEndPacket.PACKET_CODEC)
+        .s2c(PrepareForResyncPacket.class, PrepareForResyncPacket.PACKET_CODEC)
 
         .c2s(FakeCreativeSlotClickPacket.class, FakeCreativeSlotClickPacket.PACKET_CODEC)
         .c2s(RequestEnderMusicBoxUploadSessionPacket.class, RequestEnderMusicBoxUploadSessionPacket.PACKET_CODEC)
@@ -30,5 +31,6 @@ public class PhonosPackets {
         .c2s(AudioUploadPacket.class, AudioUploadPacket.PACKET_CODEC)
         .c2s(ConfigChangePacket.class, ConfigChangePacket.PACKET_CODEC)
         .c2s(ConfigurePortableSatelliteRadioChannelPacket.class, ConfigurePortableSatelliteRadioChannelPacket.PACKET_CODEC)
+        .c2s(ReadyForResyncPacket.class, ReadyForResyncPacket.PACKET_CODEC)
         .build();
 }

@@ -38,4 +38,8 @@ public final class ClientPayloadPackets {
     public static void sendConfigurePortableSatelliteRadioChannel(String channel) {
         PhonosPackets.PACKETS.send(new ConfigurePortableSatelliteRadioChannelPacket(channel));
     }
+
+    public static void sendReadyForResync() {
+        PhonosPackets.PACKETS.send(new ReadyForResyncPacket());
+    }
 }

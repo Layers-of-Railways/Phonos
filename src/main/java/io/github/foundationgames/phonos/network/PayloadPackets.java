@@ -80,4 +80,8 @@ public final class PayloadPackets {
     public static void sendNBSStreamEnd(ServerPlayerEntity player, long streamId) {
         PhonosPackets.PACKETS.sendTo(player, new NBSStreamEndPacket(streamId));
     }
+
+    public static void sendPrepareForResync(ServerPlayerEntity player) {
+        PhonosPackets.PACKETS.sendTo(player, new PrepareForResyncPacket());
+    }
 }

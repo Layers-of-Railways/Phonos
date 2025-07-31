@@ -2,14 +2,11 @@
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
 		"m",
-		"i",
+		"m",
 		"c"
 	],
 	"key": {
 		"m": {
-			"item": "minecraft:iron_bars"
-		},
-		"i": {
 			"item": "minecraft:iron_bars"
 		},
 		"c": {

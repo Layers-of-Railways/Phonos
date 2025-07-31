@@ -43,6 +43,13 @@ public class ServerOutgoingStreamHandler {
         }
     }
 
+    public static void prepareForResync(ServerPlayerEntity player) {
+        UUID uuid = player.getUuid();
+        for (var stream : STREAMS.values()) {
+            stream.listeners.remove(uuid);
+        }
+    }
+
     public static class Streaming {
         private int tickDelay = -3;
         private final Set<UUID> listeners = new HashSet<>();

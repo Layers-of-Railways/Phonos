@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -43,6 +44,13 @@ public class ServerOutgoingNBSStreamHandler {
         }
     }
 
+    public static void prepareForResync(ServerPlayerEntity player) {
+        UUID uuid = player.getUuid();
+        for (var stream : STREAMS.values()) {
+            stream.listeners.remove(uuid);
+        }
+    }
+
     public static class Streaming {
         private static final int CHUNK_LENGTH_SECONDS = 5;
 
@@ -53,7 +61,7 @@ public class ServerOutgoingNBSStreamHandler {
 
         private final NBSInitData initData;
         private final int tickInterval;
-        private final Deque<NBSChunk> chunks = new ArrayDeque<>();
+        private final Deque<@NotNull NBSChunk> chunks = new ArrayDeque<>();
 
         // keep this around for resuming
         private @Nullable NBSChunk lastChunk;

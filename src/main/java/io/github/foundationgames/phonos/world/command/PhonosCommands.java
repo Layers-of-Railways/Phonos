@@ -7,6 +7,7 @@ import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.entity.AbstractOutputBlockEntity;
 import io.github.foundationgames.phonos.block.entity.EnderMusicBoxBlockEntity;
 import io.github.foundationgames.phonos.radio.RadioStorage;
+import io.github.foundationgames.phonos.sound.ResyncManager;
 import io.github.foundationgames.phonos.sound.custom.ServerCustomAudio;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.RadarPoints;
@@ -15,6 +16,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.BlockPosArgumentType;
+import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.server.command.ServerCommandSource;
@@ -40,7 +42,8 @@ public class PhonosCommands {
 
             phonos
                 .then($radar())
-                .then($ender_music_box());
+                .then($ender_music_box())
+                .then($resync());
 
             if (Phonos.DEBUG) {
                 phonos.then($debug());
@@ -105,6 +108,25 @@ public class PhonosCommands {
                     ctx.getSource()
                 ))
             );
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> $resync() {
+        return literal("resync")
+            .executes(ctx -> {
+                ResyncManager.prepareServer(ctx.getSource().getPlayerOrThrow());
+                ctx.getSource().sendFeedback(() -> Text.translatable("command.phonos.resync.success"), false);
+                return 1;
+            })
+            .then(argument("player", EntityArgumentType.players())
+                .requires(src -> src.hasPermissionLevel(2))
+                .executes(ctx -> {
+                    var players = EntityArgumentType.getPlayers(ctx, "player");
+                    for (var player : players) {
+                        ResyncManager.prepareServer(player);
+                    }
+                    ctx.getSource().sendFeedback(() -> Text.translatable("command.phonos.resync.success.plural", players.size()), false);
+                    return players.size();
+                }));
     }
 
     private static LiteralArgumentBuilder<ServerCommandSource> $debug() {

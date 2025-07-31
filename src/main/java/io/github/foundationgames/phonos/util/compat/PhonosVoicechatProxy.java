@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+@SuppressWarnings("Convert2MethodRef")
 public class PhonosVoicechatProxy {
     public static boolean isLoaded() {
         return FabricLoader.getInstance().isModLoaded("voicechat");
@@ -59,5 +60,10 @@ public class PhonosVoicechatProxy {
     @Environment(EnvType.CLIENT)
     public static void endClientMicrophoneStream(UUID channelId, long streamId) {
         executeIfLoaded(() -> () -> PhonosVoicechatPlugin.endClientMicrophoneStream(channelId, streamId));
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void cleanupOnDisconnect() {
+        executeIfLoaded(() -> () -> PhonosVoicechatPlugin.cleanupOnDisconnect());
     }
 }

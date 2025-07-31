@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.sound;
 
+import com.mojang.logging.LogUtils;
 import cz.koca2000.nbs4j.CustomInstrument;
 import cz.koca2000.nbs4j.Layer;
 import cz.koca2000.nbs4j.Note;
@@ -18,6 +19,7 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -27,6 +29,9 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
     private final Object mutex = new Object();
     @Nullable
     private PlayerThread playerThread;
+    private boolean audible = true;
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     protected NBSStreamMultiSoundInstance(SoundEmitterTree tree, long streamId, SoundCategory category, Random random, float volume, float pitch) {
         super(tree, Phonos.STREAMED_SOUND, category, random, volume, pitch);
@@ -46,6 +51,16 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
         });
     }
 
+    @Override
+    public void tick() {
+        super.tick();
+
+        var mc = MinecraftClient.getInstance();
+        var camPos = mc.gameRenderer.getCamera().getPos();
+
+        audible = camPos.squaredDistanceTo(getX(), getY(), getZ()) <= 34 * 34;
+    }
+
     // Waiting logic is from Notica by LCLPYT and is licensed under the MIT license
     // (https://github.com/LCLPYT/notica/blob/1.21/src/api/java/work/lclpnet/notica/api/SongPlayback.java)
     private class PlayerThread extends Thread {
@@ -63,11 +78,15 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
             this.setName("Phonos NBS Player Thread " + NBSStreamMultiSoundInstance.this.streamId);
             this.setDaemon(true);
 
-            this.tick = (int) NBSStreamMultiSoundInstance.this.getSkippedTicks();
+            float notesPerSecond = song.apply(s -> s.getTempo(0));
 
-            double exactTempo = 1000. / song.apply(s -> s.getTempo(0));
+            this.tick = (int) (notesPerSecond / 20. * NBSStreamMultiSoundInstance.this.getSkippedTicks());
+
+            double exactTempo = 1000. / notesPerSecond;
             this.period = (int) Math.ceil(exactTempo);
             this.remainder = Math.max(0, period - exactTempo);
+
+            LOGGER.debug("Created player thread for stream {} with tempo {} bps ({} ms per tick)", NBSStreamMultiSoundInstance.this.streamId, notesPerSecond, period);
         }
 
         @Override
@@ -97,6 +116,9 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
                 loopStartTick = metadata.getLoopStartTick() & 0xffff;
             }
 
+            LOGGER.debug("Starting stream player thread for stream {} with loop start tick {}, end tick {}, remaining loops: {}, loop forever: {}",
+                    NBSStreamMultiSoundInstance.this.streamId, loopStartTick, songEndTick, remainingLoops, loopForever);
+
             while (true) {
                 if (!this.receivedAnyData) {
                     if (this.song.apply(s -> s.getNextNonEmptyTick(-1)) == -1) {
@@ -104,9 +126,11 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
                             Thread.onSpinWait();
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
+                            LOGGER.debug("Player thread for stream {} was interrupted while waiting for data", NBSStreamMultiSoundInstance.this.streamId);
                             return;
                         }
                     } else {
+                        LOGGER.debug("Received initial data for stream {}, starting playback", NBSStreamMultiSoundInstance.this.streamId);
                         this.receivedAnyData = true;
                     }
                 } else {
@@ -144,14 +168,17 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
                     });
 
                     mc.executeSync(() -> {
-                        SoundManager soundManager = mc.getSoundManager();
+                        if (audible) {
+                            SoundManager soundManager = mc.getSoundManager();
 
-                        for (ChildSound sound : toPlay) {
-                            sound.initActualSound(soundManager);
-                            soundManager.play(sound);
+                            for (ChildSound sound : toPlay) {
+                                sound.initActualSound(soundManager);
+                                soundManager.play(sound);
+                            }
                         }
 
                         if (mc.world == null) {
+                            LOGGER.debug("World is null, marking stream {} as done", NBSStreamMultiSoundInstance.this.streamId);
                             NBSStreamMultiSoundInstance.this.setDone();
                         }
                     });
@@ -166,9 +193,10 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
                             sleepTicks = songEndTick - this.tick;
                             this.tick = loopStartTick;
                             var loopDesc = loopForever ? "∞" : String.valueOf(remainingLoops);
-                            Phonos.LOG.info("Looping song {} to tick {}, remaining loops: {}", NBSStreamMultiSoundInstance.this.streamId, this.tick, loopDesc);
+                            LOGGER.info("Looping song {} to tick {}, remaining loops: {}", NBSStreamMultiSoundInstance.this.streamId, this.tick, loopDesc);
                         } else {
                             mc.execute(NBSStreamMultiSoundInstance.this::setDone);
+                            LOGGER.debug("Song {} has ended and will not loop", NBSStreamMultiSoundInstance.this.streamId);
                             return;
                         }
                     } else {
@@ -192,11 +220,13 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
                     try {
                         Thread.sleep(sleepTime);
                     } catch (InterruptedException e) {
+                        LOGGER.debug("Player thread for stream {} was interrupted during sleep", NBSStreamMultiSoundInstance.this.streamId);
                         return;
                     }
                 }
 
                 if (this.isInterrupted() || NBSStreamMultiSoundInstance.this.isDone()) {
+                    LOGGER.debug("Player thread for stream {} was interrupted or Instance was marked done", NBSStreamMultiSoundInstance.this.streamId);
                     return;
                 }
             }
@@ -209,13 +239,14 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
 
         synchronized (mutex) {
             if (playerThread != null && playerThread.isAlive()) {
+                LOGGER.debug("Interrupting player thread for stream {} because Instance was marked done", streamId);
                 playerThread.interrupt();
                 playerThread = null;
             }
         }
     }
 
-    private class ChildSound extends AbstractSoundInstance implements TickableSoundInstance, UnlimitedPitchSoundInstance, FabricSoundInstance {
+    private class ChildSound extends AbstractSoundInstance implements RemoveNotifiedTickableSoundInstance, UnlimitedPitchSoundInstance, FabricSoundInstance {
         private int doneTicks = 0;
         private final Identifier actualSoundId;
         private @Nullable Sound actualSound;
@@ -309,6 +340,11 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
                 initActualSound(MinecraftClient.getInstance().getSoundManager());
             }
 
+            if (actualSound == SoundManager.MISSING_SOUND) {
+                //Phonos.LOG.warn("Missing sound for note: {}", actualSoundId);
+                return CompletableFuture.completedFuture(new InstantaneousAudioStream());
+            }
+
             return loader.loadStreamed(actualSound.getLocation(), repeatInstantly).thenApply(stream -> {
                 if (stream.getFormat().getChannels() == 1) {
                     monoCache.add(actualSoundId);
@@ -318,6 +354,11 @@ public class NBSStreamMultiSoundInstance extends MultiSourceSoundInstance implem
                 }
                 return stream;
             });
+        }
+
+        @Override
+        public void setDone() {
+            this.doneTicks = 20;
         }
     }
 }

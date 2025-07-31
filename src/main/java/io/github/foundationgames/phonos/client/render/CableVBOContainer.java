@@ -84,7 +84,7 @@ public class CableVBOContainer {
 
         wipBuilder = null;
 
-        if (config.cableCulling && !bounds.visible(frustum)) {
+        if (config.cableCulling && !bounds.visible(frustum) && world == MinecraftClient.getInstance().world) {
             return;
         }
 
