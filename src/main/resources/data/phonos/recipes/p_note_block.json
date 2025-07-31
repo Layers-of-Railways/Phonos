@@ -1,0 +1,15 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"ingredients": [
+		{
+			"item": "phonos:connection_hub"
+		},
+		{
+			"item": "minecraft:note_block"
+		}
+	],
+	"result": {
+		"id": "phonos:electronic_note_block",
+		"count": 1
+	}
+}
