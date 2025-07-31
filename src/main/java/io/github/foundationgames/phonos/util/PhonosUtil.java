@@ -27,6 +27,7 @@ import org.joml.Vector4f;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.text.NumberFormat;
@@ -228,6 +229,12 @@ public enum PhonosUtil {;
         byte[] bytes = packet.readByteArray();
 
         return byteArrayToByteBuffer(bytes, create);
+    }
+
+    public static <T> String weakRefToString(@Nullable WeakReference<T> ref) {
+        if (ref == null) return "null";
+        T obj = ref.get();
+        return ref + " (" + obj + ")";
     }
 
     public static void runIfClient(Supplier<Runnable> runnable) {

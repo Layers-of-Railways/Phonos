@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ClientSoundStorage extends SoundStorage {
+public class ClientSoundStorage extends SoundStorage implements SoundStorage.AllStoppable {
     private static final Map<SoundData.Type<?>, SoundInstanceFactory<SoundData>> CLIENT_SOUND_PROVIDERS = new HashMap<>();
     private final Long2ObjectMap<SoundInstance> playingSounds = new Long2ObjectOpenHashMap<>();
     private final Set<SoundEmitterTree> activeEmitterTrees = new HashSet<>();
@@ -66,6 +66,18 @@ public class ClientSoundStorage extends SoundStorage {
     }
 
     @Override
+    public void stopAll() {
+        var soundMgr = MinecraftClient.getInstance().getSoundManager();
+        for (var sound : playingSounds.values()) {
+            if (soundMgr.isPlaying(sound)) {
+                soundMgr.stop(sound);
+            }
+        }
+        playingSounds.clear();
+        activeEmitterTrees.clear();
+    }
+
+    @Override
     public void update(SoundEmitterTree.Delta delta) {
         for (var tree : activeEmitterTrees) {
             if (tree.rootId == delta.rootId()) {
@@ -105,6 +117,7 @@ public class ClientSoundStorage extends SoundStorage {
                 new SVCMultiSoundInstance(list, data.streamId, data.soundCategory, random, data.volume, data.pitch));
         });
         registerProvider(SoundDataTypes.NBS_STREAM, (data, list, random) ->
-            new NBSStreamMultiSoundInstance(list, data.streamId, data.soundCategory, random, data.volume, data.pitch));
+            new NBSStreamMultiSoundInstance(list, data.streamId, data.soundCategory, random, data.volume, data.pitch)
+                .withSkippedTicks(data.getSkippedTicks()));
     }
 }

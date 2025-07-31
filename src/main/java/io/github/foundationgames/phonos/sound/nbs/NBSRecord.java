@@ -3,6 +3,7 @@ package io.github.foundationgames.phonos.sound.nbs;
 import cz.koca2000.nbs4j.NBSVersion;
 import cz.koca2000.nbs4j.Song;
 import cz.koca2000.nbs4j.SongMetadata;
+import io.github.foundationgames.phonos.block.entity.EnderMusicBoxBlockEntity;
 import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecord;
 import io.github.foundationgames.phonos.sound.nbs.stream.NBSInitData;
 import io.github.foundationgames.phonos.sound.nbs.stream.ServerOutgoingNBSStreamHandler;
@@ -51,9 +52,9 @@ public class NBSRecord implements PhonosAudioRecord<NBSRecord> {
     }
 
     @Override
-    public SoundData startPlaying(long emitterId, long streamId, SoundCategory category, float volume, float pitch, MinecraftServer server) {
+    public SoundData startPlaying(long emitterId, long streamId, SoundCategory category, float volume, float pitch, MinecraftServer server, EnderMusicBoxBlockEntity holder) {
         ServerOutgoingNBSStreamHandler.startStream(streamId, this, server);
-        return StreamSoundData.createNBS(emitterId, streamId, category, volume, pitch);
+        return StreamSoundData.createNBS(emitterId, streamId, category, volume, pitch, holder);
     }
 
     @Override

@@ -1,12 +1,12 @@
 package io.github.foundationgames.phonos.sound.stream;
 
+import io.github.foundationgames.phonos.block.entity.EnderMusicBoxBlockEntity;
 import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecord;
 import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecordBuilder;
 import io.github.foundationgames.phonos.sound.custom.PhonosAudioRecordUploader;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import io.github.foundationgames.phonos.world.sound.data.SoundData;
 import io.github.foundationgames.phonos.world.sound.data.StreamSoundData;
-import net.minecraft.client.render.model.json.JsonUnbakedModel;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sound.SoundCategory;
 
@@ -53,7 +53,7 @@ public class AudioDataQueue implements PhonosAudioRecord<AudioDataQueue>, Phonos
     }
 
     @Override
-    public SoundData startPlaying(long emitterId, long streamId, SoundCategory category, float volume, float pitch, MinecraftServer server) {
+    public SoundData startPlaying(long emitterId, long streamId, SoundCategory category, float volume, float pitch, MinecraftServer server, EnderMusicBoxBlockEntity holder) {
         ServerOutgoingStreamHandler.startStream(streamId, this, server);
         return StreamSoundData.create(emitterId, streamId, category, volume, pitch);
     }
@@ -70,7 +70,7 @@ public class AudioDataQueue implements PhonosAudioRecord<AudioDataQueue>, Phonos
         PhonosUtil.writeInt(stream, this.data.size());
 
         for (var buf : this.data) {
-            PhonosUtil.writeInt(stream, buf.capacity());
+            PhonosUtil.writeInt(stream, buf.remaining());
             int pos = buf.position();
             while (buf.hasRemaining()) {
                 stream.write(buf.get());

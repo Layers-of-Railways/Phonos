@@ -5,8 +5,6 @@ import io.github.foundationgames.phonos.config.PhonosServerConfig;
 import io.github.foundationgames.phonos.network.PayloadPackets;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import it.unimi.dsi.fastutil.longs.*;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -21,6 +19,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServerCustomAudio {
@@ -37,6 +36,9 @@ public class ServerCustomAudio {
     public static final LongSet SUCCESSES = new LongOpenHashSet();
 
     private static final Map<UUID, UploadSession> UPLOAD_SESSIONS = Collections.synchronizedMap(new HashMap<>());
+
+    // this exists so that Ender Music Boxes don't delete streams that have a session but haven't sent any data yet
+    public static final LongSet UNINITIALIZED_SESSIONS = LongSets.synchronize(new LongOpenHashSet());
 
     private static volatile boolean LOADED = false;
 
@@ -58,6 +60,7 @@ public class ServerCustomAudio {
 
     public static void beginUploadSession(ServerPlayerEntity player, long streamId, PhonosAudioRecord.FileType fileType) {
         UPLOAD_SESSIONS.put(player.getUuid(), new UploadSession(streamId, fileType));
+        UNINITIALIZED_SESSIONS.add(streamId);
     }
 
     public static void endUploadSession(UUID player) {
@@ -65,6 +68,7 @@ public class ServerCustomAudio {
         if (session == null) return;
         long id = session.streamId;
         UPLOADING.remove(id);
+        UNINITIALIZED_SESSIONS.remove(id); // paranoia
     }
 
     public static void receiveUpload(MinecraftServer srv, ServerPlayerEntity player, long id, int initData, ByteBuffer samples, boolean last) {
@@ -76,6 +80,7 @@ public class ServerCustomAudio {
             var session = UPLOAD_SESSIONS.get(player.getUuid());
             if (session.streamId != id) return;
             var aud = UPLOADING.computeIfAbsent(id, k -> session.fileType.createBuilder(initData));
+            UNINITIALIZED_SESSIONS.remove(id);
             aud.pushUploadBytes(samples);
 
             int maxAud = PhonosServerConfig.get(srv.getOverworld()).uploadLimitKB * 1000;
@@ -128,6 +133,7 @@ public class ServerCustomAudio {
         UPLOADING.clear();
         SAVED.clear();
         UPLOAD_SESSIONS.clear();
+        UNINITIALIZED_SESSIONS.clear();
         LOADED = false;
     }
 
@@ -185,7 +191,7 @@ public class ServerCustomAudio {
         }
     }
 
-    public static void load(Path folder) throws IOException {
+    public static void load(Path folder, MinecraftServer server) throws IOException {
         TOTAL_SAVED_SIZE = 0;
         final var startTime = Instant.now();
 
@@ -210,6 +216,7 @@ public class ServerCustomAudio {
 
         final int foundDataCount = files.size();
         var loadedDataCount = new AtomicInteger(0);
+        var anyFailed = new AtomicBoolean();
 
         if (foundDataCount == 0) {
             LOADED = true;
@@ -220,15 +227,30 @@ public class ServerCustomAudio {
         for (final var hexStr : files) {
             final var path = folder.resolve(hexStr + FILE_EXT);
             FILESYS_POOL.submit(() -> {
-                long id = Long.parseUnsignedLong(hexStr, 16);
+                try {
+                    Phonos.LOG.info("Starting to load custom audio file {}...", hexStr + FILE_EXT);
+                    long id = Long.parseUnsignedLong(hexStr, 16);
 
-                try (var in = Files.newInputStream(path)) {
-                    var aud = PhonosAudioRecord.read(in);
+                    try (var in = Files.newInputStream(path)) {
+                        var aud = PhonosAudioRecord.read(in);
 
-                    SAVED.put(id, aud);
-                    TOTAL_SAVED_SIZE += aud.getDataSize();
-                } catch (IOException ex) {
-                    Phonos.LOG.error("Error loading custom audio file {}: {}", path.getFileName(), ex);
+                        SAVED.put(id, aud);
+                        TOTAL_SAVED_SIZE += aud.getDataSize();
+
+                        Phonos.LOG.info("Loaded custom audio file {}", hexStr + FILE_EXT);
+                    } catch (IOException ex) {
+                        Phonos.LOG.error("Error loading custom audio file {}: {}", path.getFileName(), ex);
+                        anyFailed.set(true);
+                    }
+                } catch (Exception ex) {
+                    Phonos.LOG.error("Error parsing custom audio file {}, saving a backup for debugging", hexStr + FILE_EXT, ex);
+                    anyFailed.set(true);
+
+                    try {
+                        Files.copy(path, path.resolveSibling(hexStr + FILE_EXT + ".bak"));
+                    } catch (IOException e) {
+                        Phonos.LOG.error("Error saving backup for custom audio file {}", hexStr + FILE_EXT, e);
+                    }
                 }
 
                 if (loadedDataCount.incrementAndGet() >= foundDataCount) {
@@ -236,6 +258,14 @@ public class ServerCustomAudio {
 
                     var dur = Duration.between(startTime, Instant.now());
                     Phonos.LOG.info("Loaded {} bytes of saved audio from <world>/phonos/ in {} ms", TOTAL_SAVED_SIZE, dur.toMillis());
+
+                    if (anyFailed.get() && PhonosServerConfig.get(server.getOverworld()).shutdownOnAudioLoadError) {
+                        Phonos.LOG.error("Stopping server due to errors while loading custom audio files.");
+                        server.execute(() -> {
+                            server.getPlayerManager().disconnectAllPlayers();
+                            server.stop(false);
+                        });
+                    }
                 }
             });
         }

@@ -109,24 +109,21 @@ public class PhonosVoicechatPlugin implements VoicechatPlugin {
 
         server.getPlayerManager().getPlayerList().forEach(player -> {
             PayloadPackets.sendMicrophoneChannelClose(player, key.getId(), streamID);
+            Phonos.LOG.info("Closed microphone channel for player {} with stream ID {} and channel ID {}", player, streamID, key.getId());
         });
     }
 
     @Environment(EnvType.CLIENT)
-    public static CompletableFuture<SVCSoundMetadata> getClientMicrophoneChannel(long streamId) {
+    public static synchronized CompletableFuture<SVCSoundMetadata> getClientMicrophoneChannel(long streamId) {
         if (clientMetadataByStreamId.containsKey(streamId)) {
             return CompletableFuture.completedFuture(clientMetadataByStreamId.get(streamId));
-        } else if (waitingClientMetadata.containsKey(streamId)) {
-            return waitingClientMetadata.get(streamId);
         } else {
-            CompletableFuture<SVCSoundMetadata> future = new CompletableFuture<>();
-            waitingClientMetadata.put(streamId, future);
-            return future;
+            return waitingClientMetadata.computeIfAbsent(streamId, $ -> new CompletableFuture<>());
         }
     }
 
     @Environment(EnvType.CLIENT)
-    public static void startClientMicrophoneStream(UUID channelId, long streamId, UUID speakingPlayerId) {
+    public static synchronized void startClientMicrophoneStream(UUID channelId, long streamId, UUID speakingPlayerId) {
         if (clientApi == null)
             return;
 
@@ -136,13 +133,23 @@ public class PhonosVoicechatPlugin implements VoicechatPlugin {
         if (waitingClientMetadata.containsKey(streamId)) {
             waitingClientMetadata.remove(streamId).complete(metadata);
         }
+        Phonos.LOG.info("Started client microphone stream with channel ID {} and stream ID {}", channelId, streamId);
     }
 
     @Environment(EnvType.CLIENT)
-    public static void endClientMicrophoneStream(UUID channelId, long streamId) {
+    public static synchronized void endClientMicrophoneStream(UUID channelId, long streamId) {
         clientMetadataByChannelId.remove(channelId);
         clientMetadataByStreamId.remove(streamId);
         waitingClientMetadata.remove(streamId);
+        Phonos.LOG.info("Ended client microphone stream with channel ID {} and stream ID {}", channelId, streamId);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void cleanupOnDisconnect() {
+        clientMetadataByChannelId.clear();
+        clientMetadataByStreamId.clear();
+        waitingClientMetadata.clear();
+        Phonos.LOG.info("Cleaned up client microphone streams on disconnect");
     }
 
     @Override

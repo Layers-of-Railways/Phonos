@@ -80,7 +80,17 @@ public abstract class SoundStorage {
         SERVER.clear();
     }
 
+    public static void stopAllClient() {
+        if (CLIENT instanceof AllStoppable as) {
+            as.stopAll();
+        }
+    }
+
     public static void clientReset() {
         CLIENT = null;
+    }
+
+    protected interface AllStoppable {
+        void stopAll();
     }
 }

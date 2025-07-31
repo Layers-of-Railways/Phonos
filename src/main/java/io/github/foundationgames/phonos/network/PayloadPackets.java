@@ -17,6 +17,11 @@ import net.minecraft.util.math.BlockPos;
 import java.util.UUID;
 
 public final class PayloadPackets {
+    /*FIXME merge
+    ServerPlayNetworking.registerGlobalReceiver(Phonos.id("ready_for_resync"), (server, player, handler, buf, responseSender) -> {
+            server.execute(() -> ResyncManager.resyncServer(player));
+        });
+     */
     public static void sendSoundPlay(ServerPlayerEntity player, SoundData data, SoundEmitterTree tree) {
         PhonosPackets.PACKETS.sendTo(player, new SoundPlayPacket(data, tree));
     }
@@ -79,5 +84,10 @@ public final class PayloadPackets {
 
     public static void sendNBSStreamEnd(ServerPlayerEntity player, long streamId) {
         PhonosPackets.PACKETS.sendTo(player, new NBSStreamEndPacket(streamId));
+    }
+
+    public static void sendPrepareForResync(ServerPlayerEntity player) {
+        var buf = new PacketByteBuf(Unpooled.buffer());
+        ServerPlayNetworking.send(player, Phonos.id("prepare_for_resync"), buf);
     }
 }
