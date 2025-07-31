@@ -29,15 +29,23 @@ public record RequestEnderMusicBoxUploadSessionPacket(BlockPos pos, String name,
 
         if (world.getBlockEntity(pos) instanceof EnderMusicBoxBlockEntity entity) {
             Long streamId;
-            if (entity.canModifyStreams(sender) && (streamId = entity.allocateStreamId(name)) != null) {
+
+            if (!entity.canModifyStreams(sender)) {
+                PayloadPackets.sendUploadStatus(sender, entity.emitterId(), false);
+                Phonos.LOG.warn("Player {} tried to start upload session at ender music box {} without permission", sender, pos);
+            } else if ((streamId = entity.allocateStreamId(name)) == null) {
+                PayloadPackets.sendUploadStatus(sender, entity.emitterId(), false);
+                Phonos.LOG.warn("Player {} tried to start upload session at ender music box {} but no stream IDs were available", sender, pos);
+            } else {
                 ServerCustomAudio.beginUploadSession(sender, streamId, fileType);
                 PayloadPackets.sendUploadStatus(sender, streamId, true);
 
                 Phonos.LOG.info("Allowed player {} to upload audio to ender music box {}. Will be saved to <world>/phonos/{}",
                     sender, pos, Long.toHexString(streamId) + ServerCustomAudio.FILE_EXT);
-            } else {
-                PayloadPackets.sendUploadStatus(sender, entity.emitterId(), false);
             }
+        } else {
+            Phonos.LOG.warn("Player {} tried to start upload session at invalid ender music box {}", sender, pos);
+            PayloadPackets.sendUploadStatus(sender, -1, false);
         }
     }
 }

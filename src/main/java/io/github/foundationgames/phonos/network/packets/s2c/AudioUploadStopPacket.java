@@ -1,5 +1,6 @@
 package io.github.foundationgames.phonos.network.packets.s2c;
 
+import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.client.screen.EnderMusicBoxScreen;
 import io.github.foundationgames.phonos.network.packets.S2CPacket;
 import io.github.foundationgames.phonos.sound.custom.ClientCustomAudioUploader;
@@ -29,5 +30,6 @@ public record AudioUploadStopPacket(long uploadId, Text message) implements S2CP
         }
 
         ClientCustomAudioUploader.cancelUpload(uploadId);
+        Phonos.LOG.warn("Upload canceled by server for sound {}: {}", Long.toHexString(uploadId), message.getString());
     }
 }

@@ -11,15 +11,6 @@ import net.minecraft.util.ClickType;
 import java.nio.ByteBuffer;
 
 public final class ClientPayloadPackets {
-    /*FIXME merge
-    ClientPlayNetworking.registerGlobalReceiver(Phonos.id("prepare_for_resync"), (client, handler, buf, responseSender) -> {
-            client.execute(() -> {
-                ResyncManager.prepareClient();
-                sendReadyForResync();
-            });
-        });
-     */
-
     public static void sendFakeCreativeSlotClick(ItemStack onto, ItemStack with, ClickType click) {
         PhonosPackets.PACKETS.send(new FakeCreativeSlotClickPacket(onto, with, click));
     }
@@ -49,7 +40,6 @@ public final class ClientPayloadPackets {
     }
 
     public static void sendReadyForResync() {
-        var buf = new PacketByteBuf(Unpooled.buffer());
-        ClientPlayNetworking.send(Phonos.id("ready_for_resync"), buf);
+        PhonosPackets.PACKETS.send(new ReadyForResyncPacket());
     }
 }
