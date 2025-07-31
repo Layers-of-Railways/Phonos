@@ -3,7 +3,7 @@ import java.io.ByteArrayOutputStream
 plugins {
     java
     `maven-publish`
-    id("fabric-loom") version "1.7-SNAPSHOT"
+    id("fabric-loom") version "1.11-SNAPSHOT"
 }
 
 java {
@@ -37,12 +37,10 @@ repositories {
     maven("https://maven.terraformersmc.com")
     maven("https://maven.maxhenkel.de/repository/public") // Simple Voice Chat
     maven("https://mvn.devos.one/snapshots/") // Create Fabric, Porting Lib, Forge Tags, Milk Lib, Registrate Fabric
+    maven("https://mvn.devos.one/releases/") // Porting Lib
+    maven("https://raw.githubusercontent.com/Fuzss/modresources/main/maven/") // forge config api port
     maven("https://maven.jamieswhiteshirt.com/libs-release") // Reach Entity Attributes
-    exclusiveMaven( // Flywheel, Registrate
-        "https://maven.tterrag.com/",
-        "com.tterrag.registrate",
-        "com.jozufozu.flywheel"
-    )
+    maven("https://maven.createmod.net") // Create, Ponder, Flywheel
     maven("https://maven.isxander.dev/releases") // YACL
     exclusiveMaven("https://repo.sleeping.town", "com.unascribed")
     exclusiveMaven("https://jitpack.io", "com.github.koca2000")
