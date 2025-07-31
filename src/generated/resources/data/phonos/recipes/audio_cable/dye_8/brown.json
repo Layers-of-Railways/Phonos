@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "phonos_audio_cable",
+  "key": {
+    "-": {
+      "tag": "phonos:audio_cables"
+    },
+    "d": {
+      "item": "minecraft:brown_dye"
+    }
+  },
+  "pattern": [
+    "---",
+    "-d-",
+    "---"
+  ],
+  "result": {
+    "count": 8,
+    "item": "phonos:brown_audio_cable"
+  },
+  "show_notification": true
+}

@@ -3,7 +3,7 @@ import java.io.ByteArrayOutputStream
 plugins {
     java
     `maven-publish`
-    id("fabric-loom") version "1.11-SNAPSHOT"
+    id("fabric-loom") version "1.10-SNAPSHOT"
 }
 
 java {
@@ -118,6 +118,13 @@ loom {
         vmArg("-XX:+IgnoreUnrecognizedVMOptions")
         vmArg("-Dmixin.debug.export=true")
         vmArg("-Dfabric-tag-conventions-v2.missingTagTranslationWarning=VERBOSE")
+    }
+}
+
+fabricApi {
+    configureDataGeneration {
+        client = true
+        outputDirectory = file("src/generated/resources")
     }
 }
 

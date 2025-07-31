@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "phonos_audio_cable",
+  "key": {
+    "*": {
+      "item": "minecraft:redstone"
+    },
+    "/": {
+      "item": "minecraft:gold_ingot"
+    },
+    "_": {
+      "item": "minecraft:copper_ingot"
+    }
+  },
+  "pattern": [
+    "_*/"
+  ],
+  "result": {
+    "count": 3,
+    "item": "phonos:audio_cable"
+  },
+  "show_notification": true
+}

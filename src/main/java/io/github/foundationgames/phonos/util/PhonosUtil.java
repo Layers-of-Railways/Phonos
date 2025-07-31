@@ -14,7 +14,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DyeColor;
@@ -257,5 +259,26 @@ public enum PhonosUtil {;
             int b = (int) (dye.getColorComponents()[2] * 0xFF);
             DYE_COLORS.put(dye, b | (g << 8) | (r << 16));
         }
+    }
+
+    public static Item getDyeColorDyeItem(DyeColor color) {
+        return switch (color) {
+            case WHITE -> Items.WHITE_DYE;
+            case ORANGE -> Items.ORANGE_DYE;
+            case MAGENTA -> Items.MAGENTA_DYE;
+            case LIGHT_BLUE -> Items.LIGHT_BLUE_DYE;
+            case YELLOW -> Items.YELLOW_DYE;
+            case LIME -> Items.LIME_DYE;
+            case PINK -> Items.PINK_DYE;
+            case GRAY -> Items.GRAY_DYE;
+            case LIGHT_GRAY -> Items.LIGHT_GRAY_DYE;
+            case CYAN -> Items.CYAN_DYE;
+            case PURPLE -> Items.PURPLE_DYE;
+            case BLUE -> Items.BLUE_DYE;
+            case BROWN -> Items.BROWN_DYE;
+            case GREEN -> Items.GREEN_DYE;
+            case RED -> Items.RED_DYE;
+            case BLACK -> Items.BLACK_DYE;
+        };
     }
 }

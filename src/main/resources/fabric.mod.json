@@ -25,6 +25,9 @@
     "client": [
       "io.github.foundationgames.phonos.PhonosClient"
     ],
+    "fabric-datagen": [
+      "io.github.foundationgames.phonos.datagen.PhonosDataGenerator"
+    ],
     "modmenu": [
       "io.github.foundationgames.phonos.util.compat.PhonosModMenu"
     ],

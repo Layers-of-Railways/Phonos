@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "phonos_audio_cable",
+  "ingredients": [
+    {
+      "tag": "phonos:audio_cables"
+    },
+    {
+      "item": "minecraft:light_blue_dye"
+    }
+  ],
+  "result": {
+    "item": "phonos:light_blue_audio_cable"
+  }
+}
