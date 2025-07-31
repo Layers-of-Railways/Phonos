@@ -1,0 +1,15 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"ingredients": [
+		{
+			"item": "minecraft:magenta_dye"
+		},
+		{
+			"item": "phonos:audio_cable"
+		}
+	],
+	"result": {
+		"id": "phonos:magenta_audio_cable",
+		"count": 1
+	}
+}

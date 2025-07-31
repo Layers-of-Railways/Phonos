@@ -1,0 +1,15 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"ingredients": [
+		{
+			"item": "phonos:radio_transceiver"
+		},
+		{
+			"item": "phonos:portable_record_player"
+		}
+	],
+	"result": {
+		"id": "phonos:portable_radio",
+		"count": 1
+	}
+}
