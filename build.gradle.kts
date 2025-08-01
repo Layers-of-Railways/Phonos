@@ -20,6 +20,7 @@ println("Phonos v${"mod_version"()}")
 
 val isRelease = System.getenv("RELEASE_BUILD")?.toBoolean() ?: false
 val buildNumber = System.getenv("GITHUB_RUN_NUBMER")?.toInt()
+val inCI = buildNumber != null;
 val gitHash = "\"${calculateGitHash() + (if (hasUnstaged()) "-modified" else "")}\""
 
 base.archivesName.set("archives_base_name"())
@@ -69,11 +70,11 @@ dependencies {
     //modCompileOnly("de.maxhenkel.voicechat:voicechat-api:${"voicechat_api_version"()}")
     modCompileOnly("maven.modrinth:simple-voice-chat:fabric-${"voicechat_version"()}") // we do creative mixins, so can't just use the API
 
-    if ("enable_simple_voice_chat"().toBoolean()) {
+    if ("enable_simple_voice_chat"().toBoolean() && !inCI) {
         modLocalRuntime("maven.modrinth:simple-voice-chat:fabric-${"voicechat_version"()}")
     }
 
-    if ("enable_music_disc_mods"().toBoolean()) {
+    if ("enable_music_disc_mods"().toBoolean() && !inCI) {
         modLocalRuntime("maven.modrinth:more-music-discs:${"more_music_discs_version"()}") { isTransitive = false }
         modLocalRuntime("maven.modrinth:spindlemark:${"spindlemark_version"()}") { isTransitive = false }
         modLocalRuntime("com.unascribed:lib39-core:${"lib39_version"()}")
