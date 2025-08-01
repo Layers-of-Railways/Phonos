@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "phonos:loudspeaker"
+    },
+    {
+      "item": "phonos:radio_transceiver"
+    }
+  ],
+  "result": {
+    "item": "phonos:radio_loudspeaker"
+  }
+}

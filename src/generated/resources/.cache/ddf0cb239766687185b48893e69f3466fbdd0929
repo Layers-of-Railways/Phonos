@@ -1,0 +1,13 @@
+// 1.20.1	2025-08-01T04:14:01.166786263	Phonos/Block Loot Tables
+3a5b739bb8e17d3b17ec4f5c786d003582f34527 data/phonos/loot_tables/blocks/microphone_base.json
+48e2cbf10dfb8b855976fbf67e68965490a95f76 data/phonos/loot_tables/blocks/connection_hub.json
+e948d2ac6f4ff7cd0c9edfa545e9c14bb95ffc0e data/phonos/loot_tables/blocks/loudspeaker.json
+191999ecd9efd41ec33a3bb59d56d7036ee4c705 data/phonos/loot_tables/blocks/electronic_jukebox.json
+faec8fabf6283e3d8de638a96bbb5acc4516fc5a data/phonos/loot_tables/blocks/audio_switch.json
+c363ae8184948912f7a8d0d9ba2263f06f13d69a data/phonos/loot_tables/blocks/radio_loudspeaker.json
+f0cb4bae6530ab1aa1d7894ad3ed06d7fb470a1a data/phonos/loot_tables/blocks/radio_transceiver.json
+3cd1be38d59312f5a59f18749a1b615e1a2bef92 data/phonos/loot_tables/blocks/satellite_receiver.json
+3b6e73c203fdade020118c8c6e5ac75da45f84b5 data/phonos/loot_tables/blocks/electronic_note_block.json
+fa76c4de64ec370fc0e11e33b4e5261acd336220 data/phonos/loot_tables/blocks/ender_music_box.json
+7924d12950cc512d4ebefba09c57a07256f1e514 data/phonos/loot_tables/blocks/satellite_station.json
+cad19d876f7f4800efe20f5a0834a0d2483e27ee data/phonos/loot_tables/blocks/wireless_microphone_base.json

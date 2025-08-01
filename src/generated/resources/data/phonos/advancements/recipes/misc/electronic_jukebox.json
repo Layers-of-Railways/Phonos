@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_connection_hub": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "phonos:connection_hub"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "phonos:electronic_jukebox"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_connection_hub",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "phonos:electronic_jukebox"
+    ]
+  },
+  "sends_telemetry_event": false
+}

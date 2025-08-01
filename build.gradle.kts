@@ -3,7 +3,7 @@ import java.io.ByteArrayOutputStream
 plugins {
     java
     `maven-publish`
-    id("fabric-loom") version "1.7-SNAPSHOT"
+    id("fabric-loom") version "1.10-SNAPSHOT"
 }
 
 java {
@@ -33,19 +33,16 @@ if ("mod_version"().endsWith("-alpha")) {
 version = "${"mod_version"()}${gitBranchLabel}+fabric-${"minecraft_version"() + if (isRelease) "" else build}"
 
 repositories {
-    maven("https://api.modrinth.com/maven")
-    maven("https://maven.terraformersmc.com")
-    maven("https://maven.maxhenkel.de/repository/public") // Simple Voice Chat
-    maven("https://mvn.devos.one/snapshots/") // Create Fabric, Porting Lib, Forge Tags, Milk Lib, Registrate Fabric
-    maven("https://maven.jamieswhiteshirt.com/libs-release") // Reach Entity Attributes
-    exclusiveMaven( // Flywheel, Registrate
-        "https://maven.tterrag.com/",
-        "com.tterrag.registrate",
-        "com.jozufozu.flywheel"
+    exclusiveMaven("https://api.modrinth.com/maven", "maven.modrinth")
+    exclusiveMaven("https://maven.terraformersmc.com", "com.terraformersmc") // Mod Menu
+    exclusiveMaven("https://maven.maxhenkel.de/releases", "de.maxhenkel") // Simple Voice Chat
+    exclusiveMaven( // YACL
+        "https://maven.isxander.dev/releases",
+        "dev.isxander",
+        "org.quiltmc.parsers"
     )
-    maven("https://maven.isxander.dev/releases") // YACL
-    exclusiveMaven("https://repo.sleeping.town", "com.unascribed")
-    exclusiveMaven("https://jitpack.io", "com.github.koca2000")
+    exclusiveMaven("https://repo.sleeping.town", "com.unascribed") // Lib39
+    exclusiveMaven("https://jitpack.io", "com.github.koca2000") // NBS4j
 }
 
 dependencies {
@@ -66,15 +63,10 @@ dependencies {
     modImplementation("dev.isxander:yet-another-config-lib:${"yacl_version"()}")
 
     //modCompileOnly("de.maxhenkel.voicechat:voicechat-api:${"voicechat_api_version"()}")
-    modCompileOnly("maven.modrinth:simple-voice-chat:fabric-${"voicechat_version"()}")
+    modCompileOnly("maven.modrinth:simple-voice-chat:fabric-${"voicechat_version"()}") // we do creative mixins, so can't just use the API
 
     if ("enable_simple_voice_chat"().toBoolean()) {
         modLocalRuntime("maven.modrinth:simple-voice-chat:fabric-${"voicechat_version"()}")
-    }
-
-    if ("enable_create"().toBoolean()) {
-        // Create - dependencies are added transitively
-        modLocalRuntime("com.simibubi.create:create-fabric-${"minecraft_version"()}:${"create_fabric_version"()}")
     }
 
     if ("enable_music_disc_mods"().toBoolean()) {
@@ -123,6 +115,13 @@ loom {
         vmArg("-XX:+IgnoreUnrecognizedVMOptions")
         vmArg("-Dmixin.debug.export=true")
         vmArg("-Dfabric-tag-conventions-v2.missingTagTranslationWarning=VERBOSE")
+    }
+}
+
+fabricApi {
+    configureDataGeneration {
+        client = true
+        outputDirectory = file("src/generated/resources")
     }
 }
 
