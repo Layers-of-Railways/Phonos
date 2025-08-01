@@ -16,8 +16,14 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Function;
+
 public class AudioCableItem extends Item {
     public final @Nullable DyeColor color;
+
+    public static Function<Settings, AudioCableItem> create(@Nullable DyeColor color) {
+        return settings -> new AudioCableItem(color, settings);
+    }
 
     public AudioCableItem(@Nullable DyeColor color, Settings settings) {
         super(settings);

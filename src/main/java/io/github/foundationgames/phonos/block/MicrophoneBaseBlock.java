@@ -8,8 +8,10 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -27,6 +29,8 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockEntityProvider {
 
@@ -196,6 +200,16 @@ public class MicrophoneBaseBlock extends HorizontalFacingBlock implements BlockE
         }
 
         super.onStateReplaced(state, world, pos, newState, moved);
+    }
+
+    @Override
+    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options) {
+        super.appendTooltip(stack, world, tooltip, options);
+
+        if (!PhonosVoicechatProxy.isLoaded()) {
+            tooltip.add(Text.translatable("block.phonos.microphone_base.voicechat_not_installed")
+                .setStyle(Style.EMPTY.withColor(Formatting.RED)));
+        }
     }
 
     @Nullable
