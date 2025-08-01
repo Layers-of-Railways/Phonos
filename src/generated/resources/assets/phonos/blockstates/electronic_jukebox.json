@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "phonos:block/electronic_jukebox"
+    }
+  }
+}

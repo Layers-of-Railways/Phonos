@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "phonos:block/stone_base",
+    "side": "phonos:block/electronic_note_block_side",
+    "top": "phonos:block/speaker_wood"
+  }
+}

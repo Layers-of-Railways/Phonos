@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "phonos:block/stone_base",
+    "east": "phonos:block/loudspeaker_east",
+    "north": "phonos:block/loudspeaker",
+    "particle": "phonos:block/loudspeaker",
+    "south": "phonos:block/loudspeaker_back",
+    "up": "phonos:block/speaker_wood",
+    "west": "phonos:block/loudspeaker_west"
+  }
+}
