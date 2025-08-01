@@ -4,6 +4,8 @@ import io.github.foundationgames.phonos.Phonos;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.DyeColor;
 
 public class PhonosItems {
@@ -42,5 +44,14 @@ public class PhonosItems {
     }
 
     public static void init() {
+    }
+
+    public static class Tags {
+        public static final TagKey<Item> AUDIO_CABLES = phonosTag("audio_cables");
+
+        @SuppressWarnings("SameParameterValue")
+        private static TagKey<Item> phonosTag(String name) {
+            return TagKey.of(RegistryKeys.ITEM, Phonos.id(name));
+        }
     }
 }

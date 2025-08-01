@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "phonos:white_audio_cable",
+    "phonos:orange_audio_cable",
+    "phonos:magenta_audio_cable",
+    "phonos:light_blue_audio_cable",
+    "phonos:yellow_audio_cable",
+    "phonos:lime_audio_cable",
+    "phonos:pink_audio_cable",
+    "phonos:gray_audio_cable",
+    "phonos:light_gray_audio_cable",
+    "phonos:cyan_audio_cable",
+    "phonos:purple_audio_cable",
+    "phonos:blue_audio_cable",
+    "phonos:brown_audio_cable",
+    "phonos:green_audio_cable",
+    "phonos:red_audio_cable",
+    "phonos:black_audio_cable",
+    "phonos:audio_cable"
+  ]
+}

@@ -13,9 +13,7 @@ import net.minecraft.data.server.recipe.ShapelessRecipeJsonBuilder;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.book.RecipeCategory;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.registry.tag.TagKey;
 
 import java.util.function.Consumer;
 
@@ -29,10 +27,10 @@ public class PhonosRecipeProvider extends FabricRecipeProvider {
         /* Routing */
 
         ShapelessRecipeJsonBuilder.create(RecipeCategory.MISC, PhonosBlocks.CONNECTION_HUB)
-            .input(I.AUDIO_CABLES)
-            .input(I.AUDIO_CABLES)
+            .input(PhonosItems.Tags.AUDIO_CABLES)
+            .input(PhonosItems.Tags.AUDIO_CABLES)
             .input(ItemTags.WOODEN_SLABS)
-            .criterion("has_audio_cables", conditionsFromTag(I.AUDIO_CABLES))
+            .criterion("has_audio_cables", conditionsFromTag(PhonosItems.Tags.AUDIO_CABLES))
             .offerTo(exporter);
 
         ShapelessRecipeJsonBuilder.create(RecipeCategory.MISC, PhonosBlocks.AUDIO_SWITCH)
@@ -57,14 +55,14 @@ public class PhonosRecipeProvider extends FabricRecipeProvider {
 
             ShapelessRecipeJsonBuilder.create(RecipeCategory.MISC, cable)
                 .group("phonos_audio_cable")
-                .input(I.AUDIO_CABLES)
+                .input(PhonosItems.Tags.AUDIO_CABLES)
                 .input(dye)
                 .criterion("has_audio_cable", conditionsFromItem(PhonosItems.AUDIO_CABLE))
                 .offerTo(exporter, Phonos.id("audio_cable/dye_1/" + cable.color.getName()));
 
             ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, cable, 8)
                 .group("phonos_audio_cable")
-                .input('-', I.AUDIO_CABLES)
+                .input('-', PhonosItems.Tags.AUDIO_CABLES)
                 .input('d', dye)
                 .pattern("---")
                 .pattern("-d-")
@@ -185,14 +183,5 @@ public class PhonosRecipeProvider extends FabricRecipeProvider {
             .input(PhonosItems.PORTABLE_RECORD_PLAYER)
             .criterion("has_satellite_receiver", conditionsFromItem(PhonosBlocks.SATELLITE_RECEIVER))
             .offerTo(exporter);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private static TagKey<Item> phonosTag(String name) {
-        return TagKey.of(RegistryKeys.ITEM, Phonos.id(name));
-    }
-
-    private interface I {
-        TagKey<Item> AUDIO_CABLES = phonosTag("audio_cables");
     }
 }

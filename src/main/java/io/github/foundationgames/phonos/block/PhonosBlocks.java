@@ -10,6 +10,8 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
 
 public class PhonosBlocks {
     public static final Block LOUDSPEAKER = register(new LoudspeakerBlock(FabricBlockSettings.copy(Blocks.NOTE_BLOCK)), "loudspeaker");
@@ -66,5 +68,14 @@ public class PhonosBlocks {
     }
 
     public static void init() {
+    }
+
+    public static class Tags {
+        public static final TagKey<Block> TRANSMISSION_TOWERS = phonosTag("transmission_towers");
+
+        @SuppressWarnings("SameParameterValue")
+        private static TagKey<Block> phonosTag(String name) {
+            return TagKey.of(RegistryKeys.BLOCK, Phonos.id(name));
+        }
     }
 }
