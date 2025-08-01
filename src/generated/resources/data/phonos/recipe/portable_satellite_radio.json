@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "phonos:satellite_receiver"
+    },
+    {
+      "item": "phonos:portable_record_player"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "phonos:portable_satellite_radio"
+  }
+}

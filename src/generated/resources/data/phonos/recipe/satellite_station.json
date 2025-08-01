@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "phonos:connection_hub"
+    },
+    {
+      "item": "phonos:satellite_receiver"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "phonos:satellite_station"
+  }
+}

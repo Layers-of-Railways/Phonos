@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "tag": "minecraft:stone_crafting_materials"
+    },
+    "=": {
+      "tag": "minecraft:planks"
+    },
+    "c": {
+      "item": "phonos:connection_hub"
+    }
+  },
+  "pattern": [
+    "===",
+    "#c#",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "phonos:loudspeaker"
+  }
+}

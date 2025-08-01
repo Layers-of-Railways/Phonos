@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_satellite_receiver": {
+      "conditions": {
+        "items": [
+          {
+            "items": "phonos:satellite_receiver"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "phonos:portable_satellite_radio"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_satellite_receiver"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "phonos:portable_satellite_radio"
+    ]
+  }
+}

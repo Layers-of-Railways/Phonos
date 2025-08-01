@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "c": {
+      "item": "phonos:radio_transceiver"
+    },
+    "g": {
+      "item": "minecraft:gold_ingot"
+    },
+    "i": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "pattern": [
+    "i",
+    "g",
+    "c"
+  ],
+  "result": {
+    "count": 1,
+    "id": "phonos:wireless_microphone_base"
+  }
+}

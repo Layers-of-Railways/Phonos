@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "minecraft:iron_bars"
+    },
+    "c": {
+      "item": "phonos:connection_hub"
+    }
+  },
+  "pattern": [
+    "I",
+    "I",
+    "c"
+  ],
+  "result": {
+    "count": 1,
+    "id": "phonos:radio_transceiver"
+  }
+}

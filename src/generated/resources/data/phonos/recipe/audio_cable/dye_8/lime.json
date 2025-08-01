@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "phonos_audio_cable",
+  "key": {
+    "-": {
+      "tag": "phonos:audio_cables"
+    },
+    "d": {
+      "item": "minecraft:lime_dye"
+    }
+  },
+  "pattern": [
+    "---",
+    "-d-",
+    "---"
+  ],
+  "result": {
+    "count": 8,
+    "id": "phonos:lime_audio_cable"
+  }
+}

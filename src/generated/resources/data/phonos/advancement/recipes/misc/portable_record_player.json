@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_loudspeaker": {
+      "conditions": {
+        "items": [
+          {
+            "items": "phonos:loudspeaker"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "phonos:portable_record_player"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_loudspeaker"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "phonos:portable_record_player"
+    ]
+  }
+}

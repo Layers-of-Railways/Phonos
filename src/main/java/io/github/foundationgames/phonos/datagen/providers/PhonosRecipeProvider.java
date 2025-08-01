@@ -4,27 +4,29 @@ import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import io.github.foundationgames.phonos.item.AudioCableItem;
 import io.github.foundationgames.phonos.item.PhonosItems;
+import io.github.foundationgames.phonos.recipe.ItemGlowRecipe;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.data.server.recipe.ComplexRecipeJsonBuilder;
-import net.minecraft.data.server.recipe.RecipeJsonProvider;
+import net.minecraft.data.server.recipe.RecipeExporter;
 import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder;
 import net.minecraft.data.server.recipe.ShapelessRecipeJsonBuilder;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.book.RecipeCategory;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.ItemTags;
 
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 public class PhonosRecipeProvider extends FabricRecipeProvider {
-    public PhonosRecipeProvider(FabricDataOutput output) {
-        super(output);
+    public PhonosRecipeProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+        super(output, registriesFuture);
     }
 
     @Override
-    public void generate(Consumer<RecipeJsonProvider> exporter) {
+    public void generate(RecipeExporter exporter) {
         /* Routing */
 
         ShapelessRecipeJsonBuilder.create(RecipeCategory.MISC, PhonosBlocks.CONNECTION_HUB)
@@ -186,7 +188,7 @@ public class PhonosRecipeProvider extends FabricRecipeProvider {
             .offerTo(exporter);
 
         /* Special */
-        ComplexRecipeJsonBuilder.create(Phonos.ITEM_GLOW_RECIPE_SERIALIZER)
-            .offerTo(exporter, Phonos.id("item_glow").toString());
+        ComplexRecipeJsonBuilder.create(ItemGlowRecipe::new)
+            .offerTo(exporter, Phonos.id("item_glow"));
     }
 }

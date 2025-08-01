@@ -3,10 +3,13 @@ package io.github.foundationgames.phonos.datagen.providers;
 import io.github.foundationgames.phonos.block.PhonosBlocks;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
+import net.minecraft.registry.RegistryWrapper;
+
+import java.util.concurrent.CompletableFuture;
 
 public class PhonosBlockLootTableProvider extends FabricBlockLootTableProvider {
-    public PhonosBlockLootTableProvider(FabricDataOutput dataOutput) {
-        super(dataOutput);
+    public PhonosBlockLootTableProvider(FabricDataOutput dataOutput, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
+        super(dataOutput, registryLookup);
     }
 
     @Override

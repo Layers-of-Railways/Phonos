@@ -1,3 +1,3 @@
-// 1.20.1	2025-08-01T04:14:01.165943018	Phonos/Tags for minecraft:block
-3a5fc3cba63b78c28e5ea0bf0f65a8c44dda2ceb data/phonos/tags/blocks/transmission_towers.json
-9230addc5e491ec6043339d40f9051c5e8bf19e4 data/minecraft/tags/blocks/mineable/axe.json
+// 1.21.1	2025-08-01T04:48:37.437525302	Phonos/Tags for minecraft:block
+f79fc3fc970ff3296bbec06e24463b2da9a1b0c7 data/minecraft/tags/block/mineable/axe.json
+cffcdac0c57dcecbcbf6b213e4a0a1b5c8ccadde data/phonos/tags/block/transmission_towers.json
