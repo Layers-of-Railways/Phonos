@@ -1,9 +1,13 @@
 import java.io.ByteArrayOutputStream
+import dev.ithundxr.silk.ChangelogText
+import me.modmuss50.mpp.ReleaseType
 
 plugins {
     java
     `maven-publish`
     id("fabric-loom") version "1.10-SNAPSHOT"
+    id("me.modmuss50.mod-publish-plugin") version "0.3.4" // https://github.com/modmuss50/mod-publish-plugin
+    id("dev.ithundxr.silk") version "0.11.15" // https://github.com/IThundxr/silk
 }
 
 java {
@@ -182,4 +186,32 @@ fun RepositoryHandler.exclusiveMaven(url: String, vararg groups: String) {
 operator fun String.invoke(): String {
     return rootProject.ext[this] as? String
         ?: throw IllegalStateException("Property $this is not defined")
+}
+
+publishMods {
+    file = tasks.remapJar.get().archiveFile
+    version.set(project.version.toString())
+    changelog = ChangelogText.getChangelogText(rootProject).toString()
+    type = ReleaseType.valueOf(System.getenv().getOrDefault("RELEASE_TYPE", "STABLE"))
+    displayName = "Phonos v${"mod_version"()} Fabric ${"minecraft_version"()}"
+    modLoaders.add("fabric")
+
+    modrinth {
+        projectId = "modrinth_id"()
+        accessToken = System.getenv("MODRINTH_TOKEN")
+        minecraftVersions.add("minecraft_version"())
+    }
+}
+
+tasks.register("SemaphorePublish") {
+    dependsOn(":build", ":publishMods")
+}
+
+tasks.register("SemaphoreChangelog") {
+    doLast {
+        val changelog = ChangelogText.getChangelogText(rootProject)
+        val changelogFile = file("build/changelog.md")
+        changelogFile.parentFile.mkdirs()
+        changelogFile.writeText(changelog.toString())
+    }
 }

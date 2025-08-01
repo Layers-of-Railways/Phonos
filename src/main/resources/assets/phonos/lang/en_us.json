@@ -93,6 +93,7 @@
     "item.phonos.portable_record_player": "Portable Record Player",
 
     "tag.block.phonos.transmission_towers": "Radio Transmission Towers",
+    "tag.item.phonos.audio_cables": "Audio Cables",
 
     "message.phonos.portable_satellite_radio.select": "Select a channel to listen to.",
     "message.phonos.portable_satellite_radio.configure": "Configure",
