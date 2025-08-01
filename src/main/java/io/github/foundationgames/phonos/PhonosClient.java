@@ -33,7 +33,7 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -72,7 +72,7 @@ public class PhonosClient implements ClientModInitializer {
         JsonEM.registerModelLayer(SATELLITE_LAYER);
         JsonEM.registerModelLayer(HEADSET_LAYER);
 
-        ModelLoadingRegistry.INSTANCE.registerModelProvider(PartialModel::onModelRegistry);
+        ModelLoadingPlugin.register(PartialModel.Plugin.INSTANCE);
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(PartialModel.ResourceReloadListener.INSTANCE);
 
         PhonosPartialModels.init();
