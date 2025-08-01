@@ -19,7 +19,7 @@ java {
 println("Phonos v${"mod_version"()}")
 
 val isRelease = System.getenv("RELEASE_BUILD")?.toBoolean() ?: false
-val buildNumber = System.getenv("GITHUB_RUN_NUBMER")?.toInt()
+val buildNumber = System.getenv("GITHUB_RUN_NUMBER")?.toInt()
 val inCI = buildNumber != null;
 val gitHash = "\"${calculateGitHash() + (if (hasUnstaged()) "-modified" else "")}\""
 
