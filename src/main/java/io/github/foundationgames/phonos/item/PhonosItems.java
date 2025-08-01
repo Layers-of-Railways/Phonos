@@ -32,10 +32,25 @@ public class PhonosItems {
     public static final Item PORTABLE_SATELLITE_RADIO = register(new PortableSatelliteRadioItem(new Item.Settings().maxCount(1)), "portable_satellite_radio");
     public static final Item PORTABLE_RECORD_PLAYER = register(new PortableRecordPlayerItem(new Item.Settings().maxCount(1)), "portable_record_player");
 
-    public static final AudioCableItem[] ALL_AUDIO_CABLES = new AudioCableItem[] {WHITE_AUDIO_CABLE, ORANGE_AUDIO_CABLE, MAGENTA_AUDIO_CABLE,
-            LIGHT_BLUE_AUDIO_CABLE, YELLOW_AUDIO_CABLE, LIME_AUDIO_CABLE, PINK_AUDIO_CABLE, GRAY_AUDIO_CABLE,
-            LIGHT_GRAY_AUDIO_CABLE, CYAN_AUDIO_CABLE, PURPLE_AUDIO_CABLE, BLUE_AUDIO_CABLE, BROWN_AUDIO_CABLE, GREEN_AUDIO_CABLE,
-            RED_AUDIO_CABLE, BLACK_AUDIO_CABLE, AUDIO_CABLE};
+    public static final AudioCableItem[] ALL_AUDIO_CABLES = new AudioCableItem[] {
+        AUDIO_CABLE,
+        RED_AUDIO_CABLE,
+        ORANGE_AUDIO_CABLE,
+        YELLOW_AUDIO_CABLE,
+        LIME_AUDIO_CABLE,
+        GREEN_AUDIO_CABLE,
+        CYAN_AUDIO_CABLE,
+        LIGHT_BLUE_AUDIO_CABLE,
+        BLUE_AUDIO_CABLE,
+        PURPLE_AUDIO_CABLE,
+        MAGENTA_AUDIO_CABLE,
+        PINK_AUDIO_CABLE,
+        WHITE_AUDIO_CABLE,
+        LIGHT_GRAY_AUDIO_CABLE,
+        GRAY_AUDIO_CABLE,
+        BLACK_AUDIO_CABLE,
+        BROWN_AUDIO_CABLE,
+    };
 
     public static <T extends Item> T register(T item, String name) {
         var entry = Registry.register(Registries.ITEM, Phonos.id(name), item);

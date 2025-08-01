@@ -1,12 +1,12 @@
-// 1.20.1	2025-08-01T04:14:01.167693707	Phonos/Recipes
+// 1.20.1	2025-08-01T05:12:06.263264614	Phonos/Recipes
 d8fce1f8f464ef1fc81281f78ee353f2cc21e96f data/phonos/advancements/recipes/misc/audio_switch.json
 dd5091ae8abbad004c0ee10cc0e392e33d0cab19 data/phonos/advancements/recipes/misc/audio_cable/dye_8/purple.json
 581f7c7d20345634df6de9c80f2ae06d04ced484 data/phonos/recipes/audio_cable/dye_8/light_blue.json
 8ecf5478792d05b227fe69b5e6413072b94d1165 data/phonos/advancements/recipes/misc/audio_cable/dye_1/red.json
 90d330880c25ff8dea1f1d462ed6131c0317ff69 data/phonos/recipes/satellite_station.json
 c6b8ba4cdb0adaa2b0717c57e06c77e35df0b60b data/phonos/advancements/recipes/misc/audio_cable/dye_8/blue.json
-8bcfbd0146d58f7497a6bb669372c85304a1edba data/phonos/advancements/recipes/misc/audio_cable/dye_8/light_gray.json
 af846fee2025bf75bbe2d7f325415e9face6003e data/phonos/advancements/recipes/misc/audio_cable/dye_1/blue.json
+8bcfbd0146d58f7497a6bb669372c85304a1edba data/phonos/advancements/recipes/misc/audio_cable/dye_8/light_gray.json
 95673d8cfda3fb72d7bdeabf3aaac76062ad3baa data/phonos/advancements/recipes/misc/radio_loudspeaker.json
 be7fe0d78122c7ce42b9e8479bb15bd0a4a16250 data/phonos/advancements/recipes/misc/radio_transceiver.json
 35f7fcecd2eaec157e60b475af3425b057267ce1 data/phonos/recipes/audio_cable/dye_1/blue.json
@@ -61,8 +61,8 @@ eea320d59d85cd30f1b77dd64a7c0d38633dc63e data/phonos/recipes/audio_cable/dye_1/l
 e7b990cce2eeb4c11215297ca4d762a2a443afaa data/phonos/recipes/audio_cable/dye_1/green.json
 5f37347006684fbff6bf96a82b05e95b02fcb58d data/phonos/recipes/audio_cable/dye_8/lime.json
 6ea3534d073a5a4bb6a43443dd899642ab666a04 data/phonos/recipes/audio_cable/dye_1/brown.json
-93720e9d3f2f5d3852fd9cc54a089d0c58b8867f data/phonos/advancements/recipes/misc/audio_cable/dye_1/white.json
 9d987d7a3a456fe1442b0bc45607de8a7c16f88b data/phonos/recipes/audio_cable/dye_1/magenta.json
+93720e9d3f2f5d3852fd9cc54a089d0c58b8867f data/phonos/advancements/recipes/misc/audio_cable/dye_1/white.json
 a00cdad883d37dcca8056bbc459eee61a6f34683 data/phonos/recipes/radio_loudspeaker.json
 09271b1caabcb28b5c61ab924e934426c876e1a3 data/phonos/advancements/recipes/misc/portable_record_player.json
 528b8e5c24fc3750ca1008813ef4f062e345517a data/phonos/recipes/portable_record_player.json
@@ -86,8 +86,8 @@ da4455310d8a063e088a8b0486e9fb5be6501e2a data/phonos/advancements/recipes/misc/a
 2812e323ea88e594ea002e4180b5e05b33281f04 data/phonos/recipes/audio_cable/dye_1/orange.json
 32f2846325f9d1140c22816b99de892e405efb7a data/phonos/advancements/recipes/misc/electronic_note_block.json
 58733a5d4e1f5d423c947c740e3a7bfa819a60ec data/phonos/advancements/recipes/misc/satellite.json
-2f1b77c40433e206ed0901e8dd3abd077be3b404 data/phonos/recipes/audio_cable/dye_1/yellow.json
 44e5f0f45b74a601586e58c6174d7e14510082e8 data/phonos/advancements/recipes/misc/audio_cable/dye_8/orange.json
+2f1b77c40433e206ed0901e8dd3abd077be3b404 data/phonos/recipes/audio_cable/dye_1/yellow.json
 30fc00ecfb2c54c8948c1957336545c0c504b3fc data/phonos/recipes/audio_cable/dye_8/light_gray.json
 e6649a2f2ba6cdb81aae524f47c1e11fa759be85 data/phonos/recipes/audio_cable/dye_1/light_blue.json
 473d482346d658b36be3a6d6f13bf38ec079be92 data/phonos/recipes/audio_cable/dye_8/red.json
