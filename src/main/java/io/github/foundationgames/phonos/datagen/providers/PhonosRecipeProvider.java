@@ -1,4 +1,4 @@
-package io.github.foundationgames.phonos.datagen.recipe;
+package io.github.foundationgames.phonos.datagen.providers;
 
 import io.github.foundationgames.phonos.Phonos;
 import io.github.foundationgames.phonos.block.PhonosBlocks;

@@ -1,6 +1,7 @@
 package io.github.foundationgames.phonos.datagen;
 
-import io.github.foundationgames.phonos.datagen.recipe.PhonosRecipeProvider;
+import io.github.foundationgames.phonos.datagen.providers.PhonosBlockLootTableProvider;
+import io.github.foundationgames.phonos.datagen.providers.PhonosRecipeProvider;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 
@@ -10,5 +11,6 @@ public class PhonosDataGenerator implements DataGeneratorEntrypoint {
         FabricDataGenerator.Pack pack = gen.createPack();
 
         pack.addProvider(PhonosRecipeProvider::new);
+        pack.addProvider(PhonosBlockLootTableProvider::new);
     }
 }
