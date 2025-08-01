@@ -1,9 +1,0 @@
-{
-	"parent": "block/cube_bottom_top",
-	"textures": {
-		"particle": "phonos:block/electronic_jukebox_side",
-		"side": "phonos:block/electronic_jukebox_side",
-		"up": "phonos:block/electronic_jukebox_top",
-		"down": "phonos:block/stone_base"
-	}
-}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "phonos:block/loudspeaker",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "phonos:block/loudspeaker"
+    },
+    "facing=south": {
+      "model": "phonos:block/loudspeaker",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "phonos:block/loudspeaker",
+      "y": 270
+    }
+  }
+}

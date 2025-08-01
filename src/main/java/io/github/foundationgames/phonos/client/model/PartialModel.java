@@ -1,6 +1,7 @@
 package io.github.foundationgames.phonos.client.model;
 
 import io.github.foundationgames.phonos.Phonos;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.minecraft.client.MinecraftClient;
@@ -12,7 +13,6 @@ import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class PartialModel {
 
@@ -29,11 +29,16 @@ public class PartialModel {
         ALL.add(this);
     }
 
-    public static void onModelRegistry(Consumer<Identifier> out) {
-        for (PartialModel partial : ALL)
-            out.accept(partial.getLocation());
+    public enum Plugin implements ModelLoadingPlugin {
+        INSTANCE;
 
-        tooLate = true;
+        @Override
+        public void onInitializeModelLoader(Context pluginContext) {
+            for (PartialModel partial : ALL)
+                pluginContext.addModels(partial.getLocation());
+
+            tooLate = true;
+        }
     }
 
     public static void onModelBake(BakedModelManager manager) {

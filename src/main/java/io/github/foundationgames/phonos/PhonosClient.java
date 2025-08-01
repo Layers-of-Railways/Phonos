@@ -74,9 +74,7 @@ public class PhonosClient implements ClientModInitializer {
         JsonEM.registerModelLayer(SATELLITE_LAYER);
         JsonEM.registerModelLayer(HEADSET_LAYER);
 
-        ModelLoadingPlugin.register(pluginContext -> {
-            PartialModel.onModelRegistry(pluginContext::addModels);
-        });
+        ModelLoadingPlugin.register(PartialModel.Plugin.INSTANCE);
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(PartialModel.ResourceReloadListener.INSTANCE);
 
         PhonosPartialModels.init();
