@@ -17,18 +17,18 @@ import net.minecraft.registry.tag.TagKey;
 import java.util.function.Function;
 
 public class PhonosBlocks {
-    public static final Block LOUDSPEAKER = register("loudspeaker", LoudspeakerBlock::new, FabricBlockSettings.copy(Blocks.NOTE_BLOCK));
-    public static final Block ELECTRONIC_NOTE_BLOCK = register("electronic_note_block", ElectronicNoteBlock::new, FabricBlockSettings.copy(Blocks.NOTE_BLOCK));
-    public static final Block ELECTRONIC_JUKEBOX = register("electronic_jukebox", ElectronicJukeboxBlock::new, FabricBlockSettings.copy(Blocks.JUKEBOX));
-    public static final Block CONNECTION_HUB = register("connection_hub", ConnectionHubBlock::new, FabricBlockSettings.copy(Blocks.OAK_PLANKS));
-    public static final Block RADIO_TRANSCEIVER = register("radio_transceiver", RadioTransceiverBlock::new, FabricBlockSettings.copy(Blocks.OAK_SLAB));
-    public static final Block SATELLITE_RECEIVER = register("satellite_receiver", SatelliteReceiverBlock::new, FabricBlockSettings.copy(Blocks.OAK_SLAB));
-    public static final Block RADIO_LOUDSPEAKER = register("radio_loudspeaker", RadioLoudspeakerBlock::new, FabricBlockSettings.copy(Blocks.NOTE_BLOCK));
-    public static final Block SATELLITE_STATION = register("satellite_station", SatelliteStationBlock::new, FabricBlockSettings.copy(Blocks.OAK_SLAB));
-    public static final Block AUDIO_SWITCH = register("audio_switch", AudioSwitchBlock::new, FabricBlockSettings.copy(Blocks.OAK_SLAB));
-    public static final Block ENDER_MUSIC_BOX = register("ender_music_box", EnderMusicBoxBlock::new, FabricBlockSettings.copy(Blocks.NOTE_BLOCK));
-    public static final Block MICROPHONE_BASE = register("microphone_base", MicrophoneBaseBlock::new, FabricBlockSettings.copy(Blocks.OAK_PLANKS).nonOpaque());
-    public static final Block WIRELESS_MICROPHONE_BASE = register("wireless_microphone_base", WirelessMicrophoneBaseBlock::new, FabricBlockSettings.copy(Blocks.OAK_PLANKS).nonOpaque());
+    public static final Block LOUDSPEAKER = register("loudspeaker", LoudspeakerBlock::new, Settings.copy(Blocks.NOTE_BLOCK));
+    public static final Block ELECTRONIC_NOTE_BLOCK = register("electronic_note_block", ElectronicNoteBlock::new, Settings.copy(Blocks.NOTE_BLOCK));
+    public static final Block ELECTRONIC_JUKEBOX = register("electronic_jukebox", ElectronicJukeboxBlock::new, Settings.copy(Blocks.JUKEBOX));
+    public static final Block CONNECTION_HUB = register("connection_hub", ConnectionHubBlock::new, Settings.copy(Blocks.OAK_PLANKS));
+    public static final Block RADIO_TRANSCEIVER = register("radio_transceiver", RadioTransceiverBlock::new, Settings.copy(Blocks.OAK_SLAB));
+    public static final Block SATELLITE_RECEIVER = register("satellite_receiver", SatelliteReceiverBlock::new, Settings.copy(Blocks.OAK_SLAB));
+    public static final Block RADIO_LOUDSPEAKER = register("radio_loudspeaker", RadioLoudspeakerBlock::new, Settings.copy(Blocks.NOTE_BLOCK));
+    public static final Block SATELLITE_STATION = register("satellite_station", SatelliteStationBlock::new, Settings.copy(Blocks.OAK_SLAB));
+    public static final Block AUDIO_SWITCH = register("audio_switch", AudioSwitchBlock::new, Settings.copy(Blocks.OAK_SLAB));
+    public static final Block ENDER_MUSIC_BOX = register("ender_music_box", EnderMusicBoxBlock::new, Settings.copy(Blocks.NOTE_BLOCK));
+    public static final Block MICROPHONE_BASE = register("microphone_base", MicrophoneBaseBlock::new, Settings.copy(Blocks.OAK_PLANKS).nonOpaque());
+    public static final Block WIRELESS_MICROPHONE_BASE = register("wireless_microphone_base", WirelessMicrophoneBaseBlock::new, Settings.copy(Blocks.OAK_PLANKS).nonOpaque());
 
     public static BlockEntityType<ElectronicNoteBlockEntity> ELECTRONIC_NOTE_BLOCK_ENTITY = register("electronic_note_block", ElectronicNoteBlockEntity::new, ELECTRONIC_NOTE_BLOCK);
     public static BlockEntityType<ElectronicJukeboxBlockEntity> ELECTRONIC_JUKEBOX_ENTITY = register("electronic_jukebox", ElectronicJukeboxBlockEntity::new, ELECTRONIC_JUKEBOX);
@@ -42,7 +42,7 @@ public class PhonosBlocks {
     public static BlockEntityType<MicrophoneBaseBlockEntity> MICROPHONE_BASE_ENTITY = register("microphone_base", MicrophoneBaseBlockEntity::new, MICROPHONE_BASE);
     public static BlockEntityType<WirelessMicrophoneBaseBlockEntity> WIRELESS_MICROPHONE_BASE_ENTITY = register("wireless_microphone_base", WirelessMicrophoneBaseBlockEntity::new, WIRELESS_MICROPHONE_BASE);
 
-    private static <T extends Block> T register(String name, Function<Block.Settings, T> factory, Block.Settings settings) {
+    private static <T extends Block> T register(String name, Function<Settings, T> factory, Settings settings) {
         var block = factory.apply(settings);
 
         PhonosItems.register(name, itemSettings -> new BlockItem(block, itemSettings));

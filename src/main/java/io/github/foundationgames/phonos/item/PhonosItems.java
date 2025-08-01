@@ -2,7 +2,6 @@ package io.github.foundationgames.phonos.item;
 
 import io.github.foundationgames.phonos.Phonos;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
