@@ -7,6 +7,7 @@ import io.github.foundationgames.phonos.item.PhonosItems;
 import io.github.foundationgames.phonos.util.PhonosUtil;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
+import net.minecraft.data.server.recipe.ComplexRecipeJsonBuilder;
 import net.minecraft.data.server.recipe.RecipeJsonProvider;
 import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder;
 import net.minecraft.data.server.recipe.ShapelessRecipeJsonBuilder;
@@ -183,5 +184,9 @@ public class PhonosRecipeProvider extends FabricRecipeProvider {
             .input(PhonosItems.PORTABLE_RECORD_PLAYER)
             .criterion("has_satellite_receiver", conditionsFromItem(PhonosBlocks.SATELLITE_RECEIVER))
             .offerTo(exporter);
+
+        /* Special */
+        ComplexRecipeJsonBuilder.create(Phonos.ITEM_GLOW_RECIPE_SERIALIZER)
+            .offerTo(exporter, Phonos.id("item_glow").toString());
     }
 }
