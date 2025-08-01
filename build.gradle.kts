@@ -1,5 +1,6 @@
 import java.io.ByteArrayOutputStream
 import dev.ithundxr.silk.ChangelogText
+import me.modmuss50.mpp.ReleaseType
 
 plugins {
     java
@@ -194,7 +195,7 @@ publishMods {
     file = tasks.remapJar.get().archiveFile
     version.set(project.version.toString())
     changelog = ChangelogText.getChangelogText(rootProject).toString()
-    type = BETA
+    type = ReleaseType.valueOf(System.getenv().getOrDefault("RELEASE_TYPE", "STABLE"))
     displayName = "Phonos v${"mod_version"()} Fabric ${"minecraft_version"()}"
     modLoaders.add("fabric")
 

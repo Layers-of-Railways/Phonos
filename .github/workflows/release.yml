@@ -1,7 +1,16 @@
 name: Publish Release
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      release-type:
+        type: choice
+        description: Release type
+        default: STABLE
+        options:
+          - STABLE
+          - BETA
+          - ALPHA
 
 jobs:
   build:
@@ -9,6 +18,7 @@ jobs:
     env:
       RELEASE_BUILD: true
       MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      RELEASE_TYPE: ${{ inputs.release-type }}
 
     steps:
       - name: Checkout Repository
