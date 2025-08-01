@@ -1,0 +1,34 @@
+name: Publish Release
+
+on:
+  workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_BUILD: true
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
+
+      - name: Loom Cache
+        uses: actions/cache@v4
+        with:
+          path: "**/.gradle/loom-cache"
+          key: "${{ runner.os }}-gradle-${{ hashFiles('**/libs.versions.*', '**/*.gradle*', '**/gradle-wrapper.properties', '**/gradle.properties') }}"
+          restore-keys: "${{ runner.os }}-gradle-"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+          validate-wrappers: true
+
+      - name: Build & Publish
+        run: ./gradlew PhonosPublish

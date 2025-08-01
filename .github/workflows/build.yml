@@ -1,39 +1,53 @@
-# Automatically build the project and run any configured tests for every push
-# and submitted pull request. This can help catch issues that only occur on
-# certain platforms or Java versions, and provides a first line of defence
-# against bad commits.
-
-name: build
-on: [pull_request, push]
+name: Build
+on: [workflow_dispatch, push]
 
 jobs:
   build:
-    strategy:
-      matrix:
-        # Use these Java versions
-        java: [
-          17
-        ]
-        # and run on both Linux and Windows
-        os: [ubuntu-20.04, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
-      - name: checkout repository
-        uses: actions/checkout@v2
-      - name: validate gradle wrapper
-        uses: gradle/wrapper-validation-action@v1
-      - name: setup jdk ${{ matrix.java }}
-        uses: actions/setup-java@v1
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
+
+      - name: Loom Cache
+        uses: actions/cache@v4
         with:
-          java-version: ${{ matrix.java }}
-      - name: make gradle wrapper executable
-        if: ${{ runner.os != 'Windows' }}
-        run: chmod +x ./gradlew
-      - name: build
+          path: "**/.gradle/loom-cache"
+          key: "${{ runner.os }}-gradle-${{ hashFiles('**/libs.versions.*', '**/*.gradle*', '**/gradle-wrapper.properties', '**/gradle.properties') }}"
+          restore-keys: "${{ runner.os }}-gradle-"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+          validate-wrappers: true
+
+      - name: Build
         run: ./gradlew build
-      - name: capture build artifacts
-        if: ${{ runner.os == 'Linux' && matrix.java == '17' }}
-        uses: actions/upload-artifact@v2
+
+      - name: Generate Changelog
+        run: ./gradlew SemaphoreChangelog
+
+      - name: Capture build artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: Artifacts
-          path: build/libs/
+          path: build/libs
+
+      # set prerelease if tag matches v#.#.#-(alpha|beta|rc).*
+      - name: Detect Prerelease
+        id: detect-prerelease
+        run: |
+          if [[ ${{ github.ref }} =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta|rc)\. ]]; then
+              echo "match=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Github Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: build/libs/*.jar
+          body_path: build/changelog.md
+          prerelease: ${{ steps.check-tag.outputs.match }}
