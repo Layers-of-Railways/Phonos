@@ -17,4 +17,4 @@ echo "Creating tag for version $version with message '$1'"
 
 git tag -s -a v"$version" -m "$1"
 
-git push origin main v"$version"
+git push origin v"$version"
