@@ -16,6 +16,7 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
@@ -26,12 +27,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class EnderMusicBoxBlock extends Block implements BlockEntityProvider {
     public static final MapCodec<EnderMusicBoxBlock> CODEC = createCodec(EnderMusicBoxBlock::new);
-    public static final BooleanProperty POWERED = Properties.POWERED;
+    public static final IntProperty POWERED = Properties.POWER;
 
     public EnderMusicBoxBlock(Settings settings) {
         super(settings);
         setDefaultState(getDefaultState()
-            .with(POWERED, false));
+            .with(POWERED, 0));
     }
 
     @Override
@@ -91,7 +92,7 @@ public class EnderMusicBoxBlock extends Block implements BlockEntityProvider {
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         return getDefaultState()
-            .with(POWERED, ctx.getWorld().getEmittedRedstonePower(ctx.getBlockPos().down(), Direction.DOWN) > 0);
+            .with(POWERED, ctx.getWorld().getEmittedRedstonePower(ctx.getBlockPos().down(), Direction.DOWN) );
     }
 
     @Override
@@ -108,11 +109,10 @@ public class EnderMusicBoxBlock extends Block implements BlockEntityProvider {
         int power = world.getEmittedRedstonePower(pos.offset(direction), direction);
 
         if (direction == Direction.DOWN) {
-            boolean wasPowered = state.get(POWERED);
-            boolean isPowered = power > 0;
+            Integer wasPowered = state.get(POWERED);
 
-            if (wasPowered != isPowered) {
-                world.setBlockState(pos, state.with(POWERED, isPowered), Block.NOTIFY_LISTENERS);
+            if (wasPowered != power) {
+                world.setBlockState(pos, state.with(POWERED, power), Block.NOTIFY_LISTENERS);
             }
         } else {
             if (world.getBlockEntity(pos) instanceof EnderMusicBoxBlockEntity be) {
