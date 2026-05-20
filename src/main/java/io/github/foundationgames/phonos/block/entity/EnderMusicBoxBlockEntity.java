@@ -60,7 +60,7 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity i
 
     private int deleteCooldown = 0;
 
-    private Boolean lastPowered = null;
+    private int lastPowered = 0;
 
     private int lastComparatorOutput = -1;
 
@@ -129,7 +129,7 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity i
                 sync();
                 markDirty();
 
-                if (getCachedState().get(EnderMusicBoxBlock.POWERED)) {
+                if (getCachedState().get(EnderMusicBoxBlock.POWERED)>0) {
                     this.play(targetIndex);
                 }
             }
@@ -143,14 +143,14 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity i
         if (world.isClient)
             return;
 
-        boolean powered = state.get(EnderMusicBoxBlock.POWERED);
+        int powered = state.get(EnderMusicBoxBlock.POWERED);
 
-        playingIndex = MathHelper.clamp(playingIndex, 0, this.streamIds.size() - 1);
+        playingIndex = MathHelper.clamp(powered-1, 0, this.streamIds.size() - 1);
 
-        if (lastPowered == null || powered != lastPowered) {
+        if (lastPowered == 0 || powered != lastPowered) {
             lastPowered = powered;
 
-            if (powered) {
+            if (powered>0) {
                 play(playingIndex);
             } else {
                 stop();
@@ -202,7 +202,7 @@ public class EnderMusicBoxBlockEntity extends AbstractConnectionHubBlockEntity i
 
                 if (playingIndex == i) {
                     this.stop();
-                    if (powered)
+                    if (powered>0)
                         this.play(playingIndex);
                 } else if (playingIndex > i) {
                     playingIndex--;

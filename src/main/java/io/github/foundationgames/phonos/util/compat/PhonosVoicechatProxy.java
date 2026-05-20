@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 public class PhonosVoicechatProxy {
     public static boolean isLoaded() {
         return FabricLoader.getInstance().isModLoaded("voicechat");
+
     }
 
     public static <T> @Nullable T runIfLoaded(Supplier<Supplier<T>> supplier) {
