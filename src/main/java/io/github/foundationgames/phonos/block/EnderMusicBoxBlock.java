@@ -117,9 +117,10 @@ public class EnderMusicBoxBlock extends Block implements BlockEntityProvider {
         } else {
             if (world.getBlockEntity(pos) instanceof EnderMusicBoxBlockEntity be) {
                 for (Direction dir : Direction.values()) {
-                    if (dir == Direction.DOWN) continue;
                     int p = world.getEmittedRedstonePower(pos.offset(dir), dir);
                     if (p > power) power = p;
+                    world.setBlockState(pos, state.with(POWERED, power), Block.NOTIFY_LISTENERS);
+
                 }
 
                 be.requestPlay(power);
