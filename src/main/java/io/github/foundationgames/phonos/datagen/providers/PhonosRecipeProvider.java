@@ -100,6 +100,7 @@ public class PhonosRecipeProvider extends FabricRecipeProvider {
             .input('i', Items.IRON_INGOT)
             .input('g', Items.GOLD_INGOT)
             .input('c', PhonosBlocks.RADIO_TRANSCEIVER)
+            .input(Items.ECHO_SHARD)
             .pattern("i")
             .pattern("g")
             .pattern("c")
