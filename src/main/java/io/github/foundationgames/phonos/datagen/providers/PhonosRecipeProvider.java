@@ -112,6 +112,7 @@ public class PhonosRecipeProvider extends FabricRecipeProvider {
                 .input(PhonosBlocks.ELECTRONIC_JUKEBOX)
                 .input(PhonosBlocks.CONNECTION_HUB)
                 .input(Items.ENDER_EYE)
+                .input(Items.ECHO_SHARD)
                 .criterion("has_connection_hub", conditionsFromItem(PhonosBlocks.CONNECTION_HUB))
                 .offerTo(exporter);
 
