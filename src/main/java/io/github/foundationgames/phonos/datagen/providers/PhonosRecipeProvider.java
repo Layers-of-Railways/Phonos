@@ -106,6 +106,14 @@ public class PhonosRecipeProvider extends FabricRecipeProvider {
             .criterion("has_radio_transceiver", conditionsFromItem(PhonosBlocks.RADIO_TRANSCEIVER))
             .offerTo(exporter);
 
+        ShapelessRecipeJsonBuilder.create(RecipeCategory.MISC, PhonosBlocks.ENDER_MUSIC_BOX)
+                .input(PhonosBlocks.ELECTRONIC_JUKEBOX)
+                .input(PhonosBlocks.CONNECTION_HUB)
+                .input(Items.ENDER_EYE)
+                .input(Items.ECHO_SHARD)
+                .criterion("has_connection_hub", conditionsFromItem(PhonosBlocks.CONNECTION_HUB))
+                .offerTo(exporter);
+
         /* Emitters */
 
         ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, PhonosBlocks.LOUDSPEAKER)
